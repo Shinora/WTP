@@ -9,6 +9,8 @@ import logs
 import os
 import BDD
 import hashlib
+import re
+import urllib
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -26,7 +28,9 @@ def portLibre(premierPort):
 		    premierPort += 1
 	return premierPort
 
-def lsteFichiers():
+def lsteFichiers(): 
+	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
+	# CAR CHAQUE LIGNE EST DE TYPE SHA256fichier.ext @ IP:Port
 	# Fonction qui retourne un fichier qui contient tous les
 	# noms des fichers hébergés par le noeud,
 	# et qui sont dans la BDD, un par ligne
@@ -49,18 +53,21 @@ def lsteFichiers():
 	vidage = open(fileDir, "w")
 	vidage.write("")
 	vidage.close()
+	# On cherche notre IP
+	monIP = connaitreIP()
 	# Puis on commence l'importation
 	fluxEcriture = open(fileDir, "a")
 	for row in rows:
-		fluxEcriture.write(row[0]+"\n")
+		fluxEcriture.write(row[0]+" @ "+monIP+":5555\n")
 	fluxEcriture.close()
 	# Maintenant on va trouver le SHA256 du fichier
 	fluxSHA = open(fileDir, "r")
 	contenu = fluxSHA.read()
 	fluxSHA.close()
-	shaFichier = "HOSTEDFILES/" + hashlib.sha256(contenu.encode()).hexdigest()
-	os.rename(fileDir, shaFichier)
-	return shaFichier
+	nomFichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+	cheminFichier = "HOSTEDFILES/" + nomFichier
+	os.rename(fileDir, cheminFichier)
+	return nomFichier
 
 def lsteNoeuds():
 	# Fonction qui retourne un fichier qui contient toutes les
@@ -94,6 +101,42 @@ def lsteNoeuds():
 	fluxSHA = open(fileDir, "r")
 	contenu = fluxSHA.read()
 	fluxSHA.close()
-	shaFichier = "HOSTEDFILES/" + hashlib.sha256(contenu.encode()).hexdigest()
-	os.rename(fileDir, shaFichier)
-	return shaFichier
+	nomFichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+	cheminFichier = "HOSTEDFILES/" + nomFichier
+	os.rename(fileDir, cheminFichier)
+	return nomFichier
+
+def lireListeNoeuds(nomFichier):
+	# Fonction qui lit la liste de noeuds ligne par ligne et qui ajoute les noeuds dans la base de données
+	cheminFichier = "HOSTEDFILES/"+nomFichier
+	f = open(cheminFichier,'r')
+	lignes  = f.readlines()
+	f.close()
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	for ligne in lignes:
+		if reg.match(ligne):
+			# Si la ligne est une IP
+			BDD.ajtNoeud(ligne)
+	# Puis on supprime le fichier car on en n'a plus besoin
+	os.remove(cheminFichier)
+	logs.ajtLogs("INFO : Un fichier contenant une liste de noeuds a été parsé puis supprimé.")
+
+def lireListeFichiers(nomFichier):
+	# Fonction qui lit la liste de fichiers ligne par ligne et qui ajoute les noeuds dans la base de données
+	# Chaque ligne est de type SHA256fichier.ext @ IP:Port
+	cheminFichier = "HOSTEDFILES/"+nomFichier
+	f = open(cheminFichier,'r')
+	lignes  = f.readlines()
+	f.close()
+	for ligne in lignes:
+		nomFichier = ligne[:ligne.find(" @ ")]
+		ipPort = ligne[ligne.find(" @ ")+3:]
+		BDD.ajtFichierExt(nomFichier, ipPort)
+	# Puis on supprime le fichier car on en n'a plus besoin
+	os.remove(cheminFichier)
+	logs.ajtLogs("INFO : Un fichier contenant une liste de fichiers a été parsé puis supprimé.")
+
+def connaitreIP():
+	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
+	page=urllib.urlopen('https://myrasp.fr/Accueil/monip.php')
+	return page.read()
