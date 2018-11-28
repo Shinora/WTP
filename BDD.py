@@ -43,6 +43,14 @@ def creerBase():
 		""")
 		conn.commit()
 		cursor.execute("""
+			CREATE TABLE IF NOT EXISTS FichiersExt(
+				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+				Nom TEXT,
+				IP TEXT
+			)
+		""")
+		conn.commit()
+		cursor.execute("""
 			CREATE TABLE IF NOT EXISTS SuperNoeuds(
 				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 				IP TEXT,
@@ -56,6 +64,7 @@ def creerBase():
 			CREATE TABLE IF NOT EXISTS Statistiques(
 				NbNoeuds INTEGER,
 				NbSN INTEGER,
+				NbFichiersExt INTEGER,
 				NbFichiers INTEGER,
 				PoidsFichiers INTEGER,
 				NbEnvois INTEGER,
@@ -174,6 +183,44 @@ def ajtFichier(nomFichier):
 			logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichier()):" + str(e))
 	conn.close()
 
+def ajtFichierExt(nomFichier, IpPort):
+	# Fonction qui permet d'ajouter un fichier à la base de données
+	# Paramètre : nom du fichier de type SHA256.extension
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	# Vérifier si le fichier existe déjà dans la BDD.
+	# Si il existe on ne fait rien
+	# Si il n'existe pas, on l'ajoute
+	try:
+		cursor.execute("""SELECT id FROM FichiersExt WHERE Nom = ? AND IP = ?""", (nomFichier, IpPort))
+	except Exception as e:
+		logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichierExt()):" + str(e))
+	rows = cursor.fetchall()
+	nbRes = 0
+	for row in rows:
+		nbRes += 1
+	if nbRes != 0:
+		# Le fichier existe déjà
+		if nbRes > 1:
+			logs.ajtLogs("ERREUR : Fichier présent plusieurs fois dans la base. ajtFichierExt --> BDD.py")
+	else:
+		# C'est bon, on va créer le fichier dans la liste
+		datetimeAct = str(time.time())
+		datetimeAct = datetimeAct[:datetimeAct.find(".")]
+		cheminFichier = "HOSTEDFILES/" + nomFichier
+		try:
+			cursor.execute("""INSERT INTO FichiersExt (Nom, IP) VALUES (?, ?)""", (nomFichier, IpPort))
+			conn.commit()
+		except Exception as e:
+			conn.rollback()
+			logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichierExt()):" + str(e))
+	conn.close()
+
 def supprNoeud(ipPort):
 	# Vérifie que le noeud existe
 	# Si il existe, le noeud est supprimé.
@@ -184,28 +231,15 @@ def supprNoeud(ipPort):
 		creerBase()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
+	# Vérification de l'existance du noeud supprimée
 	try:
-		cursor.execute("""SELECT ID FROM Noeuds WHERE ID = ?""", (ipPort,))
+		cursor.execute("""DELETE FROM Noeuds WHERE IP =  ?""", (ipPort,))
+		conn.commit()
 	except Exception as e:
+		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (supprNoeud()):" + str(e))
-	rows = cursor.fetchall()
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes == 1:
-		# Le noeud existe, on peut le supprimer
-		try:
-			cursor.execute("""DELETE FROM Noeuds WHERE ID =  ?""", (ipPort,))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (supprNoeud()):" + str(e))
-		else:
-			logs.ajtLogs("INFO : Le noeud " + ipPort + " a bien été supprimé de la base.")
 	else:
-		# Le noeud n'existe pas, juste unwarning dans les logs.
-		logs.ajtLogs("WARNING : Le noeud " + ipPort + " n'a pas pu etre supprimé car il n'existe plus.")
-		print("NbRes : " + str(nbRes))
+		logs.ajtLogs("INFO : Le noeud " + ipPort + " a bien été supprimé de la base.")
 	conn.close()
 
 def supprFichier(nomFichier):
@@ -229,6 +263,25 @@ def supprFichier(nomFichier):
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (supprFichier()):" + str(e))
 	logs.ajtLogs("INFO : Le fichier " + nomFichier + " a bien été supprimé")
+	conn.close()
+
+def supprFichierExt(nomFichier, IpPort):
+	# Vérifie que le fichier existe
+	# Si il existe, le fichier est supprimé.
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""DELETE FROM FichiersExt WHERE Nom = ? AND IP = ?""", (nomFichier, IpPort))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (supprFichierExt()):" + str(e))
+	logs.ajtLogs("INFO : Le fichier Externe " + nomFichier + " a bien été supprimé")
 	conn.close()
 
 def ajtNoeudHS(ipPort):
@@ -381,3 +434,64 @@ def verifFichier(nomFichier):
 		FichierExiste = True
 	conn.close()
 	return FichierExiste
+
+def majStatsTaillFchsTtl():
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""UPDATE Statistiques SET PoidsFichiers = ? WHERE 1""", (nomFichier,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsTaillFchsTtl()):" + str(e))
+	conn.close()
+def majStatsNbFchs():
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""UPDATE Statistiques SET NbFichiers = ? WHERE 1""", (nomFichier,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchs()):" + str(e))
+	conn.close()
+def majStatsNbFchsExt():
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""UPDATE Statistiques SET NbFichiersExt = ? WHERE 1""", (nomFichier,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchsExt()):" + str(e))
+	conn.close()
+def majStatsNbNoeuds():
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""UPDATE Statistiques SET NbNoeuds = ? WHERE 1""", (nomFichier,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbNoeuds()):" + str(e))
+	conn.close()

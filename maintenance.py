@@ -76,7 +76,7 @@ while 1:
 		derMtnc5M = tmpsAct
 		fctsMntc.creerFichier()
 		logs.ajtLogs("INFO : Vérification des nouveaux fichiers effectée avec succès.")
-	time.sleep(300) # Se reveille toutes les 5 minutes.
+	time.sleep(30) # Se reveille toutes les 5 minutes.
 	print(derMtnc)
 	print(tmpsAct)
 	tmpsActuel = str(time.time())

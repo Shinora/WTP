@@ -11,12 +11,11 @@ import sys
 import os
 
 def verifNoeud():
-	conn = sqlite3.connect('WTP.db')
 	try:
 		with open('WTP.db'): pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+		BDD.creerBase()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT IP FROM Noeuds WHERE 1""")
@@ -64,7 +63,7 @@ def verifNoeudHS():
 		with open('WTP.db'): pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+		BDD.creerBase()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT IP FROM NoeudsHorsCo WHERE 1""")
@@ -92,7 +91,8 @@ def verifNoeudHS():
 			BDD.incrNbVerifsHS(IpPortNoeud)
 			BDD.verifNbVerifsHS(IpPortNoeud)
 		else:
-			cmdAEnvoyer = b"=cmd DemandePresence"
+			cmdAEnvoyer = b""
+			cmdAEnvoyer = "=cmd DemandePresence"
 			cmdAEnvoyer = cmdAEnvoyer.encode()
 			# On envoie le message
 			c.send(cmdAEnvoyer)
@@ -119,7 +119,7 @@ def verifFichier():
 		with open('WTP.db'): pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+		BDD.creerBase()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT Chemin FROM Fichiers WHERE 1""")
