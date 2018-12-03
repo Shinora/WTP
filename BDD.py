@@ -72,6 +72,9 @@ def creerBase():
 			)
 		""")
 		conn.commit()
+		# On initialise les Statistiques
+		cursor.execute("""INSERT INTO Statistiques (NbNoeuds, NbSN, NbFichiersExt, NbFichiers, PoidsFichiers, NbEnvois, NbReceptions) VALUES (0, 0, 0, 0, 0, 0, 0)""")
+		conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (creerBase()) :" + str(e))
@@ -435,7 +438,7 @@ def verifFichier(nomFichier):
 	conn.close()
 	return FichierExiste
 
-def majStatsTaillFchsTtl():
+def majStatsTaillFchsTtl(varAMaj):
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -444,13 +447,13 @@ def majStatsTaillFchsTtl():
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET PoidsFichiers = ? WHERE 1""", (nomFichier,))
+		cursor.execute("""UPDATE Statistiques SET PoidsFichiers = ? WHERE 1""", (varAMaj,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsTaillFchsTtl()):" + str(e))
 	conn.close()
-def majStatsNbFchs():
+def majStatsNbFchs(varAMaj):
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -459,13 +462,13 @@ def majStatsNbFchs():
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET NbFichiers = ? WHERE 1""", (nomFichier,))
+		cursor.execute("""UPDATE Statistiques SET NbFichiers = ? WHERE 1""", (varAMaj,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchs()):" + str(e))
 	conn.close()
-def majStatsNbFchsExt():
+def majStatsNbFchsExt(varAMaj):
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -474,13 +477,13 @@ def majStatsNbFchsExt():
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET NbFichiersExt = ? WHERE 1""", (nomFichier,))
+		cursor.execute("""UPDATE Statistiques SET NbFichiersExt = ? WHERE 1""", (varAMaj,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchsExt()):" + str(e))
 	conn.close()
-def majStatsNbNoeuds():
+def majStatsNbNoeuds(varAMaj):
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -489,7 +492,7 @@ def majStatsNbNoeuds():
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET NbNoeuds = ? WHERE 1""", (nomFichier,))
+		cursor.execute("""UPDATE Statistiques SET NbNoeuds = ? WHERE 1""", (varAMaj,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()

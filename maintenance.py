@@ -5,6 +5,7 @@ import time
 import logs
 import BDD
 import fctsMntc
+import stats
 
 
  ####################################################
@@ -66,6 +67,11 @@ while 1:
 		fctsMntc.verifNoeud()
 		fctsMntc.verifNoeudHS()
 		fctsMntc.verifFichier()
+		# Les fonctions de statistiques
+		stats.comptTaillFchsTtl()
+		stats.comptNbFichiers()
+		stats.comptNbFichiersExt()
+		stats.comptNbNoeuds()
 		logs.ajtLogs("INFO : Maintenance de la base de données effectée avec succès.")
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions

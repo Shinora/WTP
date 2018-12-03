@@ -138,5 +138,5 @@ def lireListeFichiers(nomFichier):
 
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
-	page=urllib.urlopen('https://myrasp.fr/Accueil/monip.php')
+	page=urllib.request.urlopen('https://myrasp.fr/Accueil/monip.php')
 	return page.read()
