@@ -34,6 +34,14 @@ The main goal of the WTP is to navigate and use a new internet free from ads and
   - The project is under GPL 3.0 license and open to contributions, contact @Torzivalds for more information.
   
   
+## Authors
+
+* [Torzivalds](https://github.com/Torzivalds)
+* [Shinora](https://github.com/Shinora)
+
+## License
+
+This project is licensed under the GPL 3.0 License - see the [LICENSE.md](LICENSE.md) file for details
  
   
 
