@@ -26,12 +26,12 @@ The main goal of the WTP is to navigate and use a new internet free from ads and
     - Clone the repository;
     - Open the "launcher.py" file with Python;
     - The program then asks you what Port you want to use, you can put whatever you want ( you can just enter 5555);
-    - Then the connection with the protocol is etablished, let the startup.py run and you can open "clientCMD.py" in the same time. Select the same port as "launcher.py".
-    You can now run the commands existing to start using the network 
+    - Then the connection with the protocol is established, let the startup.py run and you can open "clientCMD.py" in the same time. Select the same port as "launcher.py".
+    You can now run the commands existing to start using the network !
     
 ## Contribute ? 
 
-  - The project is under GPL 3.0 liscence and open to contributions, contact @Torzivalds for more informations.
+  - The project is under GPL 3.0 license and open to contributions, contact @Torzivalds for more information.
   
   
  
