@@ -24,7 +24,7 @@ How to use it?
   - For those who wants to test or try it: 
     - Clone the repository; Open the "launcher.py" file with Python;
     The program then asks you what Port you want to use, you can put whatever you want ( you can just enter 5555);
-    then the connection with the protocol is etablished, let the startup.py run and you can open "openCMD.py" in the same time. Select the same port as "launcher.py".
+    then the connection with the protocol is etablished, let the startup.py run and you can open "clientCMD.py" in the same time. Select the same port as "launcher.py".
     You can now run the commands existing to start using the network 
     
 Contribute ? 
