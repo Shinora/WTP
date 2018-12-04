@@ -2,8 +2,7 @@
 
 Web Transfert Protocol [IN PROGRESS]
 
-                                                WPT ( Web Transfert Protocol ) 
-                                                ![Logo WTP](https://static.myrasp.fr/WTP/logo.png)
+   ![Logo WTP](https://static.myrasp.fr/WTP/logo.png)
 
 
 ## What is Web Transfert Protocol ? 
