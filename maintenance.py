@@ -6,6 +6,7 @@ import logs
 import BDD
 import fctsMntc
 import stats
+import maj
 
 
  ####################################################
@@ -72,6 +73,8 @@ while 1:
 		stats.comptNbFichiers()
 		stats.comptNbFichiersExt()
 		stats.comptNbNoeuds()
+		# Fonction Mise A Jour
+		maj.verifMAJ()
 		logs.ajtLogs("INFO : Maintenance de la base de données effectée avec succès.")
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions
