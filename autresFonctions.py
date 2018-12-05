@@ -116,7 +116,7 @@ def lireListeNoeuds(nomFichier):
 	for ligne in lignes:
 		if reg.match(ligne):
 			# Si la ligne est une IP
-			BDD.ajtNoeud(ligne)
+			BDD.ajouterEntree("Noeuds", ligne)
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
 	logs.ajtLogs("INFO : Un fichier contenant une liste de noeuds a été parsé puis supprimé.")
@@ -131,7 +131,7 @@ def lireListeFichiers(nomFichier):
 	for ligne in lignes:
 		nomFichier = ligne[:ligne.find(" @ ")]
 		ipPort = ligne[ligne.find(" @ ")+3:]
-		BDD.ajtFichierExt(nomFichier, ipPort)
+		BDD.ajouterEntree("FichiersExt", nomFichier, ipPort)
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
 	logs.ajtLogs("INFO : Un fichier contenant une liste de fichiers a été parsé puis supprimé.")

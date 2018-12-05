@@ -38,13 +38,13 @@ def verifNoeud():
 			c.connect((IPNoeud, PortNoeud))
 		except socket.error as erreur:
 			# Le noeud est injoignable, on le déplace dans une autre table.
-			BDD.ajtNoeudHS(IpPortNoeud)
-			BDD.supprNoeud(IpPortNoeud)
+			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
+			BDD.supprEntree("Noeuds", IpPortNoeud)
 			logs.ajtLogs("ERREUR : Connection au noeud impossible : '" + str(erreur) + "' verifNoeud() --> fctsMntc.py")
 		except ConnectionRefusedError as erreur:
 			# Le noeud est injoignable, on le déplace dans une autre table.
-			BDD.ajtNoeudHS(IpPortNoeud)
-			BDD.supprNoeud(IpPortNoeud)
+			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
+			BDD.supprEntree("Noeuds", IpPortNoeud)
 			logs.ajtLogs("ERREUR : Connection au noeud impossible : '" + str(erreur) + "' verifNoeud() --> fctsMntc.py")
 		else:
 			cmdAEnvoyer = "=cmd DemandePresence"
@@ -55,8 +55,8 @@ def verifNoeud():
 			dataRecu = dataRecu.decode()
 			if dataRecu != '=cmd Present':
 				# Le noeud n'est pas connecté au réseau, on le déplace dans une autre table.
-				BDD.ajtNoeudHS(IpPortNoeud)
-				BDD.supprNoeud(IpPortNoeud)
+				BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
+				BDD.supprEntree("Noeuds", IpPortNoeud)
 
 def verifNoeudHS():
 	try:
@@ -101,8 +101,8 @@ def verifNoeudHS():
 			if dataRecu == '=cmd Present':
 				# C'est bon, le noeud est connecté au reseau, 
 				# on l'ajoute à la table normale et on le supprime de la table des noeuds HS
-				BDD.ajtNoeud(IpPortNoeud)
-				BDD.supprNoeudHS(IpPortNoeud)
+				BDD.ajouterEntree("Noeuds", IpPortNoeud)
+				BDD.supprEntree("NoeudsHorsCo", IpPortNoeud)
 			else:
 				# Le noeud n'est pas connecté au réseau, on incrémente de 1 son nombre de vérifications.
 				BDD.incrNbVerifsHS(IpPortNoeud)
@@ -145,7 +145,7 @@ def verifFichier():
 			#Il y a une erreur. Le fichier doit être supprimé,
 			# car il peut nuire au bon fonctionnement du réseau.
 			print("Ligne 137 : nomFichier : " + nomFichier)
-			BDD.supprFichier(nomFichier)
+			BDD.supprEntree("Fichiers", nomFichier)
 			logs.ajtLogs("ERREUR : Le fichier " + nomFichier + " contenait des erreurs. Il a été supprimé.")
 
 def creerFichier():
@@ -185,5 +185,5 @@ def creerFichier():
 			fluxEcriture.close()
 			os.remove(fichier)
 			# L'ajouter à la BDD
-			BDD.ajtFichier(filename)
+			BDD.ajouterEntree("Fichiers", filename)
 			logs.ajtLogs("INFO : Un nouveau fichier hébergé a été ajouté avec succès : " + filename)

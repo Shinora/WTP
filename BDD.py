@@ -7,7 +7,6 @@ import math
 import time
 import logs
 import sqlite3
-from Crypto import Random
 
 def creerBase():
 	# Fonction qui a pour seul but de créer la base de données
@@ -37,6 +36,7 @@ def creerBase():
 			CREATE TABLE IF NOT EXISTS Noeuds(
 				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 				IP TEXT,
+				Fonction TEXT default simple,
 				DerSync TEXT,
 				DateAjout TEXT
 			)
@@ -47,16 +47,6 @@ def creerBase():
 				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 				Nom TEXT,
 				IP TEXT
-			)
-		""")
-		conn.commit()
-		cursor.execute("""
-			CREATE TABLE IF NOT EXISTS SuperNoeuds(
-				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-				IP TEXT,
-				NbFichiers INTEGER,
-				DerSync TEXT,
-				DateAjout TEXT
 			)
 		""")
 		conn.commit()
@@ -80,43 +70,55 @@ def creerBase():
 		logs.ajtLogs("ERREUR : Problème avec base de données (creerBase()) :" + str(e))
 	conn.close()
 
-def ajtNoeud(ipPort):
-	# Fonction qui permet d'ajouter un noeud à la base de données
-	# Paramètre : IP et port du nœud, de type 88.189.108.233:12345
+def ajouterEntree(nomTable, entree, entree1 = ""):
+	# Fonction qui permet d'ajouter une entrée à une table de la base
 	try:
 		with open('WTP.db'): pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
-	# Vérifier si le noeud existe déjà dans la BDD.
+	# Vérifier si l'entrée existe déjà dans la BDD.
 	# Si il existe on ne fait rien
 	# Si il n'existe pas, on l'ajoute
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""SELECT id FROM Noeuds WHERE IP = ?""", (ipPort,))
+		if nomTable == "Noeuds":
+			cursor.execute("""SELECT id FROM ? WHERE IP = ?""", (nomTable, entree))
+		elif nomTable == "Fichiers":
+			cursor.execute("""SELECT id FROM ? WHERE Nom = ?""", (nomTable, entree))
+		elif nomTable == "FichiersExt":
+			cursor.execute("""SELECT id FROM ? WHERE Nom = ? AND IP = ?""", (nomTable, entree, entree1))
+		elif nomTable == "NoeudsHorsCo":
+			cursor.execute("""SELECT id FROM ? WHERE IP = ?""", (nomTable, entree))
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (ajtNoeud()):" + str(e))
+		logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
 	nbRes = 0
 	for row in rows:
 		nbRes += 1
 	if nbRes != 0:
-		# Le noeud existe déjà
+		# L'entrée' existe déjà
 		if nbRes > 1:
-			logs.ajtLogs("ERREUR : Noeud présent plusieurs fois dans la base. ajtNoeud --> BDD.py")
+			logs.ajtLogs("ERREUR : Entrée présente plusieurs fois dans la base. (ajouterEntree())")
 	else:
-		# C'est bon, on va créer le noeud dans la liste
-		# Nous avons l'Ip+Port (IP)
-		# La date actuelle servira de DerSync et Date
 		datetimeAct = str(time.time())
 		datetimeAct = datetimeAct[:datetimeAct.find(".")]
+		# En fonction de la table, il n'y a pas les mêmes champs à remplir
 		try:
-			cursor.execute("""INSERT INTO Noeuds (IP, DerSync, DateAjout) VALUES (?, ?, ?)""", (ipPort, datetimeAct, datetimeAct))
+			if nomTable == "Noeuds":
+				cursor.execute("""INSERT INTO ? (IP, DerSync, DateAjout) VALUES (?, ?, ?)""", (nomTable, entree, datetimeAct, datetimeAct))
+			elif nomTable == "Fichiers":
+				cheminFichier = "HOSTEDFILES/" + entree
+				cursor.execute("""INSERT INTO ? (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (nomTable, entree, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
+			elif nomTable == "FichiersExt":
+				cursor.execute("""INSERT INTO ? (Nom, IP) VALUES (?, ?)""", (nomTable, entree, entree1))
+			elif nomTable == "NoeudsHorsCo":
+				cursor.execute("""INSERT INTO ? (IP, NbVerifs) VALUES (?, 0)""", (nomTable, entree))
 			conn.commit()
 		except Exception as e:
 			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (ajtNoeud()):" + str(e))
+			logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
 	conn.close()
 
 def envNoeuds(nbreNoeuds):
@@ -148,9 +150,8 @@ def envNoeuds(nbreNoeuds):
 	conn.close()
 	return listeNoeuds
 
-def ajtFichier(nomFichier):
-	# Fonction qui permet d'ajouter un fichier à la base de données
-	# Paramètre : nom du fichier de type SHA256.extension
+def supprEntree(nomTable, entree, entree1 = ""):
+	# Fonction qui permet de supprimer une entrée dans une table
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -158,200 +159,30 @@ def ajtFichier(nomFichier):
 		creerBase()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
-	# Vérifier si le fichier existe déjà dans la BDD.
-	# Si il existe on ne fait rien
-	# Si il n'existe pas, on l'ajoute
 	try:
-		cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (nomFichier,))
-	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichier()):" + str(e))
-	rows = cursor.fetchall()
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes != 0:
-		# Le fichier existe déjà
-		if nbRes > 1:
-			logs.ajtLogs("ERREUR : Fichier présent plusieurs fois dans la base. ajtFichier --> BDD.py")
-	else:
-		# C'est bon, on va créer le fichier dans la liste
-		datetimeAct = str(time.time())
-		datetimeAct = datetimeAct[:datetimeAct.find(".")]
-		cheminFichier = "HOSTEDFILES/" + nomFichier
-		try:
-			cursor.execute("""INSERT INTO Fichiers (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (nomFichier, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichier()):" + str(e))
-	conn.close()
-
-def ajtFichierExt(nomFichier, IpPort):
-	# Fonction qui permet d'ajouter un fichier à la base de données
-	# Paramètre : nom du fichier de type SHA256.extension
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	# Vérifier si le fichier existe déjà dans la BDD.
-	# Si il existe on ne fait rien
-	# Si il n'existe pas, on l'ajoute
-	try:
-		cursor.execute("""SELECT id FROM FichiersExt WHERE Nom = ? AND IP = ?""", (nomFichier, IpPort))
-	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichierExt()):" + str(e))
-	rows = cursor.fetchall()
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes != 0:
-		# Le fichier existe déjà
-		if nbRes > 1:
-			logs.ajtLogs("ERREUR : Fichier présent plusieurs fois dans la base. ajtFichierExt --> BDD.py")
-	else:
-		# C'est bon, on va créer le fichier dans la liste
-		datetimeAct = str(time.time())
-		datetimeAct = datetimeAct[:datetimeAct.find(".")]
-		cheminFichier = "HOSTEDFILES/" + nomFichier
-		try:
-			cursor.execute("""INSERT INTO FichiersExt (Nom, IP) VALUES (?, ?)""", (nomFichier, IpPort))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (ajtFichierExt()):" + str(e))
-	conn.close()
-
-def supprNoeud(ipPort):
-	# Vérifie que le noeud existe
-	# Si il existe, le noeud est supprimé.
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	# Vérification de l'existance du noeud supprimée
-	try:
-		cursor.execute("""DELETE FROM Noeuds WHERE IP =  ?""", (ipPort,))
+		if nomTable == "Noeuds":
+			cursor.execute("""DELETE FROM ? WHERE IP =  ?""", (nomTable, entree))
+		elif nomTable == "Fichiers":
+			cursor.execute("""DELETE FROM ? WHERE Nom = ?""", (nomTable, entree))
+		elif nomTable == "FichiersExt":
+			cursor.execute("""DELETE FROM ? WHERE Nom = ? AND IP = ?""", (nomTable, entree, entree1))
+		elif nomTable == "NoeudsHorsCo":
+			cursor.execute("""DELETE FROM ? WHERE IP =  ?""", (nomTable, entree))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (supprNoeud()):" + str(e))
+		logs.ajtLogs("ERREUR : Problème avec base de données (supprEntree()):" + str(e))
 	else:
-		logs.ajtLogs("INFO : Le noeud " + ipPort + " a bien été supprimé de la base.")
-	conn.close()
-
-def supprFichier(nomFichier):
-	# Vérifie que le fichier existe
-	# Si il existe, le fichier est supprimé.
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-
-	# On supprime le fichier du disque dur
-	chemin = "HOSTEDFILES/" + nomFichier
-	os.remove(chemin)
-	try:
-		cursor.execute("""DELETE FROM Fichiers WHERE Nom = ?""", (nomFichier,))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (supprFichier()):" + str(e))
-	logs.ajtLogs("INFO : Le fichier " + nomFichier + " a bien été supprimé")
-	conn.close()
-
-def supprFichierExt(nomFichier, IpPort):
-	# Vérifie que le fichier existe
-	# Si il existe, le fichier est supprimé.
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""DELETE FROM FichiersExt WHERE Nom = ? AND IP = ?""", (nomFichier, IpPort))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (supprFichierExt()):" + str(e))
-	logs.ajtLogs("INFO : Le fichier Externe " + nomFichier + " a bien été supprimé")
-	conn.close()
-
-def ajtNoeudHS(ipPort):
-	# Vérifier si le noeud existe déjà dans la BDD.
-	# Si il existe on ne fait rien
-	# Si il n'existe pas, on l'ajoute
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT ID FROM NoeudsHorsCo WHERE IP = ?""", (ipPort,))
-		rows = cursor.fetchall()
-	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (ajtNoeudHS()):" + str(e))
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes != 0:
-		# Le noeud existe déjà
-		if nbRes > 1:
-			logs.ajtLogs("ERREUR : Noeud HS présent plusieurs fois dans la base. ajtNoeudHS --> BDD.py")
-	else:
-		# C'est bon, on va créer le noeud dans la liste
-		# Nous avons l'Ip+Port (IP)
-		try:
-			cursor.execute("""INSERT INTO NoeudsHorsCo (IP, NbVerifs) VALUES (?, 0)""", (ipPort,))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (ajtNoeudHS()):" + str(e))
-	conn.close()
-
-def supprNoeudHS(ipPort):
-	# Vérifie que le noeud existe
-	# Si il existe, le noeud est supprimé.
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT ID FROM NoeudsHorsCo WHERE IP = ?""", (ipPort,))
-		rows = cursor.fetchall()
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (supprNoeudHS()):" + str(e))
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes != 0:
-		# Le noeud existe, on peut le supprimer
-		try:
-			cursor.execute("""DELETE FROM NoeudsHorsCo WHERE IP =  ?""", (ipPort,))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (supprNoeudHS()):" + str(e))
-		logs.ajtLogs("INFO : Le noeud HS " + ipPort + " a bien été supprimé définitivement de la base.")
-	else:
-		# Le noeud n'existe pas, juste unwarning dans les logs.
-		logs.ajtLogs("WARNING : Le noeud HS " + ipPort + " n'a pas pu etre supprimé car il n'existe plus.")
+		if nomTable == "Noeuds":
+			logs.ajtLogs("INFO : Le noeud " + entree + " a bien été supprimé de la base.")
+		elif nomTable == "Fichiers":
+			chemin = "HOSTEDFILES/" + entree
+			os.remove(chemin)
+			logs.ajtLogs("INFO : Le fichier " + entree + " a bien été supprimé")
+		elif nomTable == "FichiersExt":
+			logs.ajtLogs("INFO : Le fichier Externe " + entree + " a bien été supprimé")
+		elif nomTable == "NoeudsHorsCo":
+			logs.ajtLogs("INFO : Le noeud HS " + entree + " a bien été supprimé définitivement de la base.")
 	conn.close()
 
 def incrNbVerifsHS(ipPort):
@@ -453,6 +284,7 @@ def majStatsTaillFchsTtl(varAMaj):
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsTaillFchsTtl()):" + str(e))
 	conn.close()
+
 def majStatsNbFchs(varAMaj):
 	try:
 		with open('WTP.db'): pass
@@ -468,6 +300,7 @@ def majStatsNbFchs(varAMaj):
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchs()):" + str(e))
 	conn.close()
+
 def majStatsNbFchsExt(varAMaj):
 	try:
 		with open('WTP.db'): pass
@@ -483,6 +316,7 @@ def majStatsNbFchsExt(varAMaj):
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchsExt()):" + str(e))
 	conn.close()
+
 def majStatsNbNoeuds(varAMaj):
 	try:
 		with open('WTP.db'): pass
@@ -498,3 +332,99 @@ def majStatsNbNoeuds(varAMaj):
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbNoeuds()):" + str(e))
 	conn.close()
+
+def searchFileBDD(nomFichier):
+	# Fonction qui a pour but de chercher dans la Base de données le noeud qui possède le fichier recherché
+	# Elle retourne l'IP du noeud qui a le fichier, sinon elle retourne une chaine vide
+	IPPortNoeud = "" # L'adresse du noeud sera ici
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	# On va chercher dans les fichiers hébergés
+	try:
+		cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (nomFichier,))
+	except Exception as e:
+		logs.ajtLogs("ERREUR : Problème avec base de données (searchFile()):" + str(e))
+	rows = cursor.fetchall()
+	for row in rows:
+		# Le fichier est hébergé par le noeud qui le cherche
+		IPPortNoeud = "127.0.0.1"
+	if IPPortNoeud != "127.0.0.1":
+		# Si le fichier n'a pas été trouvé
+		# Il faut chercher dans les fichiers connus externes
+		try:
+			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (nomFichier,))
+		except Exception as e:
+			logs.ajtLogs("ERREUR : Problème avec base de données (searchFile()):" + str(e))
+		rows = cursor.fetchall()
+		for row in rows:
+			# Le fichier est hébergé par un noeud connu
+			IPPortNoeud = str(row)
+	return IPPortNoeud
+
+def nbEntrees(nomTable):
+	# Fonction qui a pour seul but de compter toutes les entrées de la table
+	# Donc le nom a été âssé en paramètres
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT COUNT(*) FROM ?""", (nomTable,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (nbEntrees()):" + str(e))
+	for row in cursor.fetchall():
+		conn.close()
+		return row
+
+def aleatoire(nomTable, entree, nbEntrees):
+	# Fonction qui a pour but de renvoyer sour forme d'un tableau nbEntrees lignes
+	# contenues dans nomTable de façon aléatoire.
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT ? FROM ? ORDER BY RANDOM() LIMIT ?""", (entree, nomTable, nbEntrees))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (aleatoire()):" + str(e))
+	rows = cursor.fetchall()
+	tableau = []
+	for row in rows:
+		tableau.append(row)
+		# On remplit le tableau avant de le retourner
+	conn.close()
+	return tableau
+
+def chercherInfo(nomTable, info, retour):
+	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
+	try:
+		with open('WTP.db'): pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT ? FROM ? WHERE ?""", (retour, nomTable, info))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (chercherInfo()):" + str(e))
+	for row in cursor.fetchall():
+		conn.close()
+		return row

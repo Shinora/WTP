@@ -166,7 +166,7 @@ def DownloadFichier(IpPortReceveur):
             cmdAEnvoyer = cmdAEnvoyer.encode()
             conn.send(cmdAEnvoyer)
             # Ajouter le fichier à la BDD
-            BDD.ajtFichier(nomFichier)
+            BDD.ajouterEntree("Fichiers", nomFichier)
         else:
             # Ah, il y a un problème
             logs.ajtLogs("ERREUR : Le Hash du fichier différent. DownloadFichier --> echangeFichiers.py")

@@ -16,14 +16,14 @@ def verifMAJ():
 	# Elle va regarder sur une page de myrasp.fr la dernière version du protocol
 	# Et si elle a une version différente, on télécharge le fichier zip contenant les nouvelles sources
 	versionActuelle = "0.0.1"
-	page=urllib.request.urlopen('https://myrasp.fr/Accueil/latestWTP.php')
+	page=urllib.request.urlopen('https://static.myrasp.fr/WTP/latestWTP.php')
 	latest = str(page.read())
 	if versionActuelle != latest:
 		# Il faut mettre à jour
 		logs.ajtLogs("INFO : Démmarage de la mise à jour de V" + versionActuelle + " à V" + latest)
 		# Le fichier zip a un nom de forme WTPversion.zip Ex : WTP0.0.1.zip
 		nomFichier = "WTP"+latest+".zip"
-		url = 'https://pmyrasp.fr/Accueil/'+nomFichier
+		url = 'https://static.myrasp.fr/WTP/'+nomFichier
 		# Vérifier si le dossier .MAJ existe, sinon le créer
 		try: 
 			os.makedirs(".MAJ")

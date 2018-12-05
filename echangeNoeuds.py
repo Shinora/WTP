@@ -63,7 +63,7 @@ def DemandeNoeuds(IpPortNoeud):
         lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
         ListeNoeuds = ListeNoeuds[ListeNoeuds.find(',')+1:]
         print(lsteTemp)
-        BDD.ajtNoeud(lsteTemp)
+        BDD.ajouterEntree("Noeuds", lsteTemp)
     logs.ajtLogs("Fermeture de la connection. DemandeNoeuds() --> echangeNoeuds.py")
     ConnectionDemande.close()
 
