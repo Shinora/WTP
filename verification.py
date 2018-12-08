@@ -17,7 +17,7 @@ import maj
 def verifSources():
 	i = 0
 	fichiers= ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
-	for i in range(1, 14):
+	for i in range(1, len(fichiers):
 		en_cours = fichiers[i]
 		page = urllib.request.urlopen("https://myrasp.fr/WTPStatic/", en_cours)
 		online_sha = str(page.read())
@@ -26,7 +26,7 @@ def verifSources():
 		acces_file.close()
 		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
 		if online_sha != sha_fichier:
-			maj.versionActuelle = "0"
+			maj.forec = 1
 			maj.verifMAJ()
 		i+=1
 
