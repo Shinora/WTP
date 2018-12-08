@@ -8,6 +8,7 @@ import math
 import hashlib
 import logs
 import BDD
+import autresFonctions
 from Crypto import Random
 
  ####################################################
@@ -181,3 +182,10 @@ def DownloadFichier(IpPortReceveur):
         conn.send(cmdAEnvoyer)
     conn.close()
     s.close()
+
+def demandeFichier(nomFichier, IpPort):
+    # Fonction qui demande au noeud s'il connait un fichier,
+    # Et retourne l'IPPORT du noeud qui a le fichier (retourne le deuxième argument si c'est lui)
+    ipPortNoeud = autresFonctions.connaitreIP()
+    print("EN COURS...")
+    return ipPortNoeud

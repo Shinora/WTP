@@ -10,12 +10,17 @@ import logs
 import zipfile
 import urllib
 import time
+import hashlib
 
-def verifMAJ():
+def verifMAJ(force = 0):
 	# Fonction qui a pour but de vérifier si il y a des mises à jour à faire
 	# Elle va regarder sur une page de myrasp.fr la dernière version du protocol
 	# Et si elle a une version différente, on télécharge le fichier zip contenant les nouvelles sources
-	versionActuelle = "0.0.1"
+	# Si force = 1, il indique une version obsolète pour forcer la MAJ
+	if force == 1:
+		versionActuelle = "0.0.1"
+	else:
+		versionActuelle = "0.0.3"
 	page=urllib.request.urlopen('https://static.myrasp.fr/WTP/latestWTP.php')
 	latest = str(page.read())
 	if versionActuelle != latest:
@@ -63,3 +68,19 @@ def verifMAJ():
 		cmd = os.popen("python3 reload.py", 'r')
 	else:
 		logs.ajtLogs("INFO : Pas de mise à jour disponible")
+
+def verifSources():
+    i = 0
+    fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
+    for i in range(len(fichiers)):
+        en_cours = fichiers[i]
+        page = urllib.request.urlopen("https://myrasp.fr/WTPStatic/", en_cours)
+        online_sha = str(page.read())
+        acces_file = open(en_cours + ".py", "r")
+        contenu = acces_file.read()
+        acces_file.close()
+        sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+        if online_sha != sha_fichier:
+        	# On lance la MAJ en mode forcé
+            maj.verifMAJ(1)
+        i+=1
