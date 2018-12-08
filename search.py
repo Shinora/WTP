@@ -36,5 +36,13 @@ def searchFile(nomFichier):
 				tableauNoeudsSimple.append(tblNoeuds[x])
 			if fonctionNoeud == "supernoeud":
 				tableauSuperNoeuds.append(tblNoeuds[x])
+		if len(tableauNoeudsSimple) < 6:
+			# Il n'y a pas assez de noeuds simples dans la liste,
+			# Il faut aller en rechercher
+			print("Pas assez de noeuds simples")
+		# On ajoute les super noeuds après les noeuds simples
+		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
+		for x in range(len(tblNoeuds)):
+			# À chaque noeud on demande si il a le fichier ou s'il connait un noeud qui l'a
 	return IPPortNoeud
 
