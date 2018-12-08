@@ -75,6 +75,7 @@ while 1:
 		stats.comptNbNoeuds()
 		# Fonction Mise A Jour
 		maj.verifMAJ()
+		maj.verifSources()
 		logs.ajtLogs("INFO : Maintenance de la base de données effectée avec succès.")
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions

@@ -12,6 +12,11 @@ import autresFonctions
 import echangeNoeuds
 import echangeFichiers
 import time
+import maj
+import search
+
+# On vérifie que les sources sont correctes et pas modifiées
+maj.verifSources()
 
 # Créer un fichier qui va lancer les différentes
 # instances en fonction de la configuration
@@ -111,6 +116,15 @@ while serveur_lance:
                 # C'est tout bête, pas besoin de fonction
                 # Il suffit de renvoyer la commande informant que l'on est connecté au réseau.
                 cmdAEnvoyer = "=cmd Present"
+                cmdAEnvoyer = cmdAEnvoyer.encode()
+                client.send(cmdAEnvoyer)
+                print("Fait.")
+            elif msg_recu[:22] == "=cmd rechercherFichier": 
+                # =cmd rechercherFichier nom SHA256.ext
+                # Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
+                # Chercher le nom du fichier
+                nomFichier = msg_recu[27:]
+                cmdAEnvoyer = str(search.chercherFichier(nomFichier))
                 cmdAEnvoyer = cmdAEnvoyer.encode()
                 client.send(cmdAEnvoyer)
                 print("Fait.")

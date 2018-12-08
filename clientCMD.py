@@ -12,6 +12,7 @@ import autresFonctions
 import echangeNoeuds
 import echangeFichiers
 import fctsMntc
+import search
 
 hote = "127.0.0.1"
 port = int(input("Port : "))
@@ -93,4 +94,10 @@ while msg_a_envoyer != b"fin":
 		connexion_avec_serveur.close()
 		importantCMD = "=cmd DemandeFichier nom " + nomFichier.decode()
 		print("Fait.")
-	print(msg_a_envoyer)
+	elif msg_a_envoyer[:18] == "=cmd chercher nom ": # EN COURS...
+		# =cmd chercher nom SHA256.ext
+		# Chercher le nom du fichier
+		nomFichier = msg_recu[18:]
+		print("Go chercher")
+		search.searchFile(nomFichier)
+		print("Fait.")
