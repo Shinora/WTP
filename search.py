@@ -44,5 +44,22 @@ def searchFile(nomFichier):
 		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
 		for x in range(len(tblNoeuds)):
 			# À chaque noeud on demande si il a le fichier ou s'il connait un noeud qui l'a
+			noeudActuel = tblNoeuds[x]
+			IPNoeudActuel = noeudActuel[:noeudActuel.find(":")]
+			PortNoeudActuel = noeudActuel[noeudActuel.find(":")+1:]
+			# Maintenant on se connecte au noeud
+			# A FAIRE ********************************************************************************************
 	return IPPortNoeud
 
+def chercherFichier(nomFichier):
+	# Fonction qui regarde dans sa BDD si il y a le fichier en question
+	retour = 0
+	retour = BDD.chercherInfo("Fichiers", "Nom", "id")
+	if retour != 0:
+		# Le noeud héberge le fichier demandé
+		# Donc on retourne son IP
+		return autresFonctions.connaitreIP()
+	else:
+		retour = BDD.chercherInfo("FichiersExt", "Nom", "IP")
+		# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
+		return retour

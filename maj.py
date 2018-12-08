@@ -74,7 +74,7 @@ def verifSources():
     fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
     for i in range(len(fichiers)):
         en_cours = fichiers[i]
-        page = urllib.request.urlopen("https://myrasp.fr/WTPStatic/", en_cours)
+        page = urllib.request.urlopen("https://myrasp.fr/WTPStatic/"+en_cours)
         online_sha = str(page.read())
         acces_file = open(en_cours + ".py", "r")
         contenu = acces_file.read()
@@ -82,5 +82,5 @@ def verifSources():
         sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
         if online_sha != sha_fichier:
         	# On lance la MAJ en mode forcé
+        	logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
             maj.verifMAJ(1)
-        i+=1
