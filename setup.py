@@ -1,5 +1,5 @@
 readme = open('README.md').read()
-VERSION = "0.0.1"
+VERSION = "0.0.3"
 
 requirements = []
 
@@ -9,10 +9,10 @@ setup(
     version = VERSION,
     author = 'Torzivalds',
     author_email = 'tozivalds@gmail.com',
-    url = '...',
+    url = 'https://myrasp.fr/WTP',
     description ='P2P Network',
     long_description = readme,
-    license = 'GPL',
+    license = 'GPL3.0',
 
     # Package info
     packages = find_packages(exclude=('test',)),
