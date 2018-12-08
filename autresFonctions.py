@@ -140,3 +140,37 @@ def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
 	page=urllib.request.urlopen('https://myrasp.fr/Accueil/monip.php')
 	return page.read()
+
+
+def fillConfFile():
+
+	def_port = int(input("Entrez votre port par défaut : "))
+	min_port = int(input("Entrez le port minimal selectionnable : "))
+	max_port = int(input("Entrez le port maximal selectionnable : "))
+	blacklist = []
+	loop_blacklist = 1
+	while loop_blacklist ==1:
+		black_ip = str(input("Entrez une ip que vous souhaitez blacklister : "))
+		blacklist.append(black_ip)
+		loop_request = bool(input("Voulez vous blacklister une autre ip ? (1 = Oui / O = Non) "))
+		if loop_request == 0:
+			loop_blacklist = 0
+		elif loop_request == 1:
+			pass
+		else:
+			loop_request = 0
+	autostart = bool(input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : "))
+
+	conf_file = open("wtp.conf", "a")
+	conf_file.write("Port par defaut : ", def_port, "\n")
+	conf_file.write("Port Min : ", min_port, "\n")
+	conf_file.write("Port Max : ", max_port, "\n")
+	if autostart == 1:
+		conf_file.write("Autostart : Oui \n")
+	else:
+		conf_file.write("Autostart : Non")
+	conf_file.write("Blacklist [ ")
+	for ip in blacklist:
+		conf_file.write(ip + " ; \n")
+	conf_file.write(" ]")
+	conf_file.close()
