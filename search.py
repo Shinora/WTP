@@ -29,7 +29,7 @@ def searchFile(nomFichier):
 		# sont des noeuds "simple", puis mettre les noeuds "simple" au début du tableau
 		tableauNoeudsSimple = []
 		tableauSuperNoeuds = []
-		for x in range(10):
+		for x in range(len(tblNoeuds)):
 			# On verifie chaque noeud
 			fonctionNoeud = BDD.chercherInfo("Noeuds", tblNoeuds[x], "Fonction")
 			if fonctionNoeud == "simple":
