@@ -24,11 +24,11 @@ def verifMAJ(force = 0):
 	class AppURLopener(FancyURLopener):
 			version = "Mozilla/5.0"
 	opener = AppURLopener()
-	page = opener.open("https://static.myrasp.fr/WTP/latestWTP.php")
-	latest = str(page.read())
+	page = opener.open("https://static.myrasp.fr/WTP/latestWTP.html")
+	latest = page.read().decode("utf-8")
 	if versionActuelle != latest:
 		# Il faut mettre à jour
-		logs.ajtLogs("INFO : Démmarage de la mise à jour de V" + versionActuelle + " à V" + latest)
+		logs.ajtLogs("INFO : Démmarage de la mise à jour de V" + str(versionActuelle) + " à V" + latest)
 		# Le fichier zip a un nom de forme WTPversion.zip Ex : WTP0.0.1.zip
 		nomFichier = "WTP"+latest+".zip"
 		url = 'https://static.myrasp.fr/WTP/'+nomFichier
