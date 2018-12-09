@@ -16,8 +16,9 @@ import maj
 import search
 
 # On vérifie que les sources sont correctes et pas modifiées
-maj.verifSources()
-
+# maj.verifSources()
+# Ligne commentée pour le dev, trop pénible
+autresFonctions.fillConfFile()
 # Créer un fichier qui va lancer les différentes
 # instances en fonction de la configuration
 cmd = os.popen('python3 maintenance.py', 'r')

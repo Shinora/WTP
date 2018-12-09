@@ -142,32 +142,53 @@ def connaitreIP():
 	return page.read()
 
 def fillConfFile():
-	def_port = int(input("Entrez votre port par défaut : "))
-	min_port = int(input("Entrez le port minimal selectionnable : "))
-	max_port = int(input("Entrez le port maximal selectionnable : "))
+	# On vide le fichier avant de le remplir de nouveau
+	supprContenu = open("wtp.conf", "w")
+	supprContenu.write("")
+	supprContenu.close()
+	def_port = input("Entrez votre port principal (defaut:5555) : ")
+	if def_port == "":
+		# L'utilisateur veut laisser la valeur par défaut
+		def_port = 5555
+	else:
+		def_port = int(def_port)
+	min_port = 1
+	max_port = 0
+	while min_port > max_port:
+		print("Le port minimal doit être plus petit que le port maximal")
+		min_port = input("Entrez le port minimal utilisable (defaut:5550): ")
+		if min_port == "":
+			# L'utilisateur veut laisser la valeur par défaut
+			min_port = 5550
+		else:
+			min_port = int(min_port)
+		max_port = input("Entrez le port maximal utilisable (defaut:5600): ")
+		if max_port == "":
+			# L'utilisateur veut laisser la valeur par défaut
+			max_port = 5600
+		else:
+			max_port = int(max_port)
 	blacklist = []
 	loop_blacklist = 1
 	while loop_blacklist ==1:
 		black_ip = str(input("Entrez une ip que vous souhaitez blacklister : "))
 		blacklist.append(black_ip)
-		loop_request = bool(input("Voulez vous blacklister une autre ip ? (1 = Oui / O = Non) "))
-		if loop_request == 0:
-			loop_blacklist = 0
-		elif loop_request == 1:
-			pass
+		loop_request = int(input("Voulez vous blacklister une autre ip ? (1 = Oui / O = Non) "))
+		if loop_request != 0:
+			loop_blacklist = 1
 		else:
-			loop_request = 0
-	autostart = bool(input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : "))
+			loop_blacklist = 0
+	autostart = input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : ")
 	conf_file = open("wtp.conf", "a")
-	conf_file.write("Port par defaut : ", def_port, "\n")
-	conf_file.write("Port Min : ", min_port, "\n")
-	conf_file.write("Port Max : ", max_port, "\n")
-	if autostart == 1:
-		conf_file.write("Autostart : Oui \n")
+	conf_file.write("Port par defaut : "+str(def_port)+"\n")
+	conf_file.write("Port Min : "+str(min_port)+"\n")
+	conf_file.write("Port Max : "+str(max_port)+"\n")
+	if autostart == "1":
+		conf_file.write("Autostart : Oui\n")
 	else:
-		conf_file.write("Autostart : Non")
-	conf_file.write("Blacklist [ ")
+		conf_file.write("Autostart : Non\n")
+	conf_file.write("Blacklist [\n")
 	for ip in blacklist:
 		conf_file.write(ip + " ; \n")
-	conf_file.write(" ]")
+	conf_file.write("]")
 	conf_file.close()

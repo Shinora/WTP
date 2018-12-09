@@ -91,34 +91,35 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 			cursor.execute("""SELECT id FROM ? WHERE Nom = ? AND IP = ?""", (nomTable, entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
 			cursor.execute("""SELECT id FROM ? WHERE IP = ?""", (nomTable, entree))
-		rows = cursor.fetchall()
 	except Exception as e:
 		logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
-	nbRes = 0
-	for row in rows:
-		nbRes += 1
-	if nbRes != 0:
-		# L'entrée' existe déjà
-		if nbRes > 1:
-			logs.ajtLogs("ERREUR : Entrée présente plusieurs fois dans la base. (ajouterEntree())")
 	else:
-		datetimeAct = str(time.time())
-		datetimeAct = datetimeAct[:datetimeAct.find(".")]
-		# En fonction de la table, il n'y a pas les mêmes champs à remplir
-		try:
-			if nomTable == "Noeuds":
-				cursor.execute("""INSERT INTO ? (IP, DerSync, DateAjout) VALUES (?, ?, ?)""", (nomTable, entree, datetimeAct, datetimeAct))
-			elif nomTable == "Fichiers":
-				cheminFichier = "HOSTEDFILES/" + entree
-				cursor.execute("""INSERT INTO ? (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (nomTable, entree, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
-			elif nomTable == "FichiersExt":
-				cursor.execute("""INSERT INTO ? (Nom, IP) VALUES (?, ?)""", (nomTable, entree, entree1))
-			elif nomTable == "NoeudsHorsCo":
-				cursor.execute("""INSERT INTO ? (IP, NbVerifs) VALUES (?, 0)""", (nomTable, entree))
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
+		nbRes = 0
+		rows = cursor.fetchall()
+		for row in rows:
+			nbRes += 1
+		if nbRes != 0:
+			# L'entrée existe déjà
+			if nbRes > 1:
+				logs.ajtLogs("ERREUR : Entrée présente plusieurs fois dans la base. (ajouterEntree())")
+		else:
+			datetimeAct = str(time.time())
+			datetimeAct = datetimeAct[:datetimeAct.find(".")]
+			# En fonction de la table, il n'y a pas les mêmes champs à remplir
+			try:
+				if nomTable == "Noeuds":
+					cursor.execute("""INSERT INTO ? (IP, DerSync, DateAjout) VALUES (?, ?, ?)""", (nomTable, entree, datetimeAct, datetimeAct))
+				elif nomTable == "Fichiers":
+					cheminFichier = "HOSTEDFILES/" + entree
+					cursor.execute("""INSERT INTO ? (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (nomTable, entree, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
+				elif nomTable == "FichiersExt":
+					cursor.execute("""INSERT INTO ? (Nom, IP) VALUES (?, ?)""", (nomTable, entree, entree1))
+				elif nomTable == "NoeudsHorsCo":
+					cursor.execute("""INSERT INTO ? (IP, NbVerifs) VALUES (?, 0)""", (nomTable, entree))
+				conn.commit()
+			except Exception as e:
+				conn.rollback()
+				logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
 	conn.close()
 
 def envNoeuds(nbreNoeuds):
