@@ -83,12 +83,15 @@ def verifSources():
 		opener = AppURLopener()
 		page = opener.open("https://myrasp.fr/WTPStatic/"+en_cours)
 
-		online_sha = str(page.read())
+		online_sha = page.read().decode("utf-8")
 		acces_file = open(en_cours + ".py", "r")
 		contenu = acces_file.read()
 		acces_file.close()
-		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest()
 		if online_sha != sha_fichier:
 			# On lance la MAJ en mode forcé
 			logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
-			verifMAJ(1)
+			#verifMAJ(1)
+			print(online_sha)
+			print(sha_fichier)
+			print("")
