@@ -10,7 +10,7 @@ import os
 import BDD
 import hashlib
 import re
-import urllib
+from  urllib.request import *
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -138,8 +138,11 @@ def lireListeFichiers(nomFichier):
 
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
-	page=urllib.request.urlopen('https://myrasp.fr/Accueil/monip.php')
-	return page.read()
+	class AppURLopener(FancyURLopener):
+			version = "Mozilla/5.0"
+	opener = AppURLopener()
+	page = opener.open("https://myrasp.fr/Accueil/monip.php")
+	return page.read().decode("utf-8")
 
 def fillConfFile():
 	# On vide le fichier avant de le remplir de nouveau

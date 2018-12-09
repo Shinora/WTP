@@ -97,7 +97,7 @@ while msg_a_envoyer != b"fin":
 	elif msg_a_envoyer[:18] == "=cmd chercher nom ": # EN COURS...
 		# =cmd chercher nom SHA256.ext
 		# Chercher le nom du fichier
-		nomFichier = msg_recu[18:]
+		nomFichier = msg_a_envoyer[18:]
 		print("Go chercher")
 		search.searchFile(nomFichier)
 		print("Fait.")
