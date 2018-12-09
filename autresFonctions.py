@@ -1,5 +1,6 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
+
 import socket
 import select
 import sys
@@ -10,6 +11,7 @@ import BDD
 import hashlib
 import re
 import urllib
+
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
 	# Et renvoie le premier trouvé, en partant du port initial, donné.
@@ -25,6 +27,7 @@ def portLibre(premierPort):
 		    # Le port est déjà utilisé !
 		    premierPort += 1
 	return premierPort
+
 def lsteFichiers(): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
 	# CAR CHAQUE LIGNE EST DE TYPE SHA256fichier.ext @ IP:Port
@@ -65,6 +68,7 @@ def lsteFichiers():
 	cheminFichier = "HOSTEDFILES/" + nomFichier
 	os.rename(fileDir, cheminFichier)
 	return nomFichier
+
 def lsteNoeuds():
 	# Fonction qui retourne un fichier qui contient toutes les
 	# IP+PORT des noeuds connus par ce noeud
@@ -101,6 +105,7 @@ def lsteNoeuds():
 	cheminFichier = "HOSTEDFILES/" + nomFichier
 	os.rename(fileDir, cheminFichier)
 	return nomFichier
+
 def lireListeNoeuds(nomFichier):
 	# Fonction qui lit la liste de noeuds ligne par ligne et qui ajoute les noeuds dans la base de données
 	cheminFichier = "HOSTEDFILES/"+nomFichier
@@ -115,6 +120,7 @@ def lireListeNoeuds(nomFichier):
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
 	logs.ajtLogs("INFO : Un fichier contenant une liste de noeuds a été parsé puis supprimé.")
+
 def lireListeFichiers(nomFichier):
 	# Fonction qui lit la liste de fichiers ligne par ligne et qui ajoute les noeuds dans la base de données
 	# Chaque ligne est de type SHA256fichier.ext @ IP:Port
@@ -129,13 +135,13 @@ def lireListeFichiers(nomFichier):
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
 	logs.ajtLogs("INFO : Un fichier contenant une liste de fichiers a été parsé puis supprimé.")
+
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
 	page=urllib.request.urlopen('https://myrasp.fr/Accueil/monip.php')
 	return page.read()
 
 def fillConfFile():
-
 	def_port = int(input("Entrez votre port par défaut : "))
 	min_port = int(input("Entrez le port minimal selectionnable : "))
 	max_port = int(input("Entrez le port maximal selectionnable : "))
@@ -152,7 +158,6 @@ def fillConfFile():
 		else:
 			loop_request = 0
 	autostart = bool(input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : "))
-
 	conf_file = open("wtp.conf", "a")
 	conf_file.write("Port par defaut : ", def_port, "\n")
 	conf_file.write("Port Min : ", min_port, "\n")
