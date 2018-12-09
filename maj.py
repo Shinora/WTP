@@ -91,7 +91,4 @@ def verifSources():
 		if online_sha != sha_fichier:
 			# On lance la MAJ en mode forcé
 			logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
-			#verifMAJ(1)
-			print(online_sha)
-			print(sha_fichier)
-			print("")
+			verifMAJ(1)

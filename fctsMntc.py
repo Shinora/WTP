@@ -36,12 +36,7 @@ def verifNoeud():
 		# Connection au receveur
 		try:
 			c.connect((IPNoeud, PortNoeud))
-		except socket.error as erreur:
-			# Le noeud est injoignable, on le déplace dans une autre table.
-			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
-			BDD.supprEntree("Noeuds", IpPortNoeud)
-			logs.ajtLogs("ERREUR : Connection au noeud impossible : '" + str(erreur) + "' verifNoeud() --> fctsMntc.py")
-		except ConnectionRefusedError as erreur:
+		except Exception as erreur:
 			# Le noeud est injoignable, on le déplace dans une autre table.
 			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
 			BDD.supprEntree("Noeuds", IpPortNoeud)
