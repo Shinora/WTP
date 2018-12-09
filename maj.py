@@ -8,7 +8,7 @@ import os
 import os.path
 import logs
 import zipfile
-import urllib
+from  urllib.request import *
 import time
 import hashlib
 
@@ -21,7 +21,10 @@ def verifMAJ(force = 0):
 		versionActuelle = "0.0.1"
 	else:
 		versionActuelle = "0.0.3"
-	page=urllib.request.urlopen('https://static.myrasp.fr/WTP/latestWTP.php')
+	class AppURLopener(FancyURLopener):
+			version = "Mozilla/5.0"
+	opener = AppURLopener()
+	page = opener.open("https://static.myrasp.fr/WTP/latestWTP.php")
 	latest = str(page.read())
 	if versionActuelle != latest:
 		# Il faut mettre à jour
@@ -36,7 +39,7 @@ def verifMAJ(force = 0):
 			if not os.path.isdir(".MAJ"):
 				raise
 		with open('.MAJ/'+nomFichier, 'wb') as archive:
-			archive.write(urllib.request.urlopen(url).read())
+			archive.write(opener.open(url).read())
 		# Le téléchargement des nouvelles sources est terminé
 		# Extraction dans .MAJ/version Ex : .MAJ/0.0.1/
 		# Vérifier si le dossier .MAJ/version existe, sinon le créer
@@ -70,17 +73,22 @@ def verifMAJ(force = 0):
 		logs.ajtLogs("INFO : Pas de mise à jour disponible")
 
 def verifSources():
-    i = 0
-    fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
-    for i in range(len(fichiers)):
-        en_cours = fichiers[i]
-        page = urllib.request.urlopen("https://myrasp.fr/WTPStatic/"+en_cours)
-        online_sha = str(page.read())
-        acces_file = open(en_cours + ".py", "r")
-        contenu = acces_file.read()
-        acces_file.close()
-        sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
-        if online_sha != sha_fichier:
-        	# On lance la MAJ en mode forcé
-        	logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
-            maj.verifMAJ(1)
+	i = 0
+	fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
+	for i in range(len(fichiers)):
+		en_cours = fichiers[i]
+
+		class AppURLopener(FancyURLopener):
+			version = "Mozilla/5.0"
+		opener = AppURLopener()
+		page = opener.open("https://myrasp.fr/WTPStatic/"+en_cours)
+
+		online_sha = str(page.read())
+		acces_file = open(en_cours + ".py", "r")
+		contenu = acces_file.read()
+		acces_file.close()
+		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+		if online_sha != sha_fichier:
+			# On lance la MAJ en mode forcé
+			logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
+			verifMAJ(1)

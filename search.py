@@ -48,7 +48,18 @@ def searchFile(nomFichier):
 			IPNoeudActuel = noeudActuel[:noeudActuel.find(":")]
 			PortNoeudActuel = noeudActuel[noeudActuel.find(":")+1:]
 			# Maintenant on se connecte au noeud
-			# A FAIRE ********************************************************************************************
+			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			connexion_avec_serveur.connect((IPNoeudActuel, PortNoeudActuel))
+			msg_a_envoyer = b""
+			msg_a_envoyer = "=cmd rechercherFichier nom " + nomFichier
+			msg_a_envoyer = msg_a_envoyer.encode()
+			connexion_avec_serveur.send(msg_a_envoyer)
+			msg_recu = connexion_avec_serveur.recv(1024)
+			msg_recu = msg_recu.decode()
+			connexion_avec_serveur.close()
+			if msg_recu != "0":
+				IPPortNoeud = msg_recu
+				break
 	return IPPortNoeud
 
 def chercherFichier(nomFichier):
