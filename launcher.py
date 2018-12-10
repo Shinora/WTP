@@ -111,7 +111,10 @@ while serveur_lance:
                 # On va récuperer le nom du fichier qui contient la liste
                 # Ensuite, on la transmet au noeud distant pour qu'il puisse
                 # faire la demande de réception du fichier pour qu'il puisse l'analyser
-                fichier = autresFonctions.lsteFichiers()
+                if msg_recu[:28] == "=cmd DemandeListeFichiersExt":
+                    fichier = autresFonctions.lsteFichiers(1)
+                else:
+                    fichier = autresFonctions.lsteFichiers()
                 client.send(fichier.encode())
                 print("Fait.")
             elif msg_recu[:23] == "=cmd DemandeListeNoeuds":
