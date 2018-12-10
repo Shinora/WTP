@@ -28,12 +28,13 @@ def portLibre(premierPort):
 		    premierPort += 1
 	return premierPort
 
-def lsteFichiers(): 
+def lsteFichiers(fichiersExternes = 0): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
 	# CAR CHAQUE LIGNE EST DE TYPE SHA256fichier.ext @ IP:Port
 	# Fonction qui retourne un fichier qui contient tous les
 	# noms des fichers hébergés par le noeud,
 	# et qui sont dans la BDD, un par ligne
+	# Si fichiersExternes = 1, on doit faire la liste des focihers externes connus et non des fichiers hébergés
 	try:
 		with open('WTP.db'): pass
 	except IOError:
@@ -46,7 +47,10 @@ def lsteFichiers():
 			raise
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
-	cursor.execute("""SELECT Nom FROM Fichiers WHERE 1""")
+	if fichiersExternes == 0:
+		cursor.execute("""SELECT Nom FROM Fichiers WHERE 1""")
+	else:
+		cursor.execute("""SELECT Nom FROM FichiersExt WHERE 1""")
 	rows = cursor.fetchall()
 	fileDir = "HOSTEDFILES/listeFichiers"
 	# On vide le fichier au cas où
@@ -58,7 +62,10 @@ def lsteFichiers():
 	# Puis on commence l'importation
 	fluxEcriture = open(fileDir, "a")
 	for row in rows:
-		fluxEcriture.write(row[0]+" @ "+monIP+":5555\n")
+		if fichiersExternes == 0:
+			fluxEcriture.write(row[0]+" @ "+monIP+":5555\n")
+		else:
+			fluxEcriture.write(row[0]+" @ "+row[1]+"\n")
 	fluxEcriture.close()
 	# Maintenant on va trouver le SHA256 du fichier
 	fluxSHA = open(fileDir, "r")
@@ -190,6 +197,7 @@ def fillConfFile():
 		conf_file.write("Autostart : Oui\n")
 	else:
 		conf_file.write("Autostart : Non\n")
+	conf_file.write("SuperNoeud : Non\n")
 	conf_file.write("Blacklist [\n")
 	for ip in blacklist:
 		conf_file.write(ip + " ; \n")

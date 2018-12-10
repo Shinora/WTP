@@ -369,7 +369,7 @@ def searchFileBDD(nomFichier):
 
 def nbEntrees(nomTable):
 	# Fonction qui a pour seul but de compter toutes les entrées de la table
-	# Donc le nom a été âssé en paramètres
+	# Dont le nom a été passé en paramètres
 	try:
 		with open('WTP.db'): pass
 	except IOError:
