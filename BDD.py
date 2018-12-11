@@ -72,12 +72,7 @@ def creerBase():
 
 def ajouterEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet d'ajouter une entrée à une table de la base
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	# Vérifier si l'entrée existe déjà dans la BDD.
 	# Si il existe on ne fait rien
 	# Si il n'existe pas, on l'ajoute
@@ -128,12 +123,7 @@ def envNoeuds(nbreNoeuds):
 	# ... renvoyer une chaine de type 88.189.108.233:12345
 	# Paramètre : Le nomnbre de noeuds à renvoyer
 	listeNoeuds = ""
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	datetimeAct24H = str(time.time()-86400)
@@ -155,12 +145,7 @@ def envNoeuds(nbreNoeuds):
 
 def supprEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet de supprimer une entrée dans une table
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -192,12 +177,7 @@ def supprEntree(nomTable, entree, entree1 = ""):
 def incrNbVerifsHS(ipPort):
 	# Vérifie que le noeud existe
 	# Si il existe, le noeud est incémenté de 1.
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -226,12 +206,7 @@ def incrNbVerifsHS(ipPort):
 def verifNbVerifsHS(ipPort):
 	# Vérifie que le nombre de vérifications déjà effectuées
 	# S'il y en a plus que 10, le noeud est définitivement supprimé
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -256,12 +231,7 @@ def verifNbVerifsHS(ipPort):
 
 def verifFichier(nomFichier):
 	# Fonction qui vérifie si le fichier existe dans la base de données
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -277,12 +247,7 @@ def verifFichier(nomFichier):
 	return FichierExiste
 
 def majStatsTaillFchsTtl(varAMaj):
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -294,12 +259,7 @@ def majStatsTaillFchsTtl(varAMaj):
 	conn.close()
 
 def majStatsNbFchs(varAMaj):
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -311,12 +271,7 @@ def majStatsNbFchs(varAMaj):
 	conn.close()
 
 def majStatsNbFchsExt(varAMaj):
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -328,12 +283,7 @@ def majStatsNbFchsExt(varAMaj):
 	conn.close()
 
 def majStatsNbNoeuds(varAMaj):
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -348,12 +298,7 @@ def searchFileBDD(nomFichier):
 	# Fonction qui a pour but de chercher dans la Base de données le noeud qui possède le fichier recherché
 	# Elle retourne l'IP du noeud qui a le fichier, sinon elle retourne une chaine vide
 	IPPortNoeud = "" # L'adresse du noeud sera ici
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	# On va chercher dans les fichiers hébergés
@@ -381,12 +326,7 @@ def searchFileBDD(nomFichier):
 def nbEntrees(nomTable):
 	# Fonction qui a pour seul but de compter toutes les entrées de la table
 	# Dont le nom a été passé en paramètres
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -402,12 +342,7 @@ def nbEntrees(nomTable):
 def aleatoire(nomTable, entree, nbEntrees):
 	# Fonction qui a pour but de renvoyer sour forme d'un tableau nbEntrees lignes
 	# contenues dans nomTable de façon aléatoire.
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -426,12 +361,7 @@ def aleatoire(nomTable, entree, nbEntrees):
 
 def chercherInfo(nomTable, info, retour):
 	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -443,3 +373,12 @@ def chercherInfo(nomTable, info, retour):
 	for row in cursor.fetchall():
 		conn.close()
 		return row
+
+def verifExistBDD():
+	# Fonction qui permet d'alèger le code en évitant les duplications
+	try:
+		with open('WTP.db'):
+			pass
+	except IOError:
+		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		creerBase()

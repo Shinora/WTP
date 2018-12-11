@@ -21,7 +21,8 @@ import search
 
 # On vérifie que le fichier de config existe
 try:
-    with open('wtp.conf'): pass
+    with open('wtp.conf'):
+        pass
 except IOError:
     # Le fichier n'existe pas, on lance le créateur
     autresFonctions.fillConfFile()
@@ -36,7 +37,7 @@ fExtW.write("ALLUMER")
 fExtW.close()
 
 hote = '127.0.0.1'
-port = int(input("Port : "))
+port = int(autresFonctions.readConfFile("Port par defaut"))
 
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))

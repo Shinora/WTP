@@ -41,7 +41,8 @@ def lsteFichiers(fichiersExternes = 0):
 	# et qui sont dans la BDD, un par ligne
 	# Si fichiersExternes = 1, on doit faire la liste des focihers externes connus et non des fichiers hébergés
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		BDD.creerBase()
@@ -86,7 +87,8 @@ def lsteNoeuds():
 	# IP+PORT des noeuds connus par ce noeud
 	# et qui sont dans la BDD, un par ligne
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		BDD.creerBase()
