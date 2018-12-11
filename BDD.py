@@ -73,7 +73,8 @@ def creerBase():
 def ajouterEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet d'ajouter une entrée à une table de la base
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -128,7 +129,8 @@ def envNoeuds(nbreNoeuds):
 	# Paramètre : Le nomnbre de noeuds à renvoyer
 	listeNoeuds = ""
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -154,7 +156,8 @@ def envNoeuds(nbreNoeuds):
 def supprEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet de supprimer une entrée dans une table
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -190,7 +193,8 @@ def incrNbVerifsHS(ipPort):
 	# Vérifie que le noeud existe
 	# Si il existe, le noeud est incémenté de 1.
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -223,7 +227,8 @@ def verifNbVerifsHS(ipPort):
 	# Vérifie que le nombre de vérifications déjà effectuées
 	# S'il y en a plus que 10, le noeud est définitivement supprimé
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -252,7 +257,8 @@ def verifNbVerifsHS(ipPort):
 def verifFichier(nomFichier):
 	# Fonction qui vérifie si le fichier existe dans la base de données
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -272,7 +278,8 @@ def verifFichier(nomFichier):
 
 def majStatsTaillFchsTtl(varAMaj):
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -288,7 +295,8 @@ def majStatsTaillFchsTtl(varAMaj):
 
 def majStatsNbFchs(varAMaj):
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -304,7 +312,8 @@ def majStatsNbFchs(varAMaj):
 
 def majStatsNbFchsExt(varAMaj):
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -320,7 +329,8 @@ def majStatsNbFchsExt(varAMaj):
 
 def majStatsNbNoeuds(varAMaj):
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -339,7 +349,8 @@ def searchFileBDD(nomFichier):
 	# Elle retourne l'IP du noeud qui a le fichier, sinon elle retourne une chaine vide
 	IPPortNoeud = "" # L'adresse du noeud sera ici
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -371,7 +382,8 @@ def nbEntrees(nomTable):
 	# Fonction qui a pour seul but de compter toutes les entrées de la table
 	# Dont le nom a été passé en paramètres
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -391,7 +403,8 @@ def aleatoire(nomTable, entree, nbEntrees):
 	# Fonction qui a pour but de renvoyer sour forme d'un tableau nbEntrees lignes
 	# contenues dans nomTable de façon aléatoire.
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -414,7 +427,8 @@ def aleatoire(nomTable, entree, nbEntrees):
 def chercherInfo(nomTable, info, retour):
 	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
