@@ -10,6 +10,7 @@ import os
 import BDD
 import hashlib
 import re
+import time
 from  urllib.request import *
 
 def portLibre(premierPort):
@@ -26,7 +27,11 @@ def portLibre(premierPort):
 		else:
 		    # Le port est déjà utilisé !
 		    premierPort += 1
-	return premierPort
+		if premierPort < int(autresFonctions.readConfFile("Port par defaut")):
+			return premierPort
+		else:
+			logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
+			time.sleep(1)
 
 def lsteFichiers(fichiersExternes = 0): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
@@ -63,7 +68,7 @@ def lsteFichiers(fichiersExternes = 0):
 	fluxEcriture = open(fileDir, "a")
 	for row in rows:
 		if fichiersExternes == 0:
-			fluxEcriture.write(row[0]+" @ "+monIP+":5555\n")
+			fluxEcriture.write(row[0]+" @ "+monIP+":"+str(autresFonctions.readConfFile("Port par defaut"))+"\n")
 		else:
 			fluxEcriture.write(row[0]+" @ "+row[1]+"\n")
 	fluxEcriture.close()
@@ -203,3 +208,22 @@ def fillConfFile():
 		conf_file.write(ip + " ; \n")
 	conf_file.write("]")
 	conf_file.close()
+
+def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
+	# Fonction qui lit le fichier de configuration et qui retourne l'information demandée en paramètres
+	try:
+		with open('wtp.conf'):
+			pass
+	except IOError:
+		# Le fichier est inexistant, il faut le créer
+		fillConfFile()
+	f = open("wtp.conf",'r')
+	lignes  = f.readlines()
+	f.close()
+	for ligne in lignes:
+		# On lit le fichier ligne par ligne et si on trouve le paramètre dans la ligne,
+		# on renvoie ce qui se trouva après
+		if ligne[:len(parametre)] == parametre:
+			# On a trouvé ce que l'on cherchait
+			# Maintenant on enlève " : "
+			return ligne[len(parametre)+3:]

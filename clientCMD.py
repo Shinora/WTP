@@ -62,7 +62,7 @@ def CmdDemandeFichier(ip, port, fichier, special = "non"):
 	print("Connexion établie avec le serveur sur le port {}".format(port))
 	# Il faut trouver un port libre pour que le noeud donneur
 	# puisse se connecter à ce noeud sur le bon port
-	newIPPort = str(autresFonctions.connaitreIP()) + str(autresFonctions.portLibre(5555))
+	newIPPort = str(autresFonctions.connaitreIP()) + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("Port Min"))))
 	msg_a_envoyer = "=cmd DemandeFichier  nom " + fichier
 	msg_a_envoyer += " ipPort " + newIPPort
 	msg_a_envoyer = msg_a_envoyer.encode()
