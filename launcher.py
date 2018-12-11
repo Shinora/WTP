@@ -101,7 +101,7 @@ while serveur_lance:
                 # Dirriger vers la fonction EnvoiNoeuds()
                 # Le noeud distant a demandé les noeuds, on lui envoi !
                 # On trouve le premier port qui peut être attribué
-                IpPortNoeud = "127.0.0.1:" + str(autresFonctions.portLibre(5555))
+                IpPortNoeud = "127.0.0.1:" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("Port Min"))))
                 cmdAEnvoyer = IpPortNoeud # On envoie au demandeur l'adresse à contacter
                 cmdAEnvoyer = cmdAEnvoyer.encode()
                 client.send(cmdAEnvoyer)
