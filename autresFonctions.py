@@ -40,12 +40,7 @@ def lsteFichiers(fichiersExternes = 0):
 	# noms des fichers hébergés par le noeud,
 	# et qui sont dans la BDD, un par ligne
 	# Si fichiersExternes = 1, on doit faire la liste des focihers externes connus et non des fichiers hébergés
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		BDD.creerBase()
+	BDD.verifExistBDD()
 	try: 
 		os.makedirs("HOSTEDFILES")
 	except OSError:
@@ -86,12 +81,7 @@ def lsteNoeuds():
 	# Fonction qui retourne un fichier qui contient toutes les
 	# IP+PORT des noeuds connus par ce noeud
 	# et qui sont dans la BDD, un par ligne
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		BDD.creerBase()
+	BDD.verifExistBDD()
 	try: 
 		os.makedirs("HOSTEDFILES")
 	except OSError:
@@ -218,6 +208,10 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 			pass
 	except IOError:
 		# Le fichier est inexistant, il faut le créer
+		fillConfFile()
+	if os.path.getsize("wtp.conf") < 80:
+		# Le fichier est très léger, il ne peut contenir les informations
+		# Il faut donc le recréer
 		fillConfFile()
 	f = open("wtp.conf",'r')
 	lignes  = f.readlines()
