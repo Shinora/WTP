@@ -20,6 +20,7 @@ import search
 # Ligne commentée pour le dev, trop pénible
 
 # On vérifie que le fichier de config existe
+# VÉRIFIER QU'IL N'EST PAS VIDE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 try:
     with open('wtp.conf'):
         pass
