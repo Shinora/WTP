@@ -1,13 +1,11 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import time
 import logs
 import BDD
 import socket
 import hashlib
 import sqlite3
-import sys
 import os
 
 def verifNoeud():
@@ -151,13 +149,13 @@ def creerFichier():
 	# Et pour finir, elle supprime les fichiers ajoutés de façon à ce que le dossier ADDFILES soit vide.
 	repertoire = "ADDFILES"
 	# Vérifier si le dossier ADDFILES existe, sinon le créer
-	try: 
+	try:
 		os.makedirs("ADDFILES")
 	except OSError:
 		if not os.path.isdir("ADDFILES"):
 			raise
 	# Vérifier si le dossier HOSTEDFILES existe, sinon le créer
-	try: 
+	try:
 		os.makedirs("HOSTEDFILES")
 	except OSError:
 		if not os.path.isdir("HOSTEDFILES"):

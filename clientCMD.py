@@ -2,16 +2,9 @@
 # -*-coding:Utf-8 -*
 
 import socket
-import select
-import sys
-import os
-import os.path
-import logs
-import BDD
 import autresFonctions
 import echangeNoeuds
 import echangeFichiers
-import fctsMntc
 import search
 
 hote = "127.0.0.1"
@@ -38,6 +31,16 @@ while msg_a_envoyer != b"fin":
 	elif msg_a_envoyer[:18] == "=cmd chercher nom ":
 		# =cmd chercher nom SHA256.ext
 		CmdRechercherNom(hote, port, msg_a_envoyer[18:])
+	else:
+		connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		connexion_avec_serveur.connect((hote, port))
+		commande = msg_a_envoyer
+		commande = commande.encode()
+		connexion_avec_serveur.send(commande)
+		msg_recu = connexion_avec_serveur.recv(1024)
+		connexion_avec_serveur.close()
+		print(msg_recu.decode())
+		print("Fait.")
 
 def CmdDemandeNoeud(ip, port):
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
