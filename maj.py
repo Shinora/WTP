@@ -1,7 +1,6 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import socket
 import select
 import sys
 import os
@@ -68,16 +67,14 @@ def verifMAJ(force = 0):
 			logs.ajtLogs("INFO : Le fichier " + oldFichier + " a été mis à jour")
 		logs.ajtLogs("INFO : La mise à jour est terminée")
 		# Il faut redemarrer le protocol
-		cmd = os.popen("python3 reload.py", 'r')
+		os.popen("python3 reload.py", 'r')
 	else:
 		logs.ajtLogs("INFO : Pas de mise à jour disponible")
 
 def verifSources():
 	i = 0
 	fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
-	for i in range(len(fichiers)):
-		en_cours = fichiers[i]
-
+	for en_cours in fichiers:
 		class AppURLopener(FancyURLopener):
 			version = "Mozilla/5.0"
 		opener = AppURLopener()

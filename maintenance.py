@@ -3,7 +3,6 @@
 
 import time
 import logs
-import BDD
 import fctsMntc
 import stats
 import maj

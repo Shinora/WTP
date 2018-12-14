@@ -9,7 +9,6 @@ import hashlib
 import logs
 import BDD
 import autresFonctions
-from Crypto import Random
 
  ####################################################
 #                          #

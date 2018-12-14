@@ -1,17 +1,8 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import socket
-import select
-import sys
-import os
-import os.path
 import logs
-import BDD
-import autresFonctions
-import echangeNoeuds
-import echangeFichiers
-import time
+import clientCMD
 
 # Ici sont regroupées toutes les fonctions liées uniquement aux super-noeuds
 
@@ -35,9 +26,9 @@ def parseAll():
 		port = row[row.find(":")+1:]
 		# Pour chaque noeud on demande la liste de :
 		# tous les fichiers qu'il héberge (=cmd DemandeListeFichiers)
-		CmdDemandeListeFichiers(hote, port)
+		clientCMD.CmdDemandeListeFichiers(hote, port)
 		# tous les fichiers externes qu'il connait (=cmd DemandeListeFichiersExt)
-		CmdDemandeListeFichiers(hote, port, 1)
+		clientCMD.CmdDemandeListeFichiers(hote, port, 1)
 		# tous les noeuds qu'il connait (=cmd DemandeListeNoeuds)
-		CmdDemandeListeNoeuds(hote, port)
+		clientCMD.CmdDemandeListeNoeuds(hote, port)
 	conn.close()

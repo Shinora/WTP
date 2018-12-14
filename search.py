@@ -2,16 +2,8 @@
 # -*- coding:utf-8 -*-
 
 import socket
-import select
-import sys
-import os
-import os.path
-import logs
 import BDD
 import autresFonctions
-import echangeNoeuds
-import echangeFichiers
-import time
 
 # Les fonctions ici servent à chercher des fichiers sur le réseau
 
@@ -42,9 +34,8 @@ def searchFile(nomFichier):
 			print("Pas assez de noeuds simples")
 		# On ajoute les super noeuds après les noeuds simples
 		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
-		for x in range(len(tblNoeuds)):
+		for noeudActuel in tblNoeuds:
 			# À chaque noeud on demande si il a le fichier ou s'il connait un noeud qui l'a
-			noeudActuel = tblNoeuds[x]
 			IPNoeudActuel = noeudActuel[:noeudActuel.find(":")]
 			PortNoeudActuel = noeudActuel[noeudActuel.find(":")+1:]
 			# Maintenant on se connecte au noeud
