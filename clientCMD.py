@@ -22,8 +22,8 @@ while msg_a_envoyer != b"fin":
 	if msg_a_envoyer == "=cmd DemandeNoeud":
 		CmdDemandeNoeud(hote, port)
 	elif msg_a_envoyer[:19] == "=cmd DemandeFichier":
-		# =cmd DemandeFichier  nom sha256.ext
-		CmdDemandeFichier(hote, port, msg_a_envoyer[25:])
+		# =cmd DemandeFichier nom sha256.ext
+		CmdDemandeFichier(hote, port, msg_a_envoyer[24:])
 	elif msg_a_envoyer == "=cmd DemandeListeNoeuds":
 		CmdDemandeListeNoeuds(hote, port)
 	elif msg_a_envoyer == "=cmd DemandeListeFichiers":

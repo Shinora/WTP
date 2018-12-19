@@ -10,7 +10,8 @@ import os
 
 def verifNoeud():
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		BDD.creerBase()
@@ -53,7 +54,8 @@ def verifNoeud():
 
 def verifNoeudHS():
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		BDD.creerBase()
@@ -109,7 +111,8 @@ def verifFichier():
 	# LE SHA256 doit être identique au nom.
 	# Sinon on envoie vers la fonction qui supprime le fichier de la BDD et du disque
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		BDD.creerBase()

@@ -16,7 +16,8 @@ import maj
  ####################################################
 
 try:
-	with open(".TempMaintenance24H", "r"): pass
+	with open(".TempMaintenance24H", "r"):
+		pass
 except IOError:
 	# Le fichier n'existe pas.
 	# On va donc le créer, et dans le doute mettre 0 pour le datetime,
@@ -32,7 +33,8 @@ f.close()
 
 # Et pareil pour l'importation de fichiers
 try:
-	with open(".TempMaintenance5M", "r"): pass
+	with open(".TempMaintenance5M", "r"):
+		pass
 except IOError:
 	# Le fichier n'existe pas.
 	# On va donc le créer, et dans le doute mettre 0 pour le datetime,
