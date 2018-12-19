@@ -9,7 +9,8 @@ def comptTaillFchsTtl():
 	# Fonction qui compte la taille totale de tous les fichiers hébergés sur le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -30,7 +31,8 @@ def comptNbFichiers():
 	# Fonction qui compte le nombre total de fichiers hébergés par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -51,7 +53,8 @@ def comptNbFichiersExt():
 	# Fonction qui compte le nombre total de fichiers connus par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
@@ -72,7 +75,8 @@ def comptNbNoeuds():
 	# Fonction qui compte le nombre total de neouds connus par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	try:
-		with open('WTP.db'): pass
+		with open('WTP.db'):
+			pass
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()

@@ -159,6 +159,12 @@ def fillConfFile():
 		def_port = 5555
 	else:
 		def_port = int(def_port)
+	portVPN = input("Entrez votre port principal (defaut:5556) : ")
+	if portVPN == "":
+		# L'utilisateur veut laisser la valeur par défaut
+		portVPN = 5556
+	else:
+		portVPN = int(portVPN)
 	min_port = 1
 	max_port = 0
 	while min_port > max_port:
@@ -188,6 +194,7 @@ def fillConfFile():
 	autostart = input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : ")
 	conf_file = open("wtp.conf", "a")
 	conf_file.write("Port par defaut : "+str(def_port)+"\n")
+	conf_file.write("Port VPN : "+str(portVPN)+"\n")
 	conf_file.write("Port Min : "+str(min_port)+"\n")
 	conf_file.write("Port Max : "+str(max_port)+"\n")
 	if autostart == "1":
@@ -203,12 +210,7 @@ def fillConfFile():
 
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 	# Fonction qui lit le fichier de configuration et qui retourne l'information demandée en paramètres
-	try:
-		with open('wtp.conf'):
-			pass
-	except IOError:
-		# Le fichier est inexistant, il faut le créer
-		fillConfFile()
+	BDD.verifExistBDD()
 	if os.path.getsize("wtp.conf") < 80:
 		# Le fichier est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer

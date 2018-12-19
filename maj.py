@@ -79,7 +79,6 @@ def verifSources():
 			version = "Mozilla/5.0"
 		opener = AppURLopener()
 		page = opener.open("https://myrasp.fr/WTPStatic/"+en_cours)
-
 		online_sha = page.read().decode("utf-8")
 		acces_file = open(en_cours + ".py", "r")
 		contenu = acces_file.read()
