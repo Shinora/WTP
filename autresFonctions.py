@@ -29,9 +29,8 @@ def portLibre(premierPort):
 		    premierPort += 1
 		if premierPort < int(autresFonctions.readConfFile("Port par defaut")):
 			return premierPort
-		else:
-			logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
-			time.sleep(1)
+		logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
+		time.sleep(1)
 
 def lsteFichiers(fichiersExternes = 0): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE

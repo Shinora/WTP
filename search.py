@@ -61,10 +61,9 @@ def chercherFichier(nomFichier):
 		# Le noeud héberge le fichier demandé
 		# Donc on retourne son IP
 		return autresFonctions.connaitreIP()
-	else:
-		retour = BDD.chercherInfo("FichiersExt", "Nom", "IP")
-		# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
-		return retour
+	retour = BDD.chercherInfo("FichiersExt", "Nom", "IP")
+	# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
+	return retour
 
 def searchNDD(url):
 	# Fonction qui vérifie si le nom de fichier envoyé est plus petit qu'un SHA256
@@ -112,10 +111,8 @@ def rechercheFichierEntiere(donnee):
 	if retour2 != "0":
 		# Le noeud héberge déjà le fichier ou le connait
 		return retour2
-	else:
-		# Le noeud ne connait pas le fichier
-		retour3 = searchFile(retour)
-		if retour3 != "":
-			return retour3
-		else:
-			return "=cmd NOHOST"
+	# Le noeud ne connait pas le fichier
+	retour3 = searchFile(retour)
+	if retour3 != "":
+		return retour3
+	return "=cmd NOHOST"
