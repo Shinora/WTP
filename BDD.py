@@ -368,3 +368,22 @@ def verifExistBDD():
 	except IOError:
 		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
+
+def searchNoeud(role, nbre = 10):
+	# Fonction qui  pour but de chercher 'nbre' noeuds ayant pour role 'role'
+	verifExistBDD()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = ? ORDER BY RANDOM() LIMIT ?""", (role, nbre))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("ERREUR : Problème avec base de données (aleatoire()):" + str(e))
+	rows = cursor.fetchall()
+	tableau = []
+	for row in rows:
+		tableau.append(row)
+		# On remplit le tableau avant de le retourner
+	conn.close()
+	return tableau

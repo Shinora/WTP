@@ -31,7 +31,7 @@ while msg_a_envoyer != b"fin":
 		CmdDemandeListeFichiers(hote, port)
 	elif msg_a_envoyer[:18] == "=cmd chercher nom ":
 		# =cmd chercher nom SHA256.ext
-		CmdRechercherNom(hote, port, msg_a_envoyer[18:])
+		search.rechercheFichierEntiere(msg_a_envoyer[18:])
 	else:
 		connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		connexion_avec_serveur.connect((hote, port))
@@ -117,12 +117,6 @@ def CmdDemandeListeFichiers(ip, port, ext = 0):
 	CmdDemandeFichier(ip, port, nomFichier.decode(), "fichiers")
 	print("Fait.")
 
-def CmdRechercherNom(ip, port, nomFichier): # En cours...
-	# Chercher le nom du fichier
-	print("Go chercher")
-	search.searchFile(nomFichier)
-	print("Fait.")
-
 def VPN(demande, ipPortVPN, ipPortExt):
 	ip = ipPortVPN[:ipPortVPN.find(":")]
 	port = ipPortVPN[ipPortVPN.find(":")+1:]
@@ -150,6 +144,6 @@ def VPN(demande, ipPortVPN, ipPortExt):
 		CmdDemandeListeNoeuds(hote, port)
 	elif commande[:22] == "=cmd rechercherFichier":
 		# =cmd chercher nom SHA256.ext
-		CmdRechercherNom(hote, port, msg_a_envoyer[18:])
+		search.rechercheFichierEntiere(msg_a_envoyer[18:])
 	else:
 		print("ERREUR : Commande inconnue")

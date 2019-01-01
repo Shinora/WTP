@@ -91,19 +91,6 @@ def supprNDD(ipport, ndd, password):
 	message = connexion_avec_serveur.recv(1024)
 	connexion_avec_serveur.close()
 
-def remAdr(NDD):
-	# Fonction pour supprimer une adresse au DNS
-	print("BONJOUR")
-
-def searchAdr(NDD):
-	# Fonction pour chercher le SHA256 correspondant à l'adresse
-	print("BONJOUR")
-
-def showAll(limit = 150):
-	# Fonction qui affiche un certain nombre de noms de domaines (défaut 150)
-	# Qui sont dans la base du noeud DNS
-	print("BONJOUR")
-
 ######################################################################
 ##########################  BASE DE DONNÉES ##########################
 ######################################################################
@@ -304,3 +291,35 @@ def verifExistBDD():
 	except IOError:
 		logs.ajtLogs("DNS : ERREUR : Base introuvable... Création d'une nouvelle base.")
 		creerBase()
+
+def searchSHA(ndd):
+	# Fonction qui a pour but de chercher le sha256 correspondant
+	# au nom de domaine passé en paramètres s'il existe
+	verifExistBDD()
+	problem = 0
+	sha256 = "0"
+	conn = sqlite3.connect('WTPDNS.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT SHA256 FROM DNS WHERE NDD = ?""", (entree1,))
+		rows = cursor.fetchall()
+		nbRes = 0
+		for row in rows:
+			nbRes += 1
+			if nbRes > 1:
+				# On trouve plusieurs fois le même nom de domaine dans la base
+				problem = 5
+				logs.ajtLogs("DNS : ERREUR : Le nom de domaine " + ndd + " est présent plusieurs fois dans la base de données")
+			else:
+				sha256 = row[0]
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (searchSHA()):" + str(e))
+		problem += 1
+	conn.close()
+	if problem > 1:
+		return problem
+	elif sha256 == "0":
+		return "INCONNU"
+	else:
+		return sha256

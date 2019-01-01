@@ -89,7 +89,7 @@ while serveur_lance:
 						cmdAEnvoyer = "=cmd SUCCESS"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
-				elif commande[:8] = "supprNDD":
+				elif commande[:8] == "supprNDD":
 					# =cmd DNS supprNDD ndd ****** pass ******
 					ndd = commande[22:commande.find(" pass ")]
 					password = commande[commande.find(" pass ")+6:]
@@ -101,6 +101,18 @@ while serveur_lance:
 							cmdAEnvoyer = "=cmd ERROR"
 					else:
 						cmdAEnvoyer = "=cmd SUCCESS"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
+				elif commande[:9] == "searchSHA":
+					# =cmd DNS searchSHA ndd ******
+					sortie = str(dns.searchSHA(ndd))
+					if len(sortie) >= 64:
+						cmdAEnvoyer = sortie
+					else:
+						if sortie == "INCONNU":
+							cmdAEnvoyer = "=cmd NNDInconnu"
+						else:
+							cmdAEnvoyer = "=cmd ERROR"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				else:

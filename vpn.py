@@ -80,7 +80,7 @@ while serveur_lance:
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				elif commande[:22] == "=cmd rechercherFichier":
-					clientCMD.CmdRechercherNom(ip, port, commande[26:])
+					search.rechercheFichierEntiere(commande[26:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
