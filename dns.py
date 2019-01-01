@@ -321,5 +321,4 @@ def searchSHA(ndd):
 		return problem
 	elif sha256 == "0":
 		return "INCONNU"
-	else:
-		return sha256
+	return sha256
