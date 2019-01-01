@@ -159,12 +159,18 @@ def fillConfFile():
 		def_port = 5555
 	else:
 		def_port = int(def_port)
-	portVPN = input("Entrez votre port principal (defaut:5556) : ")
+	portVPN = input("Entrez votre port VPN (defaut:5556) : ")
 	if portVPN == "":
 		# L'utilisateur veut laisser la valeur par défaut
 		portVPN = 5556
 	else:
 		portVPN = int(portVPN)
+	portDNS = input("Entrez votre port DNS (defaut:5557) : ")
+	if portDNS == "":
+		# L'utilisateur veut laisser la valeur par défaut
+		portDNS = 5557
+	else:
+		portDNS = int(portDNS)
 	min_port = 1
 	max_port = 0
 	while min_port > max_port:
@@ -195,6 +201,7 @@ def fillConfFile():
 	conf_file = open("wtp.conf", "a")
 	conf_file.write("Port par defaut : "+str(def_port)+"\n")
 	conf_file.write("Port VPN : "+str(portVPN)+"\n")
+	conf_file.write("Port DNS : "+str(portDNS)+"\n")
 	conf_file.write("Port Min : "+str(min_port)+"\n")
 	conf_file.write("Port Max : "+str(max_port)+"\n")
 	if autostart == "1":
@@ -210,7 +217,11 @@ def fillConfFile():
 
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 	# Fonction qui lit le fichier de configuration et qui retourne l'information demandée en paramètres
-	BDD.verifExistBDD()
+	try:
+		with open('wtp.conf'): pass
+	except IOError:
+		# Le fichier n'existe pas
+		fillConfFile()
 	if os.path.getsize("wtp.conf") < 80:
 		# Le fichier est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer
@@ -225,3 +236,15 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 			# On a trouvé ce que l'on cherchait
 			# Maintenant on enlève " : "
 			return ligne[len(parametre)+3:]
+
+def afficherLogo():
+	print("")
+	print("                        ██╗    ██╗████████╗██████╗ ")
+	print("                        ██║    ██║╚══██╔══╝██╔══██╗")
+	print("                        ██║ █╗ ██║   ██║   ██████╔╝")
+	print("                        ██║███╗██║   ██║   ██╔═══╝ ")
+	print("                        ╚███╔███╔╝   ██║   ██║     ")
+	print("                         ╚══╝╚══╝    ╚═╝   ╚═╝     ")
+	print("")
+	print("")
+

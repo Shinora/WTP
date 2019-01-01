@@ -3,16 +3,13 @@
 
 import logs
 import clientCMD
+import BDD
 
 # Ici sont regroupées toutes les fonctions liées uniquement aux super-noeuds
 
 def parseAll():
 	# Fonction qui permet de connaitre l'intégralité du réseau
-	try:
-		with open('WTP.db'): pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:

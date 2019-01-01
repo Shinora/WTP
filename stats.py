@@ -8,12 +8,7 @@ import sqlite3
 def comptTaillFchsTtl():
 	# Fonction qui compte la taille totale de tous les fichiers hébergés sur le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -25,17 +20,12 @@ def comptTaillFchsTtl():
 	for row in rows:
 		tailleTotale += row[0]
 	# On met à jour directement dans la BDD
-	BDD.majStatsTaillFchsTtl(tailleTotale)
+	BDD.modifStats("PoidsFichiers", tailleTotale)
 
 def comptNbFichiers():
 	# Fonction qui compte le nombre total de fichiers hébergés par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -47,17 +37,12 @@ def comptNbFichiers():
 	for row in rows:
 		nbTotal += 1
 	# On met à jour directement dans la BDD
-	BDD.majStatsNbFchs(nbTotal)
+	BDD.modifStats("NbFichiers", nbTotal)
 
 def comptNbFichiersExt():
 	# Fonction qui compte le nombre total de fichiers connus par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -69,17 +54,12 @@ def comptNbFichiersExt():
 	for row in rows:
 		nbTotal += 1
 	# On met à jour directement dans la BDD
-	BDD.majStatsNbFchsExt(nbTotal)
+	BDD.modifStats("NbFichiersExt", nbTotal)
 
 def comptNbNoeuds():
 	# Fonction qui compte le nombre total de neouds connus par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -91,4 +71,4 @@ def comptNbNoeuds():
 	for row in rows:
 		nbTotal += 1
 	# On met à jour directement dans la BDD
-	BDD.majStatsNbNoeuds(nbTotal)
+	BDD.modifStats("NbNoeuds", nbTotal)
