@@ -57,13 +57,17 @@ def creerBase():
 				NbFichiersExt INTEGER,
 				NbFichiers INTEGER,
 				PoidsFichiers INTEGER,
-				NbEnvois INTEGER,
-				NbReceptions INTEGER
+				NbEnvsLstNoeuds INTEGER,
+				NbEnvsLstFichiers INTEGER,
+				NbEnvsLstFichiersExt INTEGER,
+				NbEnvsFichiers INTEGER,
+				NbPresence INTEGER,
+				NbReceptFichiers INTEGER
 			)
 		""")
 		conn.commit()
 		# On initialise les Statistiques
-		cursor.execute("""INSERT INTO Statistiques (NbNoeuds, NbSN, NbFichiersExt, NbFichiers, PoidsFichiers, NbEnvois, NbReceptions) VALUES (0, 0, 0, 0, 0, 0, 0)""")
+		cursor.execute("""INSERT INTO Statistiques (NbNoeuds, NbSN, NbFichiersExt, NbFichiers, PoidsFichiers, NbEnvsLstNoeuds, NbEnvsLstFichiers, NbEnvsLstFichiersExt, NbEnvsFichiers, NbPresence, NbReceptFichiers) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)""")
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
@@ -246,52 +250,34 @@ def verifFichier(nomFichier):
 	conn.close()
 	return FichierExiste
 
-def majStatsTaillFchsTtl(varAMaj):
+def modifStats(colonne, valeur=-1):
+	# Si valeur = -1, on incrémente, sinon on assigne la valeur en paramètres
 	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET PoidsFichiers = ? WHERE 1""", (varAMaj,))
+		if valeur == -1:
+			colonne2 = colonne
+			cursor.execute("""UPDATE Statistiques SET ? = 1 WHERE 1""", (colonne, colonne2))
+		else:
+			cursor.execute("""UPDATE Statistiques SET ? = ? WHERE 1""", (colonne, int(valeur)))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsTaillFchsTtl()):" + str(e))
+		logs.ajtLogs("ERREUR : Problème avec base de données (modifStats()):" + str(e))
+		logs.ajtLogs(str(valeur) + colonne)
 	conn.close()
 
-def majStatsNbFchs(varAMaj):
+def compterStats(colonne):
 	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""UPDATE Statistiques SET NbFichiers = ? WHERE 1""", (varAMaj,))
+		cursor.execute("""SELECT ? FROM Statistiques WHERE 1""", (colonne,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchs()):" + str(e))
-	conn.close()
-
-def majStatsNbFchsExt(varAMaj):
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""UPDATE Statistiques SET NbFichiersExt = ? WHERE 1""", (varAMaj,))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbFchsExt()):" + str(e))
-	conn.close()
-
-def majStatsNbNoeuds(varAMaj):
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""UPDATE Statistiques SET NbNoeuds = ? WHERE 1""", (varAMaj,))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (majStatsNbNoeuds()):" + str(e))
+		logs.ajtLogs("ERREUR : Problème avec base de données (compterStats()):" + str(e))
 	conn.close()
 
 def searchFileBDD(nomFichier):

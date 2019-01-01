@@ -65,3 +65,10 @@ def chercherFichier(nomFichier):
 		retour = BDD.chercherInfo("FichiersExt", "Nom", "IP")
 		# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
 		return retour
+
+def searchDNS(url):
+	# Fonction qui vérifie si le nom de fichier envoyé est plus petit qu'un SHA256
+	# Si c'est le cas, il va chercher chez les noeuds de DNS si ils connaissent ce nom de domaine
+	if url < 64:
+		# Ce n'est pas un nom de fichier, car il est plus petit qu'un SHA256
+		

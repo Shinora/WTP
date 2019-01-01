@@ -10,6 +10,7 @@ import search
 hote = "127.0.0.1"
 port = int(input("Port : "))
 
+autresFonctions.afficherLogo()
 
 msg_a_envoyer = b""
 importantCMD = ""
@@ -121,3 +122,34 @@ def CmdRechercherNom(ip, port, nomFichier): # En cours...
 	print("Go chercher")
 	search.searchFile(nomFichier)
 	print("Fait.")
+
+def VPN(demande, ipPortVPN, ipPortExt):
+	ip = ipPortVPN[:ipPortVPN.find(":")]
+	port = ipPortVPN[ipPortVPN.find(":")+1:]
+	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	connexion_avec_serveur.connect((ip, port))
+	print("Connexion établie avec le VPN sur le port {}".format(port))
+	# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
+	commande = "=cmd VPN noeud " + ipPortExt + " commande " + demande
+	commande = commande.encode()
+	connexion_avec_serveur.send(commande)
+	print(connexion_avec_serveur.recv(1024))
+	connexion_avec_serveur.close()
+	# Maintenant que l'on a demandé au VPN d'executer la demande, il faut recuperer les donnnées
+	# Pour cela, il faut analyser la commande initiale
+	if commande[:19] == "=cmd DemandeFichier":
+		# =cmd DemandeFichier nom sha256.ext
+		CmdDemandeFichier(ip, port, commande[24:])
+	elif commande[:17] == "=cmd DemandeNoeud":
+		CmdDemandeNoeud(hote, port)
+	elif commande[:28] == "=cmd DemandeListeFichiersExt":
+		CmdDemandeListeFichiers(ip, port, 1)
+	elif commande[:25] == "=cmd DemandeListeFichiers":
+		CmdDemandeListeFichiers(ip, port)
+	elif commande[:23] == "=cmd DemandeListeNoeuds":
+		CmdDemandeListeNoeuds(hote, port)
+	elif commande[:22] == "=cmd rechercherFichier":
+		# =cmd chercher nom SHA256.ext
+		CmdRechercherNom(hote, port, msg_a_envoyer[18:])
+	else:
+		print("ERREUR : Commande inconnue")

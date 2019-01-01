@@ -9,12 +9,7 @@ import sqlite3
 import os
 
 def verifNoeud():
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		BDD.creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT IP FROM Noeuds WHERE 1""")
@@ -53,12 +48,7 @@ def verifNoeud():
 				BDD.supprEntree("Noeuds", IpPortNoeud)
 
 def verifNoeudHS():
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		BDD.creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT IP FROM NoeudsHorsCo WHERE 1""")
@@ -110,12 +100,7 @@ def verifFichier():
 	# Il doit être présent sur le disque.
 	# LE SHA256 doit être identique au nom.
 	# Sinon on envoie vers la fonction qui supprime le fichier de la BDD et du disque
-	try:
-		with open('WTP.db'):
-			pass
-	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
-		BDD.creerBase()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT Chemin FROM Fichiers WHERE 1""")

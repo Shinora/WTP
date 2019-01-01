@@ -52,21 +52,39 @@ while serveur_lance:
 				if commande[:19] == "=cmd DemandeFichier":
 					clientCMD.CmdDemandeFichier(ip, port, commande[24:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				elif commande[:17] == "=cmd DemandeNoeud":
 					clientCMD.CmdDemandeNoeud(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				elif commande[:28] == "=cmd DemandeListeFichiersExt":
 					clientCMD.CmdDemandeListeFichiers(ip, port, 1)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				elif commande[:25] == "=cmd DemandeListeFichiers":
 					clientCMD.CmdDemandeListeFichiers(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				elif commande[:23] == "=cmd DemandeListeNoeuds":
 					clientCMD.CmdDemandeListeNoeuds(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				elif commande[:22] == "=cmd rechercherFichier":
 					clientCMD.CmdRechercherNom(ip, port, commande[26:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
+					cmdAEnvoyer = "=cmd TravailFini"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 				else:
 					#
 					print("Inconnu !")

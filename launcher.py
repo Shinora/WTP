@@ -30,8 +30,9 @@ except IOError:
 
 # Créer un fichier qui va lancer les différentes
 # instances en fonction de la configuration
-cmd = os.popen('python3 maintenance.py', 'r')
-print("Bonjour")
+os.popen('python3 maintenance.py', 'r')
+os.popen('python3 vpn.py', 'r')
+autresFonctions.afficherLogo()
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
@@ -80,6 +81,7 @@ while serveur_lance:
 					client.send("=cmd OK".encode())
 					time.sleep(0.5) # Le temps que le noeud distant mette en place son serveur
 					echangeFichiers.UploadFichier(nomFichier, IpPortNoeud)
+					BDD.modifStats("NbEnvsFichiers")
 				else:
 					client.send("=cmd ERROR".encode())
 			elif msg_recu[:17] == "=cmd DemandeNoeud": # Fonction Serveur
@@ -92,14 +94,17 @@ while serveur_lance:
 				client.send(cmdAEnvoyer)
 				print("OK !!")
 				echangeNoeuds.EnvoiNoeuds(IpPortNoeud)
+				BDD.modifStats("NbEnvsLstNoeuds")
 			elif msg_recu[:25] == "=cmd DemandeListeFichiers":
 				# On va récuperer le nom du fichier qui contient la liste
 				# Ensuite, on la transmet au noeud distant pour qu'il puisse
 				# faire la demande de réception du fichier pour qu'il puisse l'analyser
 				if msg_recu[:28] == "=cmd DemandeListeFichiersExt":
 					fichier = autresFonctions.lsteFichiers(1)
+					BDD.modifStats("NbEnvsLstFichiers")
 				else:
 					fichier = autresFonctions.lsteFichiers()
+					BDD.modifStats("NbEnvsLstFichiersExt")
 				client.send(fichier.encode())
 				print("Fait.")
 			elif msg_recu[:23] == "=cmd DemandeListeNoeuds":
@@ -109,6 +114,7 @@ while serveur_lance:
 				fichier = autresFonctions.lsteNoeuds()
 				client.send(fichier.encode())
 				print("Fait.")
+				BDD.modifStats("NbEnvsLstNoeuds")
 			elif msg_recu[:20] == "=cmd DemandePresence": # OPPÉRATIONNEL
 				# C'est tout bête, pas besoin de fonction
 				# Il suffit de renvoyer la commande informant que l'on est connecté au réseau.
@@ -116,6 +122,7 @@ while serveur_lance:
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
 				print("Fait.")
+				BDD.modifStats("NbPresence")
 			elif msg_recu[:22] == "=cmd rechercherFichier": 
 				# =cmd rechercherFichier nom SHA256.ext
 				# Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
