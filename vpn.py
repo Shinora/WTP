@@ -14,6 +14,7 @@ import echangeFichiers
 import time
 import maj
 import search
+import fctsClient
 
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
@@ -50,37 +51,38 @@ while serveur_lance:
 				ip = ipport[:ipport.find(":")]
 				port = ipport[ipport.find(":")+1:]
 				if commande[:19] == "=cmd DemandeFichier":
-					clientCMD.CmdDemandeFichier(ip, port, commande[24:])
+					fctsClient.CmdDemandeFichier(ip, port, commande[24:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				elif commande[:17] == "=cmd DemandeNoeud":
-					clientCMD.CmdDemandeNoeud(ip, port)
+					fctsClient.CmdDemandeNoeud(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				elif commande[:28] == "=cmd DemandeListeFichiersExt":
-					clientCMD.CmdDemandeListeFichiers(ip, port, 1)
+					fctsClient.CmdDemandeListeFichiers(ip, port, 1)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				elif commande[:25] == "=cmd DemandeListeFichiers":
-					clientCMD.CmdDemandeListeFichiers(ip, port)
+					fctsClient.CmdDemandeListeFichiers(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				elif commande[:23] == "=cmd DemandeListeNoeuds":
-					clientCMD.CmdDemandeListeNoeuds(ip, port)
+					fctsClient.CmdDemandeListeNoeuds(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
-				elif commande[:22] == "=cmd rechercherFichier":
-					search.rechercheFichierEntiere(commande[26:])
+				elif commande[:22] == "=cmd rechercher":
+					# =cmd rechercher nom ******
+					search.rechercheFichierEntiere(commande[20:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()

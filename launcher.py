@@ -26,7 +26,7 @@ try:
 except IOError:
 	# Le fichier n'existe pas, on lance le créateur
 	autresFonctions.fillConfFile()
-
+BDD.ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
 
 # Créer un fichier qui va lancer les différentes
 # instances en fonction de la configuration
@@ -123,14 +123,15 @@ while serveur_lance:
 				client.send(cmdAEnvoyer)
 				print("Fait.")
 				BDD.modifStats("NbPresence")
-			elif msg_recu[:22] == "=cmd rechercherFichier": 
-				# =cmd rechercherFichier nom SHA256.ext
+			elif msg_recu[:15] == "=cmd rechercher": 
+				# =cmd rechercher nom SHA256.ext
 				# Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
 				# Chercher le nom du fichier
-				nomFichier = msg_recu[27:]
-				cmdAEnvoyer = str(search.chercherFichier(nomFichier))
+				donnee = msg_recu[20:]
+				cmdAEnvoyer = str(search.rechercheFichierEntiere(donnee))
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
+				print("COUCOU LES AMIS")
 				print("Fait.")
 			else:
 				# Oups... Demande non-reconnue...

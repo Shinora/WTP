@@ -73,6 +73,8 @@ def creerBase():
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (creerBase()) :" + str(e))
 	conn.close()
+	ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
+	ajouterEntree("FichiersExt", "BBDEFA2950F49882F295B1285D4FA9DEC45FC4144BFB07EE6ACC68762D12C2E3", "127.0.0.1:5555")
 
 def ajouterEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet d'ajouter une entrée à une table de la base
@@ -84,13 +86,13 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 	cursor = conn.cursor()
 	try:
 		if nomTable == "Noeuds":
-			cursor.execute("""SELECT id FROM ? WHERE IP = ?""", (nomTable, entree))
+			cursor.execute("""SELECT id FROM Noeuds WHERE IP = ?""", (entree,))
 		elif nomTable == "Fichiers":
-			cursor.execute("""SELECT id FROM ? WHERE Nom = ?""", (nomTable, entree))
+			cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (entree,))
 		elif nomTable == "FichiersExt":
-			cursor.execute("""SELECT id FROM ? WHERE Nom = ? AND IP = ?""", (nomTable, entree, entree1))
+			cursor.execute("""SELECT id FROM FichiersExt WHERE Nom = ? AND IP = ?""", (entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
-			cursor.execute("""SELECT id FROM ? WHERE IP = ?""", (nomTable, entree))
+			cursor.execute("""SELECT id FROM NoeudsHorsCo WHERE IP = ?""", (entree,))
 	except Exception as e:
 		logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
 	else:
@@ -108,14 +110,16 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 			# En fonction de la table, il n'y a pas les mêmes champs à remplir
 			try:
 				if nomTable == "Noeuds":
-					cursor.execute("""INSERT INTO ? (IP, DerSync, DateAjout) VALUES (?, ?, ?)""", (nomTable, entree, datetimeAct, datetimeAct))
+					if entree1 == "":
+						entree1 == "Simple"
+					cursor.execute("""INSERT INTO Noeuds (IP, Fonction, DerSync, DateAjout) VALUES (?, ?, ?, ?)""", (entree, entree1, datetimeAct, datetimeAct))
 				elif nomTable == "Fichiers":
 					cheminFichier = "HOSTEDFILES/" + entree
-					cursor.execute("""INSERT INTO ? (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (nomTable, entree, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
+					cursor.execute("""INSERT INTO Fichiers (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (entree, datetimeAct, os.path.getsize(cheminFichier), cheminFichier))
 				elif nomTable == "FichiersExt":
-					cursor.execute("""INSERT INTO ? (Nom, IP) VALUES (?, ?)""", (nomTable, entree, entree1))
+					cursor.execute("""INSERT INTO FichiersExt (Nom, IP) VALUES (?, ?)""", (entree, entree1))
 				elif nomTable == "NoeudsHorsCo":
-					cursor.execute("""INSERT INTO ? (IP, NbVerifs) VALUES (?, 0)""", (nomTable, entree))
+					cursor.execute("""INSERT INTO NoeudsHorsCo (IP, NbVerifs) VALUES (?, 0)""", (entree,))
 				conn.commit()
 			except Exception as e:
 				conn.rollback()
@@ -154,13 +158,13 @@ def supprEntree(nomTable, entree, entree1 = ""):
 	cursor = conn.cursor()
 	try:
 		if nomTable == "Noeuds":
-			cursor.execute("""DELETE FROM ? WHERE IP =  ?""", (nomTable, entree))
+			cursor.execute("""DELETE FROM Noeuds WHERE IP =  ?""", (entree,))
 		elif nomTable == "Fichiers":
-			cursor.execute("""DELETE FROM ? WHERE Nom = ?""", (nomTable, entree))
+			cursor.execute("""DELETE FROM Fichiers WHERE Nom = ?""", (entree,))
 		elif nomTable == "FichiersExt":
-			cursor.execute("""DELETE FROM ? WHERE Nom = ? AND IP = ?""", (nomTable, entree, entree1))
+			cursor.execute("""DELETE FROM FichiersExt WHERE Nom = ? AND IP = ?""", (entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
-			cursor.execute("""DELETE FROM ? WHERE IP =  ?""", (nomTable, entree))
+			cursor.execute("""DELETE FROM NoeudsHorsCo WHERE IP =  ?""", (entree,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
@@ -332,8 +336,9 @@ def aleatoire(nomTable, entree, nbEntrees):
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""SELECT ? FROM ? ORDER BY RANDOM() LIMIT ?""", (entree, nomTable, nbEntrees))
-		conn.commit()
+		if nomTable == "Noeuds":
+			cursor.execute("""SELECT IP FROM Noeuds ORDER BY RANDOM() LIMIT ?""", (nbEntrees,))
+			conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (aleatoire()):" + str(e))
@@ -345,20 +350,25 @@ def aleatoire(nomTable, entree, nbEntrees):
 	conn.close()
 	return tableau
 
-def chercherInfo(nomTable, info, retour):
+def chercherInfo(nomTable, info):
 	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
 	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""SELECT ? FROM ? WHERE ?""", (retour, nomTable, info))
+		if nomTable == "Noeuds":
+			cursor.execute("""SELECT Fonction FROM Noeuds WHERE IP = ?""", (info,))
+		elif nomTable == "Fichiers":
+			cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (info,))
+		elif nomTable == "FichiersExt":
+			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (info,))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERREUR : Problème avec base de données (chercherInfo()):" + str(e))
 	for row in cursor.fetchall():
 		conn.close()
-		return row
+		return row[0]
 
 def verifExistBDD():
 	# Fonction qui permet d'alèger le code en évitant les duplications

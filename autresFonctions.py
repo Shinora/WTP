@@ -27,7 +27,7 @@ def portLibre(premierPort):
 		else:
 		    # Le port est déjà utilisé !
 		    premierPort += 1
-		if premierPort < int(autresFonctions.readConfFile("Port par defaut")):
+		if premierPort < int(readConfFile("Port par defaut")):
 			return premierPort
 		logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
 		time.sleep(1)
@@ -63,7 +63,7 @@ def lsteFichiers(fichiersExternes = 0):
 	fluxEcriture = open(fileDir, "a")
 	for row in rows:
 		if fichiersExternes == 0:
-			fluxEcriture.write(row[0]+" @ "+monIP+":"+str(autresFonctions.readConfFile("Port par defaut"))+"\n")
+			fluxEcriture.write(row[0]+" @ "+monIP+":"+str(readConfFile("Port par defaut"))+"\n")
 		else:
 			fluxEcriture.write(row[0]+" @ "+row[1]+"\n")
 	fluxEcriture.close()
