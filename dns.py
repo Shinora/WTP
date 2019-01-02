@@ -132,11 +132,12 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 	# Si il n'existe pas, on l'ajoute
 	conn = sqlite3.connect('WTPDNS.db')
 	cursor = conn.cursor()
+	problem = 0
 	try:
 		if nomTable == "DNS":
-			cursor.execute("""SELECT id FROM ? WHERE NDD = ?""", (nomTable, entree))
+			cursor.execute("""SELECT id FROM DNS WHERE NDD = ?""", (entree,))
 		elif nomTable == "DNSExt":
-			cursor.execute("""SELECT id FROM ? WHERE IPPORT = ?""", (nomTable, entree))
+			cursor.execute("""SELECT id FROM DNSExt WHERE IPPORT = ?""", (entree,))
 		else:
 			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (ajouterEntree()) : " + str(nomTable))
 			problem += 1
@@ -162,13 +163,20 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 				if nomTable == "DNS":
 					if entree1 != "" and entree2 != "":
 						passwordHash = hashlib.sha256(str(entree2).encode()).hexdigest()
-						cursor.execute("""INSERT INTO ? (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (nomTable, entree, entree1, passwordHash, datetimeAct))
+						try:
+							cursor.execute("""INSERT INTO DNS (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (entree1, entree, passwordHash, datetimeAct))
+							conn.commit()
+						except Exception as e:
+							print("DNS : ERREUR :" + str(e))
+						else:
+							print("C'est bon !")
 					else:
 						logs.ajtLogs("DNS : ERREUR : Il manque des paramètres lors de l'appel de la fonction (ajouterEntree())")
 						problem += 1
 				elif nomTable == "DNSExt":
 					cheminFichier = "HOSTEDFILES/" + entree
-					cursor.execute("""INSERT INTO ? (IPPORT, DateAjout) VALUES (?, ?)""", (nomTable, entree, datetimeAct))
+					cursor.execute("""INSERT INTO DNS (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
+					conn.commit()
 			except Exception as e:
 				conn.rollback()
 				logs.ajtLogs("DNS : ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
@@ -226,7 +234,7 @@ def supprEntree(nomTable, entree, entree1 = ""):
 					if row[0] == passwordHash:
 						cursor.execute("""DELETE FROM DNS WHERE NDD = ? AND PASSWORD = ?""", (entree, passwordHash))
 					else:
-						print("ERREUR : Le mot de passe n'est pas valide.")
+						# Le mot de passe n'est pas valide
 						problem = 5
 			else:
 				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (supprEntree())")
@@ -264,8 +272,9 @@ def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 				for row in rows:
 					if row[0] == hashlib.sha256(str(entree2).encode()).hexdigest():
 						cursor.execute("""UPDATE DNS SET SHA256 = ? WHERE NDD = ?""", (entree, entree1))
+						conn.commit()
 					else:
-						print("ERREUR : Le mot de passe n'est pas valide.")
+						# Le mot de passe n'est pas valide.
 						problem = 5
 			else:
 				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (supprEntree())")
@@ -301,8 +310,13 @@ def searchSHA(ndd):
 	conn = sqlite3.connect('WTPDNS.db')
 	cursor = conn.cursor()
 	try:
-		cursor.execute("""SELECT SHA256 FROM DNS WHERE NDD = ?""", (entree1,))
+		cursor.execute("""SELECT SHA256 FROM DNS WHERE NDD = ?""", (ndd,))
 		rows = cursor.fetchall()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (searchSHA()):" + str(e))
+		problem += 1
+	else:
 		nbRes = 0
 		for row in rows:
 			nbRes += 1
@@ -310,15 +324,12 @@ def searchSHA(ndd):
 				# On trouve plusieurs fois le même nom de domaine dans la base
 				problem = 5
 				logs.ajtLogs("DNS : ERREUR : Le nom de domaine " + ndd + " est présent plusieurs fois dans la base de données")
-			else:
-				sha256 = row[0]
-	except Exception as e:
-		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (searchSHA()):" + str(e))
-		problem += 1
+			sha256 = row[0]
 	conn.close()
 	if problem > 1:
 		return problem
 	elif sha256 == "0":
 		return "INCONNU"
 	return sha256
+
+creerBase()

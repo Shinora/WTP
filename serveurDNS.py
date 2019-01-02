@@ -14,6 +14,11 @@ import echangeFichiers
 import time
 import maj
 import search
+import dns
+
+fExtW = open(".extinctionWTP", "w")
+fExtW.write("ALLUMER")
+fExtW.close()
 
 hote = '127.0.0.1'
 port = int(autresFonctions.readConfFile("Port DNS"))
@@ -105,7 +110,7 @@ while serveur_lance:
 					client.send(cmdAEnvoyer)
 				elif commande[:9] == "searchSHA":
 					# =cmd DNS searchSHA ndd ******
-					sortie = str(dns.searchSHA(ndd))
+					sortie = str(dns.searchSHA(commande[14:]))
 					if len(sortie) >= 64:
 						cmdAEnvoyer = sortie
 					else:
@@ -116,11 +121,14 @@ while serveur_lance:
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				else:
-					#
-					print("Inconnu !")
 					cmdAEnvoyer = "=cmd Inconnu"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+			elif msg_recu == "=cmd DemandePresence":
+				cmdAEnvoyer = "=cmd Present"
+				cmdAEnvoyer = cmdAEnvoyer.encode()
+				client.send(cmdAEnvoyer)
+				print("Fait.")
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud

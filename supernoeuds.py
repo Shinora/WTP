@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import logs
-import clientCMD
+import fctsClient
 import BDD
 
 # Ici sont regroupées toutes les fonctions liées uniquement aux super-noeuds
@@ -23,9 +23,9 @@ def parseAll():
 		port = row[row.find(":")+1:]
 		# Pour chaque noeud on demande la liste de :
 		# tous les fichiers qu'il héberge (=cmd DemandeListeFichiers)
-		clientCMD.CmdDemandeListeFichiers(hote, port)
+		fctsClient.CmdDemandeListeFichiers(hote, port)
 		# tous les fichiers externes qu'il connait (=cmd DemandeListeFichiersExt)
-		clientCMD.CmdDemandeListeFichiers(hote, port, 1)
+		fctsClient.CmdDemandeListeFichiers(hote, port, 1)
 		# tous les noeuds qu'il connait (=cmd DemandeListeNoeuds)
-		clientCMD.CmdDemandeListeNoeuds(hote, port)
+		fctsClient.CmdDemandeListeNoeuds(hote, port)
 	conn.close()
