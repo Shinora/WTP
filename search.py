@@ -14,7 +14,6 @@ def searchFile(nomFichier):
 	IPPortNoeud = BDD.searchFileBDD(nomFichier)
 	if IPPortNoeud == "":
 		# Il faut demander aux noeuds que l'on connait
-		print("En cours...")
 		tblNoeuds = BDD.aleatoire("Noeuds", "IP", 10)
 		# On a 10 noeuds dans le tableau
 		# Maintenant, il faut vérifier que au moins la moitiée des noeuds choisis aléatoirement
@@ -57,11 +56,9 @@ def chercherFichier(nomFichier):
 	# Fonction qui regarde dans sa BDD si il y a le fichier en question
 	retour = 0
 	retour = BDD.chercherInfo("Fichiers", nomFichier)
-	print("Retour : " + str(retour))
 	if retour != 0 and str(retour) != "None":
 		# Le noeud héberge le fichier demandé
 		# Donc on retourne son IP
-		print("azerty")
 		return autresFonctions.connaitreIP()
 	retour = BDD.chercherInfo("FichiersExt", nomFichier)
 	# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
@@ -83,7 +80,6 @@ def searchNDD(url):
 			connexion_avec_serveur.connect((ip, port))
 			msg_a_envoyer = b""
 			msg_a_envoyer = "=cmd DNS searchSHA ndd " + url
-			print("MSG : " + str(msg_a_envoyer))
 			msg_a_envoyer = msg_a_envoyer.encode()
 			connexion_avec_serveur.send(msg_a_envoyer)
 			msg_recu = connexion_avec_serveur.recv(1024)
@@ -92,7 +88,6 @@ def searchNDD(url):
 			if msg_recu != "=cmd NNDInconnu" and msg_recu != "=cmd ERROR":
 				# On a trouvé !!
 				sha = msg_recu
-				print("Trouvé")
 				break
 	return sha
 
@@ -101,31 +96,23 @@ def rechercheFichierEntiere(donnee):
 	# La donnée passée en paramètres peut etre un nom de domaine, ou un sha256
 	# Renvoi une erreur ou IP:Port;sha256
 	retour = ""
-	print("ICI")
 	if len(str(donnee)) <= 63:
-		print("NDD")
 		# C'est un nom de domaine
 		retour = ""
 		nbre = 0
 		while retour == "":
-			print("WHILE")
 			nbre += 1
 			retour = searchNDD(donnee)
 			if retour == "" and nbre > 9:
-				print("IF")
 				# La fonction n'a pas trouvé le sha256 associé à ce nom de domaine
 				# Elle a pu demander jusqu'à 250 DNS différents
 				return "=cmd BADDNS"
 	# Si on arrive là c'est que l'on connait le sha256 du fichier (c'est retour)
-	print("APRES")
 	retour2 = str(chercherFichier(retour))
-	print("retour2")
 	if retour2 != "0" and str(retour2) != "None":
-		print("if")
 		# Le noeud héberge déjà le fichier ou le connait
 		return str(retour2 + ";" + retour)
 	# Le noeud ne connait pas le fichier
-	print("cestlafin")
 	retour3 = searchFile(retour)
 	if retour3 != "":
 		return str(retour3 + ";" + retour)

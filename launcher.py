@@ -92,7 +92,6 @@ while serveur_lance:
 				cmdAEnvoyer = IpPortNoeud # On envoie au demandeur l'adresse à contacter
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
-				print("OK !!")
 				echangeNoeuds.EnvoiNoeuds(IpPortNoeud)
 				BDD.modifStats("NbEnvsLstNoeuds")
 			elif msg_recu[:25] == "=cmd DemandeListeFichiers":
@@ -106,14 +105,12 @@ while serveur_lance:
 					fichier = autresFonctions.lsteFichiers()
 					BDD.modifStats("NbEnvsLstFichiersExt")
 				client.send(fichier.encode())
-				print("Fait.")
 			elif msg_recu[:23] == "=cmd DemandeListeNoeuds":
 				# On va récuperer le nom du fichier qui contient la liste
 				# Ensuite, on la transmet au noeud distant pour qu'il puisse
 				# faire la demande de réception du fichier pour qu'il puisse l'analyser
 				fichier = autresFonctions.lsteNoeuds()
 				client.send(fichier.encode())
-				print("Fait.")
 				BDD.modifStats("NbEnvsLstNoeuds")
 			elif msg_recu[:20] == "=cmd DemandePresence": # OPPÉRATIONNEL
 				# C'est tout bête, pas besoin de fonction
@@ -121,7 +118,6 @@ while serveur_lance:
 				cmdAEnvoyer = "=cmd Present"
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
-				print("Fait.")
 				BDD.modifStats("NbPresence")
 			elif msg_recu[:15] == "=cmd rechercher": 
 				# =cmd rechercher nom SHA256.ext
@@ -131,12 +127,10 @@ while serveur_lance:
 				cmdAEnvoyer = str(search.rechercheFichierEntiere(donnee))
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
-				print("COUCOU LES AMIS")
-				print("Fait.")
 			else:
 				# Oups... Demande non-reconnue...
 				if msg_recu != '':
-					print("ERROR : " + msg_recu)
+					logs.ajtLogs("ERREUR : Commande non reconnue : " + msg_recu)
 	# Vérifier si WTP a recu une demande d'extinction
 	fExt = open(".extinctionWTP", "r")
 	contenu = fExt.read()
@@ -148,11 +142,7 @@ while serveur_lance:
 		fExtW = open(".extinctionWTP", "w")
 		fExtW.write("ALLUMER")
 		fExtW.close()
-
-
-print("Fermeture des connexions")
 for client in clients_connectes:
 	client.close()
-
 connexion_principale.close()
 logs.ajtLogs("INFO : WTP s'est correctement arrèté.")

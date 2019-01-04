@@ -125,7 +125,6 @@ def verifFichier():
 		else:
 			#Il y a une erreur. Le fichier doit être supprimé,
 			# car il peut nuire au bon fonctionnement du réseau.
-			print("Ligne 137 : nomFichier : " + nomFichier)
 			BDD.supprEntree("Fichiers", nomFichier)
 			logs.ajtLogs("ERREUR : Le fichier " + nomFichier + " contenait des erreurs. Il a été supprimé.")
 
