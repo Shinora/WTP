@@ -74,11 +74,13 @@ while 1:
 		stats.comptNbFichiers()
 		stats.comptNbFichiersExt()
 		stats.comptNbNoeuds()
+		# Fonction rapport des erreurs
+		logs.rapportErreur()
 		# Fonction Mise A Jour
 		# maj.verifMAJ()
 		# maj.verifSources()
-		# logs.ajtLogs("INFO : Maintenance de la base de données effectée avec succès.")
-		# Ligne commentée pour le dev, trop pénible
+		logs.ajtLogs("INFO : Maintenance de la base de données effectée avec succès.")
+		# Lignes commentée pour le dev, trop pénible
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions
 		# Puis on change le contenu du fichier temporel
@@ -88,9 +90,7 @@ while 1:
 		derMtnc5M = tmpsAct
 		fctsMntc.creerFichier()
 		logs.ajtLogs("INFO : Vérification des nouveaux fichiers effectée avec succès.")
-	time.sleep(30) # Se reveille toutes les 5 minutes.
-	print(derMtnc)
-	print(tmpsAct)
+	time.sleep(300) # Se reveille toutes les 5 minutes.
 	tmpsActuel = str(time.time())
 	point = tmpsActuel.find('.')
 	tmpsAct = int(tmpsActuel[0:point])

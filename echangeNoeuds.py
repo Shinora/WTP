@@ -37,8 +37,6 @@ def DemandeNoeuds(IpPortNoeud):
 	IPNoeud = IpPortNoeud[pos0+1:pos1]
 	PortNoeud = IpPortNoeud[pos1+1:len(IpPortNoeud)-1]
 	ConnectionDemande = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	print(IPNoeud)
-	print(PortNoeud)
 	ConnectionDemande.connect((IPNoeud, int(PortNoeud)))
 	logs.ajtLogs("Connection avec le serveur établie. DemandeNoeuds() --> echangeNoeuds.py")
 	msg_a_envoyer = b""
@@ -58,7 +56,6 @@ def DemandeNoeuds(IpPortNoeud):
 	for loop in range(ListeNoeuds.count(',')+1):
 		lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
 		ListeNoeuds = ListeNoeuds[ListeNoeuds.find(',')+1:]
-		print(lsteTemp)
 		BDD.ajouterEntree("Noeuds", lsteTemp)
 	logs.ajtLogs("Fermeture de la connection. DemandeNoeuds() --> echangeNoeuds.py")
 	ConnectionDemande.close()

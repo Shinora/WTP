@@ -3,6 +3,7 @@
 
 import os
 from datetime import datetime
+import requests
 
  ####################################################
 #                                                    #
@@ -23,10 +24,23 @@ def ajtLogs(texte):
 	f.write(chaineFinale)
 	f.close()
 
-
 # Fonction pour supprimer les logs
 # Elle n'a aucun paramètre.
 def supprLogs():
 	f = open("logs.txt", "w")
 	f.write("")
 	f.close()
+
+def rapportErreur(selection = " "):
+	# Sélectionne les lignes ayant le mot clef de la selection ou les mots clefs plus graves
+	# Envoie le tout à un serveur
+	# INFO < WARNING < ERREUR
+	megaStr = ""
+	with open("logs.txt") as f :
+		for line in f :
+			if line.find(selection) != -1:
+				megaStr += line
+	f.close()
+	data = {"text":megaStr}
+	r = requests.post("https://myrasp.fr/WTPStatic/rapport.php", data = data)
+	supprLogs()

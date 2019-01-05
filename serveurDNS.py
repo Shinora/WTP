@@ -49,14 +49,14 @@ while serveur_lance:
 				# =cmd DNS ...
 				commande = msg_recu[9:]
 				if commande[:7] == "AddNDD ":
-					# =cmd DNS AddDNS sha ******* ndd ******* pass *******
+					# =cmd DNS AddNDD sha ******* ndd ******* pass *******
 					sha256 = commande[11:commande.find(" ndd ")]
-					ndd = commande[commande.find(" nnd ")+5:commande.find(" pass ")]
+					ndd = commande[commande.find(" ndd ")+5:commande.find(" pass ")]
 					password = commande[commande.find(" pass ")+6:]
-					erreur = dns.ajouterEntree("DNS", sha256, ndd, password)
+					erreur = dns.ajouterEntree("DNS", ndd, sha256, password)
 					if erreur != 0:
 						# Une erreur s'est produite et le nom de domaine n'a pas été ajouté
-						if erreur == 7:
+						if erreur == 5:
 							# Le nom de domaine ets déjà pris
 							cmdAEnvoyer = "=cmd NDDDejaUtilise"
 						else:
@@ -65,12 +65,13 @@ while serveur_lance:
 						cmdAEnvoyer = "=cmd SUCCESS"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+					print(erreur)
 				elif commande[:9] == "AddDNSExt":
 					# =cmd DNS AddDNSExt ipport ******
 					erreur = dns.ajouterEntree("DNSExt", commande[17:])
 					if erreur != 0:
 						# Une erreur s'est produite et le noeud DNS n'a pas été ajouté
-						if erreur == 7:
+						if erreur == 5:
 							# Le noeud est déjà connu
 							cmdAEnvoyer = "=cmd IPPORTDejaUtilise"
 						else:
@@ -79,21 +80,25 @@ while serveur_lance:
 						cmdAEnvoyer = "=cmd SUCCESS"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+					print(erreur)
 				elif commande[:8] == "modifNDD":
 					# =cmd DNS modifNDD ndd ****** adress ****** pass ******
-					ndd = commande[22:commande.find(" adress ")]
+					ndd = commande[13:commande.find(" adress ")]
 					adress = commande[commande.find(" adress ")+8:commande.find(" pass ")]
 					password = commande[commande.find(" pass ")+6:]
 					erreur = dns.modifEntree("DNS", adress, ndd, password)
 					if erreur > 0:
 						if erreur == 5:
 							cmdAEnvoyer = "=cmd MDPInvalide"
+						elif erreur == 8:
+							cmdAEnvoyer = "=cmd NDDInconnuCree"
 						else:
 							cmdAEnvoyer = "=cmd ERROR"
 					else:
 						cmdAEnvoyer = "=cmd SUCCESS"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+					print(erreur)
 				elif commande[:8] == "supprNDD":
 					# =cmd DNS supprNDD ndd ****** pass ******
 					ndd = commande[22:commande.find(" pass ")]
@@ -108,6 +113,7 @@ while serveur_lance:
 						cmdAEnvoyer = "=cmd SUCCESS"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+					print(erreur)
 				elif commande[:9] == "searchSHA":
 					# =cmd DNS searchSHA ndd ******
 					sortie = str(dns.searchSHA(commande[14:]))
@@ -120,6 +126,7 @@ while serveur_lance:
 							cmdAEnvoyer = "=cmd ERROR"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+					print(erreur)
 				else:
 					cmdAEnvoyer = "=cmd Inconnu"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
@@ -128,12 +135,11 @@ while serveur_lance:
 				cmdAEnvoyer = "=cmd Present"
 				cmdAEnvoyer = cmdAEnvoyer.encode()
 				client.send(cmdAEnvoyer)
-				print("Fait.")
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
 				if msg_recu != '':
-					print("ERROR : " + msg_recu)
+					logs.ajtLogs("ERROR : Commande non-reconnue (serveurDNS.py) : " + str(msg_recu))
 					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
@@ -148,11 +154,7 @@ while serveur_lance:
 		fExtW = open(".extinctionWTP", "w")
 		fExtW.write("ALLUMER")
 		fExtW.close()
-
-
-print("Fermeture des connexions")
 for client in clients_connectes:
 	client.close()
-
 connexion_principale.close()
 logs.ajtLogs("INFO : Le serveur DNS s'est correctement arrèté.")

@@ -40,10 +40,7 @@ def UploadFichier(nomFichier, IpPortNoeud):
 	try:
 		c.connect((IPNoeud, PortNoeud))
 	except socket.error as erreur:
-		logs.ajtLogs("ERREUR : Connection au receveur impossible. UploadFichier() --> echangeFichiers.py")
-		print(erreur)
-		print("IP : " + str(IPNoeud))
-		print("Port : " + str(PortNoeud))
+		logs.ajtLogs("ERREUR : Connection au receveur impossible. UploadFichier() --> echangeFichiers.py" + str(erreur))
 		sys.exit()
 	# Connaitre la taille du fichier en octet
 	tailleFichier = os.path.getsize(cheminFichier)
@@ -182,10 +179,3 @@ def DownloadFichier(IpPortReceveur):
 		conn.send(cmdAEnvoyer)
 	conn.close()
 	s.close()
-
-def demandeFichier(nomFichier, IpPort):
-	# Fonction qui demande au noeud s'il connait un fichier,
-	# Et retourne l'IPPORT du noeud qui a le fichier (retourne le deuxième argument si c'est lui)
-	ipPortNoeud = autresFonctions.connaitreIP()
-	print("EN COURS...")
-	return ipPortNoeud

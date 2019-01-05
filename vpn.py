@@ -88,13 +88,12 @@ while serveur_lance:
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				else:
-					#
-					print("Inconnu !")
+					logs.ajtLogs("ERREUR : Commande non-reconnue (vpn.py) : " + str(commande))
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
 				if msg_recu != '':
-					print("ERROR : " + msg_recu)
+					logs.ajtLogs("ERREUR : Commande non-reconnue (vpn.py) : " + str(msg_recu))
 					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
@@ -109,11 +108,7 @@ while serveur_lance:
 		fExtW = open(".extinctionWTP", "w")
 		fExtW.write("ALLUMER")
 		fExtW.close()
-
-
-print("Fermeture des connexions")
 for client in clients_connectes:
 	client.close()
-
 connexion_principale.close()
 logs.ajtLogs("INFO : WTP s'est correctement arrèté.")
