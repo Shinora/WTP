@@ -4,7 +4,6 @@
 import socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
-import socket
 import autresFonctions
 import echangeNoeuds
 import echangeFichiers
