@@ -12,15 +12,13 @@ import logs
 def CmdDemandeNoeud(ip, port):
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le serveur sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le serveur sur le port {}".format(port))
 	commande = "=cmd DemandeNoeud"
 	commande = commande.encode()
 	connexion_avec_serveur.send(commande)
 	msg_recu = connexion_avec_serveur.recv(1024)
 	connexion_avec_serveur.close()
-	print(msg_recu.decode())
 	echangeNoeuds.DemandeNoeuds(str(msg_recu))
-	print("Fait.")
 
 def CmdDemandeFichier(ip, port, fichier, special = "non"):
 	# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
@@ -29,7 +27,7 @@ def CmdDemandeFichier(ip, port, fichier, special = "non"):
 	# L'IP et le port du noeud qui va envoyer le fichier (sous forme IP:PORT)
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le serveur sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le serveur sur le port {}".format(port))
 	# Il faut trouver un port libre pour que le noeud donneur
 	# puisse se connecter à ce noeud sur le bon port
 	newIPPort = str(autresFonctions.connaitreIP()) + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("Port Min"))))
@@ -60,13 +58,12 @@ def CmdDemandeListeNoeuds(ip, port):
 	msg_a_envoyer = "=cmd DemandeListeNoeuds"
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le serveur sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le serveur sur le port {}".format(port))
 	msg_a_envoyer = msg_a_envoyer.encode()
 	connexion_avec_serveur.send(msg_a_envoyer)
 	nomFichier = connexion_avec_serveur.recv(1024)
 	connexion_avec_serveur.close()
 	CmdDemandeFichier(ip, port, nomFichier.decode(), "noeuds")
-	print("Fait.")
 
 def CmdDemandeListeFichiers(ip, port, ext = 0):
 	if ext == 1:
@@ -75,20 +72,19 @@ def CmdDemandeListeFichiers(ip, port, ext = 0):
 		msg_a_envoyer = "=cmd DemandeListeFichiers"
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le serveur sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le serveur sur le port {}".format(port))
 	msg_a_envoyer = msg_a_envoyer.encode()
 	connexion_avec_serveur.send(msg_a_envoyer)
 	nomFichier = connexion_avec_serveur.recv(1024)
 	connexion_avec_serveur.close()
 	CmdDemandeFichier(ip, port, nomFichier.decode(), "fichiers")
-	print("Fait.")
 
 def VPN(demande, ipPortVPN, ipPortExt):
 	ip = ipPortVPN[:ipPortVPN.find(":")]
 	port = ipPortVPN[ipPortVPN.find(":")+1:]
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le VPN sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le VPN sur le port {}".format(port))
 	# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
 	commande = "=cmd VPN noeud " + ipPortExt + " commande " + demande
 	commande = commande.encode()
@@ -112,4 +108,4 @@ def VPN(demande, ipPortVPN, ipPortExt):
 		# =cmd rechercher nom SHA256.ext
 		search.rechercheFichierEntiere(msg_a_envoyer[20:])
 	else:
-		print("ERREUR : Commande inconnue")
+		logs.ajtLogs("ERREUR : Commande inconnue (VPN() in fctsClient.py) : " + str(commande))

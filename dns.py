@@ -14,7 +14,7 @@ def addNDD(ipport, sha, ndd, password):
 	port = ipport[ipport.find(":")+1:]
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le DNS sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
 	# =cmd DNS AddDNS sha ******* ndd ******* pass *******
 	commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
 	commande = commande.encode()
@@ -37,7 +37,7 @@ def addNoeudDNS(ipport, ipportNoeud):
 	port = ipport[ipport.find(":")+1:]
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le DNS sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
 	# =cmd DNS AddDNSExt ipport ******
 	commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
 	commande = commande.encode()
@@ -60,7 +60,7 @@ def modifNDD(ipport, ndd, adress, password):
 	port = ipport[ipport.find(":")+1:]
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le DNS sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
 	# =cmd DNS modifNDD ndd ****** adress ****** pass ******
 	commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
 	commande = commande.encode()
@@ -83,7 +83,7 @@ def supprNDD(ipport, ndd, password):
 	port = ipport[ipport.find(":")+1:]
 	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	connexion_avec_serveur.connect((ip, port))
-	print("Connexion établie avec le DNS sur le port {}".format(port))
+	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
 	# =cmd DNS supprNDD ndd ****** pass ******
 	commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
 	commande = commande.encode()
@@ -167,15 +167,12 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 							cursor.execute("""INSERT INTO DNS (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (entree1, entree, passwordHash, datetimeAct))
 							conn.commit()
 						except Exception as e:
-							print("DNS : ERREUR :" + str(e))
-						else:
-							print("C'est bon !")
+							logs.ajtLogs("DNS : ERREUR :" + str(e))
 					else:
 						logs.ajtLogs("DNS : ERREUR : Il manque des paramètres lors de l'appel de la fonction (ajouterEntree())")
 						problem += 1
 				elif nomTable == "DNSExt":
-					cheminFichier = "HOSTEDFILES/" + entree
-					cursor.execute("""INSERT INTO DNS (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
+					cursor.execute("""INSERT INTO DNSExt (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
 					conn.commit()
 			except Exception as e:
 				conn.rollback()
@@ -233,6 +230,7 @@ def supprEntree(nomTable, entree, entree1 = ""):
 				for row in rows:
 					if row[0] == passwordHash:
 						cursor.execute("""DELETE FROM DNS WHERE NDD = ? AND PASSWORD = ?""", (entree, passwordHash))
+						conn.commit()
 					else:
 						# Le mot de passe n'est pas valide
 						problem = 5
@@ -241,6 +239,7 @@ def supprEntree(nomTable, entree, entree1 = ""):
 				problem += 1
 		elif nomTable == "DNSExt":
 			cursor.execute("""DELETE FROM DNSExt WHERE IPPORT = ?""", (entree,))
+			conn.commit()
 		else:
 			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (supprEntree()) : " + str(nomTable))
 			problem += 1
@@ -270,25 +269,30 @@ def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 				rows = cursor.fetchall()
 				nbRes = 0
 				for row in rows:
+					nbRes += 1
 					if row[0] == hashlib.sha256(str(entree2).encode()).hexdigest():
 						cursor.execute("""UPDATE DNS SET SHA256 = ? WHERE NDD = ?""", (entree, entree1))
 						conn.commit()
 					else:
 						# Le mot de passe n'est pas valide.
 						problem = 5
+				if nbRes == 0:
+					logs.ajtLogs("DNS : ERREUR : Le nom de domaine à modifier n'existe pas (modifEntree())")
+					problem = 8
+					problem += ajouterEntree("DNS", entree1, entree, entree2)
 			else:
-				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (supprEntree())")
+				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (modifEntree())")
 				problem += 1
 		else:
-			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (supprEntree()) : " + str(nomTable))
+			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (modifEntree()) : " + str(nomTable))
 			problem += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (supprEntree()):" + str(e))
+		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (modifEntree()):" + str(e))
 		problem += 1
 	else:
-		logs.ajtLogs("DNS : INFO : L'entrée' " + entree + " de la table " + nomTable + " a bien été supprimé.")
+		logs.ajtLogs("DNS : INFO : Le nom de domaine " + entree1 + " a bien été modifiée.")
 	conn.close()
 	return problem
 
