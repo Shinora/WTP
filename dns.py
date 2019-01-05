@@ -332,7 +332,7 @@ def searchSHA(ndd):
 	conn.close()
 	if problem > 1:
 		return problem
-	elif sha256 == "0":
+	if sha256 == "0":
 		return "INCONNU"
 	return sha256
 

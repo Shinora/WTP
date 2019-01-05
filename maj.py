@@ -7,7 +7,6 @@ import os
 import os.path
 import logs
 import zipfile
-from  urllib.request import *
 import time
 import hashlib
 

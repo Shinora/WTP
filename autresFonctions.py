@@ -11,7 +11,6 @@ import BDD
 import hashlib
 import re
 import time
-from  urllib.request import *
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -217,7 +216,8 @@ def fillConfFile():
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 	# Fonction qui lit le fichier de configuration et qui retourne l'information demandée en paramètres
 	try:
-		with open('wtp.conf'): pass
+		with open('wtp.conf'):
+			pass
 	except IOError:
 		# Le fichier n'existe pas
 		fillConfFile()
