@@ -111,7 +111,7 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 			try:
 				if nomTable == "Noeuds":
 					if entree1 == "":
-						entree1 == "Simple"
+						entree1 = "Simple"
 					cursor.execute("""INSERT INTO Noeuds (IP, Fonction, DerSync, DateAjout) VALUES (?, ?, ?, ?)""", (entree, entree1, datetimeAct, datetimeAct))
 				elif nomTable == "Fichiers":
 					cheminFichier = "HOSTEDFILES/" + entree

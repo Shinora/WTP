@@ -11,6 +11,7 @@ import BDD
 import hashlib
 import re
 import time
+from urllib.request import *
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -246,4 +247,3 @@ def afficherLogo():
 	print("                         ╚══╝╚══╝    ╚═╝   ╚═╝     ")
 	print("")
 	print("")
-
