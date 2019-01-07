@@ -20,14 +20,14 @@ def portLibre(premierPort):
 	while port:
 		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
-		    clientsocket.connect(('127.0.0.1' , premierPort))
+		    clientsocket.connect(('127.0.0.1' , int(premierPort)))
 		except ConnectionRefusedError:
 		    # Le port est libre !
 		    port = False
 		else:
 		    # Le port est déjà utilisé !
 		    premierPort += 1
-		if premierPort < int(readConfFile("Port par defaut")):
+		if premierPort < int(readConfFile("Port Max")):
 			return premierPort
 		logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
 		time.sleep(1)
@@ -247,3 +247,15 @@ def afficherLogo():
 	print("                         ╚══╝╚══╝    ╚═╝   ╚═╝     ")
 	print("")
 	print("")
+
+def connectionClient(ip, port):
+	try:
+		connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		connexion_avec_serveur.connect((ip, int(port)))
+	except ConnectionRefusedError as e:
+		print("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
+	except ConnectionResetError as e:
+		print("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
+	else:
+		return connexion_avec_serveur
+	return "=cmd ERROR"

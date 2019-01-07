@@ -30,37 +30,36 @@ import BDD
 
 def DemandeNoeuds(IpPortNoeud):
 	#Le paramètre à donner est l'ip suivie du port du Noeud à contacter sous la forme 000.000.000.000:00000
-	
 	#Départager l'IP et le port
-	pos1 = IpPortNoeud.find(":")
-	pos0 = IpPortNoeud.find("'")
-	IPNoeud = IpPortNoeud[pos0+1:pos1]
-	PortNoeud = IpPortNoeud[pos1+1:len(IpPortNoeud)-1]
-	ConnectionDemande = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	ConnectionDemande.connect((IPNoeud, int(PortNoeud)))
-	logs.ajtLogs("Connection avec le serveur établie. DemandeNoeuds() --> echangeNoeuds.py")
-	msg_a_envoyer = b""
-	msg_a_envoyer = "=cmd DonListeNoeuds 48"
-	msg_a_envoyer = msg_a_envoyer.encode()
-	# On envoie le message
-	ConnectionDemande.send(msg_a_envoyer)
-	ListeNoeudsEnc = ConnectionDemande.recv(1024)
-	ListeNoeuds = ListeNoeudsEnc.decode()
-	#Les 48 IP+port sont sous la forme 000.000.000.000:00000 et sont séparés par une virgule
-	##################################################
-	##  IL FAUT VERIFIER SI CE SONT BIEN DES IP ET  ##
-	##        PAS UNE ERREUR QUI EST RECUE          ##
-	##################################################
-	#Départager les IP et les ports et envoi à la BDD par l'intermédiaire 
-	# de la fonction spécifique
-	for loop in range(ListeNoeuds.count(',')+1):
-		lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
-		ListeNoeuds = ListeNoeuds[ListeNoeuds.find(',')+1:]
-		BDD.ajouterEntree("Noeuds", lsteTemp)
-	logs.ajtLogs("Fermeture de la connection. DemandeNoeuds() --> echangeNoeuds.py")
-	ConnectionDemande.close()
-
-
+	ip = IpPortNoeud[:IpPortNoeud.find(":")]
+	port = IpPortNoeud[IpPortNoeud.find(":")+1:]
+	error = 0
+	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	if str(connexion_avec_serveur) == "=cmd ERROR":
+		error += 1
+	else:
+		logs.ajtLogs("Connection avec le serveur établie. DemandeNoeuds() --> echangeNoeuds.py")
+		msg_a_envoyer = b""
+		msg_a_envoyer = "=cmd DonListeNoeuds 48"
+		msg_a_envoyer = msg_a_envoyer.encode()
+		# On envoie le message
+		ConnectionDemande.send(msg_a_envoyer)
+		ListeNoeudsEnc = ConnectionDemande.recv(1024)
+		ListeNoeuds = ListeNoeudsEnc.decode()
+		#Les 48 IP+port sont sous la forme 000.000.000.000:00000 et sont séparés par une virgule
+		##################################################
+		##  IL FAUT VERIFIER SI CE SONT BIEN DES IP ET  ##
+		##        PAS UNE ERREUR QUI EST RECUE          ##
+		##################################################
+		#Départager les IP et les ports et envoi à la BDD par l'intermédiaire 
+		# de la fonction spécifique
+		for loop in range(ListeNoeuds.count(',')+1):
+			lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
+			ListeNoeuds = ListeNoeuds[ListeNoeuds.find(',')+1:]
+			BDD.ajouterEntree("Noeuds", lsteTemp)
+		logs.ajtLogs("Fermeture de la connection. DemandeNoeuds() --> echangeNoeuds.py")
+		ConnectionDemande.close()
+	return error
 
 ########################
 #
