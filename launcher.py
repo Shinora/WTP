@@ -75,7 +75,6 @@ while serveur_lance:
 				nomFichier = msg_recu[pos1:pos2]
 				pos2 = pos2+8
 				pos3 = len(msg_recu)
-				print(msg_recu)
 				IpPortNoeud = msg_recu[pos2:pos3]
 				if BDD.verifFichier(nomFichier):
 					# Le fichier est présent dans la BDD, on peut l'envoyer

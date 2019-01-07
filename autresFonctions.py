@@ -253,9 +253,9 @@ def connectionClient(ip, port):
 		connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		connexion_avec_serveur.connect((ip, int(port)))
 	except ConnectionRefusedError as e:
-		print("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
+		logs.ajtLogs("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
 	except ConnectionResetError as e:
-		print("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
+		logs.ajtLogs("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
 	else:
 		return connexion_avec_serveur
 	return "=cmd ERROR"
