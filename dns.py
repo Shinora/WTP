@@ -8,6 +8,7 @@ import math
 import time
 import hashlib
 import sqlite3
+import autresFonctions
 
 def addNDD(ipport, sha, ndd, password):
 	ip = ipport[:ipport.find(":")]
