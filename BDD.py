@@ -312,7 +312,6 @@ def searchFileBDD(nomFichier):
 		for row in rows:
 			# Le fichier est hébergé par un noeud connu
 			IPPortNoeud = str(row)
-			print("IPPORTNOEUD : "+IPPortNoeud)
 	return IPPortNoeud
 
 def nbEntrees(nomTable):

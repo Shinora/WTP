@@ -30,7 +30,7 @@ def searchFile(nomFichier):
 		if len(tableauNoeudsSimple) < 6:
 			# Il n'y a pas assez de noeuds simples dans la liste,
 			# Il faut aller en rechercher
-			print("Pas assez de noeuds simples")
+			logs.ajtLogs("Pas assez de noeuds simples")
 		# On ajoute les super noeuds après les noeuds simples
 		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
 		for noeudActuel in tblNoeuds:

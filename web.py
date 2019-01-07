@@ -26,11 +26,8 @@ class MyServer(BaseHTTPRequestHandler):
 		if requete[:19] == "=cmd rechercher nom":
 			# =cmd rechercher nom SHA256.ext
 			sortie = search.rechercheFichierEntiere(requete[20:])
-			print("Sortie : " + sortie)
 			ipport = sortie[:sortie.find(";")]
 			sha = sortie[sortie.find(";")+1:]
-			print("SHA : " + sha)
-			print("IPPORT : " + ipport)
 			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
 				# C'est un IPPort
 				# On envoi vers la fonction qui télécharge le fichier
@@ -38,7 +35,6 @@ class MyServer(BaseHTTPRequestHandler):
 				port = int(ipport[ipport.find(":")+1:])
 				error = fctsClient.CmdDemandeFichier(ip, port, sha)
 				if error == 0:
-					print("ICI")
 					resultat = "=cmd SUCCESS : " + sha
 				elif error == 5:
 					resultat = "=cmd ERROR NO FILE"
@@ -57,6 +53,7 @@ class MyServer(BaseHTTPRequestHandler):
 		self.wfile.write(bytes(resultat, "utf-8"))
 myServer = HTTPServer((hostName, hostPort), MyServer)
 print(time.asctime(), "Server Starts - %s:%s" % (hostName, hostPort))
+autresFonctions.afficherLogo()
 try:
 	myServer.serve_forever()
 except KeyboardInterrupt:

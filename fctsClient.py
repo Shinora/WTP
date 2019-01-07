@@ -60,10 +60,10 @@ def CmdDemandeFichier(ip, port, fichier, special = "non"):
 					autresFonctions.lireListeFichiers(nomFichier)
 			else:
 				error += 1
-				print("Le téléchargement (down) du fichier a échoué")
+				logs.ajtLogs("Le téléchargement (down) du fichier a échoué")
 		else:
 			# Le noeud distant n'a pas le fichier que l'on veut
-			print("Le noeud n'a pas le fichier recherché")
+			logs.ajtLogs("Le noeud n'a pas le fichier recherché")
 			error = 5
 	return error
 
