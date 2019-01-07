@@ -75,12 +75,16 @@ while serveur_lance:
 				nomFichier = msg_recu[pos1:pos2]
 				pos2 = pos2+8
 				pos3 = len(msg_recu)
+				print(msg_recu)
 				IpPortNoeud = msg_recu[pos2:pos3]
 				if BDD.verifFichier(nomFichier):
 					# Le fichier est présent dans la BDD, on peut l'envoyer
 					client.send("=cmd OK".encode())
 					time.sleep(0.5) # Le temps que le noeud distant mette en place son serveur
-					echangeFichiers.UploadFichier(nomFichier, IpPortNoeud)
+					if echangeFichiers.UploadFichier(nomFichier, IpPortNoeud) != 0:
+						client.send("=cmd ERROR".encode())
+					else:
+						client.send("=cmd SUCCESS".encode())
 					BDD.modifStats("NbEnvsFichiers")
 				else:
 					client.send("=cmd ERROR".encode())

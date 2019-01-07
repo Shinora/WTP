@@ -23,56 +23,27 @@ class MyServer(BaseHTTPRequestHandler):
 			requete = requete[:requete.find("%20")] + " " + requete[requete.find("%20")+3:]
 		resultat = ""
 		# Maintenant, requete est egal à la requete passée en paramètres, avec les espaces
-		if requete[:17] == "=cmd DemandeNoeud":
-			# =cmd DemandeNoeud ipport ******
-			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', requete[requete.find(" ipport")+8:]):
-				ip = requete[requete.find(" ipport ")+8:requete.find(":")]
-				port = int(requete[requete.find(":")+1:])
-				fctsClient.CmdDemandeNoeud(ip, port)
-				resultat = "=cmd SUCCESS"
-			else:
-				resultat = "=cmd ERROR MISS IPPort"
-		elif requete[:19] == "=cmd DemandeFichier":
-			# =cmd DemandeFichier nom sha256.ext ipport ******
-			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', requete[requete.find(" ipport")+8:]):
-				ip = requete[requete.find(" ipport ")+8:requete.find(":")]
-				port = int(requete[requete.find(":")+1:])
-				fctsClient.CmdDemandeFichier(ip, port, requete[24:])
-				resultat = "=cmd SUCCESS"
-			else:
-				resultat = "=cmd ERROR MISS IPPort"
-		elif requete[:23] == "=cmd DemandeListeNoeuds":
-			# =cmd DemandeListeNoeuds ipport ******
-			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', requete[requete.find(" ipport")+8:]):
-				ip = requete[requete.find(" ipport ")+8:requete.find(":")]
-				port = int(requete[requete.find(":")+1:])
-				fctsClient.CmdDemandeListeNoeuds(ip, port)
-				resultat = "=cmd SUCCESS"
-			else:
-				resultat = "=cmd ERROR MISS IPPort"
-		elif requete[:25] == "=cmd DemandeListeFichiers":
-			# =cmd DemandeListeFichiers ipport ******
-			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', requete[requete.find(" ipport")+8:]):
-				ip = requete[requete.find(" ipport ")+8:requete.find(":")]
-				port = int(requete[requete.find(":")+1:])
-				fctsClient.CmdDemandeListeFichiers(ip, port)
-				resultat = "=cmd SUCCESS"
-			else:
-				resultat = "=cmd ERROR MISS IPPort"
-		elif requete[:19] == "=cmd rechercher nom":
+		if requete[:19] == "=cmd rechercher nom":
 			# =cmd rechercher nom SHA256.ext
-			ip = requete[requete.find(" ipport ")+8:requete.find(":")]
-			port = int(requete[requete.find(":"):])
 			sortie = search.rechercheFichierEntiere(requete[20:])
+			print("Sortie : " + sortie)
 			ipport = sortie[:sortie.find(";")]
 			sha = sortie[sortie.find(";")+1:]
+			print("SHA : " + sha)
+			print("IPPORT : " + ipport)
 			if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
 				# C'est un IPPort
 				# On envoi vers la fonction qui télécharge le fichier
 				ip = ipport[:ipport.find(":")]
 				port = int(ipport[ipport.find(":")+1:])
-				fctsClient.CmdDemandeFichier(ip, port, sha)
-				resultat = "=cmd SUCCESS"
+				error = fctsClient.CmdDemandeFichier(ip, port, sha)
+				if error == 0:
+					print("ICI")
+					resultat = "=cmd SUCCESS : " + sha
+				elif error == 5:
+					resultat = "=cmd ERROR NO FILE"
+				else:
+					resultat = "=cmd ERROR"
 			else:
 				# C'est une erreur
 				print("AHH")
@@ -81,6 +52,8 @@ class MyServer(BaseHTTPRequestHandler):
 				resultat = sortie
 		else:
 			resultat = "=cmd CommandeInconnue :"+requete+":"
+		print(resultat)
+		resultat = "HTTP/1.0 200 OK\r\nContent-Length: 11\r\nAccess-Control-Allow-Origin: *\r\nCache-Control: no-store\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n"+resultat+"\r\n"
 		self.wfile.write(bytes(resultat, "utf-8"))
 myServer = HTTPServer((hostName, hostPort), MyServer)
 print(time.asctime(), "Server Starts - %s:%s" % (hostName, hostPort))

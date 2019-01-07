@@ -299,8 +299,9 @@ def searchFileBDD(nomFichier):
 	rows = cursor.fetchall()
 	for row in rows:
 		# Le fichier est hébergé par le noeud qui le cherche
-		IPPortNoeud = "127.0.0.1"
-	if IPPortNoeud != "127.0.0.1":
+		ipPortIci = "127.0.0.1:"+str(autresFonctions.readConfFile("Port par defaut"))
+		IPPortNoeud = ipPortIci
+	if IPPortNoeud != ipPortIci:
 		# Si le fichier n'a pas été trouvé
 		# Il faut chercher dans les fichiers connus externes
 		try:
@@ -311,6 +312,7 @@ def searchFileBDD(nomFichier):
 		for row in rows:
 			# Le fichier est hébergé par un noeud connu
 			IPPortNoeud = str(row)
+			print("IPPORTNOEUD : "+IPPortNoeud)
 	return IPPortNoeud
 
 def nbEntrees(nomTable):

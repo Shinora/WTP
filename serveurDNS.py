@@ -126,7 +126,6 @@ while serveur_lance:
 							cmdAEnvoyer = "=cmd ERROR"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
-					print(erreur)
 				else:
 					cmdAEnvoyer = "=cmd Inconnu"
 					cmdAEnvoyer = cmdAEnvoyer.encode()

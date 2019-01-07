@@ -25,7 +25,7 @@ def searchFile(nomFichier):
 			fonctionNoeud = BDD.chercherInfo("Noeuds", noeud)
 			if fonctionNoeud == "simple":
 				tableauNoeudsSimple.append(noeud)
-			if fonctionNoeud == "supernoeud":
+			if fonctionNoeud == "supernoeud" or fonctionNoeud == "DNS":
 				tableauSuperNoeuds.append(noeud)
 		if len(tableauNoeudsSimple) < 6:
 			# Il n'y a pas assez de noeuds simples dans la liste,
@@ -38,18 +38,21 @@ def searchFile(nomFichier):
 			IPNoeudActuel = noeudActuel[:noeudActuel.find(":")]
 			PortNoeudActuel = noeudActuel[noeudActuel.find(":")+1:]
 			# Maintenant on se connecte au noeud
-			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connexion_avec_serveur.connect((IPNoeudActuel, PortNoeudActuel))
-			msg_a_envoyer = b""
-			msg_a_envoyer = "=cmd rechercherFichier nom " + nomFichier
-			msg_a_envoyer = msg_a_envoyer.encode()
-			connexion_avec_serveur.send(msg_a_envoyer)
-			msg_recu = connexion_avec_serveur.recv(1024)
-			msg_recu = msg_recu.decode()
-			connexion_avec_serveur.close()
-			if msg_recu != "0":
-				IPPortNoeud = msg_recu
-				break
+			error = 0
+			connexion_avec_serveur = autresFonctions.connectionClient(IPNoeudActuel, PortNoeudActuel)
+			if str(connexion_avec_serveur) == "=cmd ERROR":
+				error += 1
+			else:
+				msg_a_envoyer = b""
+				msg_a_envoyer = "=cmd rechercherFichier nom " + nomFichier
+				msg_a_envoyer = msg_a_envoyer.encode()
+				connexion_avec_serveur.send(msg_a_envoyer)
+				msg_recu = connexion_avec_serveur.recv(1024)
+				msg_recu = msg_recu.decode()
+				connexion_avec_serveur.close()
+				if msg_recu != "0":
+					IPPortNoeud = msg_recu
+					break
 	return IPPortNoeud # Peut retourner "" si il ne trouve pas d'hébergeur
 
 def chercherFichier(nomFichier):
@@ -59,7 +62,8 @@ def chercherFichier(nomFichier):
 	if retour != 0 and str(retour) != "None":
 		# Le noeud héberge le fichier demandé
 		# Donc on retourne son IP
-		return autresFonctions.connaitreIP()
+		#return autresFonctions.connaitreIP()+":"+str(autresFonctions.readConfFile("Port par defaut"))
+		return "127.0.0.1:5555" ########################################################################################################################################################################
 	retour = BDD.chercherInfo("FichiersExt", nomFichier)
 	# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
 	return retour
@@ -76,19 +80,22 @@ def searchNDD(url):
 			noeud = str(noeud[0])
 			ip = noeud[:noeud.find(":")]
 			port = int(noeud[noeud.find(":")+1:])
-			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connexion_avec_serveur.connect((ip, port))
-			msg_a_envoyer = b""
-			msg_a_envoyer = "=cmd DNS searchSHA ndd " + url
-			msg_a_envoyer = msg_a_envoyer.encode()
-			connexion_avec_serveur.send(msg_a_envoyer)
-			msg_recu = connexion_avec_serveur.recv(1024)
-			msg_recu = msg_recu.decode()
-			connexion_avec_serveur.close()
-			if msg_recu != "=cmd NNDInconnu" and msg_recu != "=cmd ERROR":
-				# On a trouvé !!
-				sha = msg_recu
-				break
+			error = 0
+			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			if str(connexion_avec_serveur) == "=cmd ERROR":
+				error += 1
+			else:
+				msg_a_envoyer = b""
+				msg_a_envoyer = "=cmd DNS searchSHA ndd " + url
+				msg_a_envoyer = msg_a_envoyer.encode()
+				connexion_avec_serveur.send(msg_a_envoyer)
+				msg_recu = connexion_avec_serveur.recv(1024)
+				msg_recu = msg_recu.decode()
+				connexion_avec_serveur.close()
+				if msg_recu != "=cmd NNDInconnu" and msg_recu != "=cmd ERROR":
+					# On a trouvé !!
+					sha = msg_recu
+					break
 	return sha
 
 def rechercheFichierEntiere(donnee):

@@ -12,84 +12,97 @@ import sqlite3
 def addNDD(ipport, sha, ndd, password):
 	ip = ipport[:ipport.find(":")]
 	port = ipport[ipport.find(":")+1:]
-	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	connexion_avec_serveur.connect((ip, port))
-	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-	# =cmd DNS AddDNS sha ******* ndd ******* pass *******
-	commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
-	commande = commande.encode()
-	connexion_avec_serveur.send(commande)
-	message = connexion_avec_serveur.recv(1024)
-	connexion_avec_serveur.close()
-	erreur = 0
-	if message == "=cmd NDDDejaUtilise":
-		erreur = 5
-		print("Le nom de domaine est déjà utilisé. S'il vous appartient, vous pouvez le modifier à condition de connaitre le mot de passe")
-	elif message == "=cmd SUCCESS":
-		print("Le nom de domaine et l'adresse SHA256 ont bien été associés.")
+	error = 0
+	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	if str(connexion_avec_serveur) == "=cmd ERROR":
+		error += 1
 	else:
-		print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
-		erreur = 1
-	return erreur
+		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
+		# =cmd DNS AddDNS sha ******* ndd ******* pass *******
+		commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
+		commande = commande.encode()
+		connexion_avec_serveur.send(commande)
+		message = connexion_avec_serveur.recv(1024)
+		connexion_avec_serveur.close()
+		if message == "=cmd NDDDejaUtilise":
+			error = 5
+			print("Le nom de domaine est déjà utilisé. S'il vous appartient, vous pouvez le modifier à condition de connaitre le mot de passe")
+		elif message == "=cmd SUCCESS":
+			print("Le nom de domaine et l'adresse SHA256 ont bien été associés.")
+		else:
+			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
+			error = 1
+	return error
 
 def addNoeudDNS(ipport, ipportNoeud):
 	ip = ipport[:ipport.find(":")]
 	port = ipport[ipport.find(":")+1:]
-	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	connexion_avec_serveur.connect((ip, port))
-	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-	# =cmd DNS AddDNSExt ipport ******
-	commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
-	commande = commande.encode()
-	connexion_avec_serveur.send(commande)
-	message = connexion_avec_serveur.recv(1024)
-	connexion_avec_serveur.close()
-	erreur = 0
-	if message == "=cmd IPPORTDejaUtilise":
-		erreur = 5
-		print("Le noeud DNS est déjà connu par le receveur.")
-	elif message == "=cmd SUCCESS":
-		print("Le noeud DNS a bien été ajouté à la base du receveur.")
+	error = 0
+	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	if str(connexion_avec_serveur) == "=cmd ERROR":
+		error += 1
 	else:
-		print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
-		erreur = 1
-	return erreur
+		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
+		# =cmd DNS AddDNSExt ipport ******
+		commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
+		commande = commande.encode()
+		connexion_avec_serveur.send(commande)
+		message = connexion_avec_serveur.recv(1024)
+		connexion_avec_serveur.close()
+		if message == "=cmd IPPORTDejaUtilise":
+			error = 5
+			print("Le noeud DNS est déjà connu par le receveur.")
+		elif message == "=cmd SUCCESS":
+			print("Le noeud DNS a bien été ajouté à la base du receveur.")
+		else:
+			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
+			error = 1
+	return error
 
 def modifNDD(ipport, ndd, adress, password):
 	ip = ipport[:ipport.find(":")]
 	port = ipport[ipport.find(":")+1:]
-	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	connexion_avec_serveur.connect((ip, port))
-	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-	# =cmd DNS modifNDD ndd ****** adress ****** pass ******
-	commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
-	commande = commande.encode()
-	connexion_avec_serveur.send(commande)
-	message = connexion_avec_serveur.recv(1024)
-	connexion_avec_serveur.close()
-	erreur = 0
-	if message == "=cmd IPPORTDejaUtilise":
-		erreur = 5
-		print("Le noeud DNS est déjà connu par le receveur.")
-	elif message == "=cmd SUCCESS":
-		print("Le noeud DNS a bien été ajouté à la base du receveur.")
+	error = 0
+	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	if str(connexion_avec_serveur) == "=cmd ERROR":
+		error += 1
 	else:
-		print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
-		erreur = 1
-	return erreur
+		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
+		# =cmd DNS modifNDD ndd ****** adress ****** pass ******
+		commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
+		commande = commande.encode()
+		connexion_avec_serveur.send(commande)
+		message = connexion_avec_serveur.recv(1024)
+		connexion_avec_serveur.close()
+		error = 0
+		if message == "=cmd IPPORTDejaUtilise":
+			error = 5
+			print("Le noeud DNS est déjà connu par le receveur.")
+		elif message == "=cmd SUCCESS":
+			print("Le noeud DNS a bien été ajouté à la base du receveur.")
+		else:
+			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
+			error += 1
+	return error
 
 def supprNDD(ipport, ndd, password):
 	ip = ipport[:ipport.find(":")]
 	port = ipport[ipport.find(":")+1:]
-	connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	connexion_avec_serveur.connect((ip, port))
-	logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-	# =cmd DNS supprNDD ndd ****** pass ******
-	commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
-	commande = commande.encode()
-	connexion_avec_serveur.send(commande)
-	message = connexion_avec_serveur.recv(1024)
-	connexion_avec_serveur.close()
+	error = 0
+	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	if str(connexion_avec_serveur) == "=cmd ERROR":
+		error += 1
+	else:
+		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
+		# =cmd DNS supprNDD ndd ****** pass ******
+		commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
+		commande = commande.encode()
+		connexion_avec_serveur.send(commande)
+		message = connexion_avec_serveur.recv(1024)
+		if message != "=cmd SUCCESS":
+			error += 1
+		connexion_avec_serveur.close()
+	return error
 
 ######################################################################
 ##########################  BASE DE DONNÉES ##########################
