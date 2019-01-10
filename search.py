@@ -30,7 +30,7 @@ def searchFile(nomFichier):
 		if len(tableauNoeudsSimple) < 6:
 			# Il n'y a pas assez de noeuds simples dans la liste,
 			# Il faut aller en rechercher
-			logs.ajtLogs("Pas assez de noeuds simples")
+			logs.ajtLogs("WARNING : Not enough simple peers")
 		# On ajoute les super noeuds après les noeuds simples
 		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
 		for noeudActuel in tblNoeuds:
@@ -62,8 +62,7 @@ def chercherFichier(nomFichier):
 	if retour != 0 and str(retour) != "None":
 		# Le noeud héberge le fichier demandé
 		# Donc on retourne son IP
-		#return autresFonctions.connaitreIP()+":"+str(autresFonctions.readConfFile("Port par defaut"))
-		return "127.0.0.1:5555" ########################################################################################################################################################################
+		return autresFonctions.connaitreIP()+":"+str(autresFonctions.readConfFile("Port par defaut"))
 	retour = BDD.chercherInfo("FichiersExt", nomFichier)
 	# ATTENTION ! Si le fichier n'est pas connu, 0 est retourné
 	return retour

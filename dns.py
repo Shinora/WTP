@@ -6,103 +6,120 @@ import sys
 import os
 import math
 import time
+import re
 import hashlib
 import sqlite3
 import autresFonctions
 
 def addNDD(ipport, sha, ndd, password):
-	ip = ipport[:ipport.find(":")]
-	port = ipport[ipport.find(":")+1:]
 	error = 0
-	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-	if str(connexion_avec_serveur) == "=cmd ERROR":
-		error += 1
-	else:
-		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-		# =cmd DNS AddDNS sha ******* ndd ******* pass *******
-		commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
-		commande = commande.encode()
-		connexion_avec_serveur.send(commande)
-		message = connexion_avec_serveur.recv(1024)
-		connexion_avec_serveur.close()
-		if message == "=cmd NDDDejaUtilise":
-			error = 5
-			print("Le nom de domaine est déjà utilisé. S'il vous appartient, vous pouvez le modifier à condition de connaitre le mot de passe")
-		elif message == "=cmd SUCCESS":
-			print("Le nom de domaine et l'adresse SHA256 ont bien été associés.")
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(ipport): # Si ipport est un ip:port
+		ip = ipport[:ipport.find(":")]
+		port = ipport[ipport.find(":")+1:]
+		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		if str(connexion_avec_serveur) == "=cmd ERROR":
+			error += 1
 		else:
-			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
-			error = 1
+			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			# =cmd DNS AddDNS sha ******* ndd ******* pass *******
+			commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
+			commande = commande.encode()
+			connexion_avec_serveur.send(commande)
+			message = connexion_avec_serveur.recv(1024)
+			connexion_avec_serveur.close()
+			if message == "=cmd NDDDejaUtilise":
+				error = 5
+				print("The domain name is already used. If it belongs to you, you can modify it provided you know the password.")
+			elif message == "=cmd SUCCESS":
+				print("The domain name and address SHA256 have been associated.")
+			else:
+				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				error = 1
+	else:
+		error += 1
 	return error
 
 def addNoeudDNS(ipport, ipportNoeud):
-	ip = ipport[:ipport.find(":")]
-	port = ipport[ipport.find(":")+1:]
-	error = 0
-	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-	if str(connexion_avec_serveur) == "=cmd ERROR":
-		error += 1
-	else:
-		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-		# =cmd DNS AddDNSExt ipport ******
-		commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
-		commande = commande.encode()
-		connexion_avec_serveur.send(commande)
-		message = connexion_avec_serveur.recv(1024)
-		connexion_avec_serveur.close()
-		if message == "=cmd IPPORTDejaUtilise":
-			error = 5
-			print("Le noeud DNS est déjà connu par le receveur.")
-		elif message == "=cmd SUCCESS":
-			print("Le noeud DNS a bien été ajouté à la base du receveur.")
+	errror = 0
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(ipport): # Si ipport est un ip:port
+		ip = ipport[:ipport.find(":")]
+		port = ipport[ipport.find(":")+1:]
+		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		if str(connexion_avec_serveur) == "=cmd ERROR":
+			error += 1
 		else:
-			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
-			error = 1
+			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			# =cmd DNS AddDNSExt ipport ******
+			commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
+			commande = commande.encode()
+			connexion_avec_serveur.send(commande)
+			message = connexion_avec_serveur.recv(1024)
+			connexion_avec_serveur.close()
+			if message == "=cmd IPPORTDejaUtilise":
+				error = 5
+				print("The peer DNS is already known by the receiver.")
+			elif message == "=cmd SUCCESS":
+				print("The DNS pair has been added to the receiver base.")
+			else:
+				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				error = 1
+	else:
+		error += 1
 	return error
 
 def modifNDD(ipport, ndd, adress, password):
-	ip = ipport[:ipport.find(":")]
-	port = ipport[ipport.find(":")+1:]
 	error = 0
-	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-	if str(connexion_avec_serveur) == "=cmd ERROR":
-		error += 1
-	else:
-		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-		# =cmd DNS modifNDD ndd ****** adress ****** pass ******
-		commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
-		commande = commande.encode()
-		connexion_avec_serveur.send(commande)
-		message = connexion_avec_serveur.recv(1024)
-		connexion_avec_serveur.close()
-		error = 0
-		if message == "=cmd IPPORTDejaUtilise":
-			error = 5
-			print("Le noeud DNS est déjà connu par le receveur.")
-		elif message == "=cmd SUCCESS":
-			print("Le noeud DNS a bien été ajouté à la base du receveur.")
-		else:
-			print("Une erreur indeterminée s'est produite. Veuillez réessayer plus tard ou changer de noeud DNS.")
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(ipport): # Si ipport est un ip:port
+		ip = ipport[:ipport.find(":")]
+		port = ipport[ipport.find(":")+1:]
+		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
+		else:
+			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			# =cmd DNS modifNDD ndd ****** adress ****** pass ******
+			commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
+			commande = commande.encode()
+			connexion_avec_serveur.send(commande)
+			message = connexion_avec_serveur.recv(1024)
+			connexion_avec_serveur.close()
+			error = 0
+			if message == "=cmd IPPORTDejaUtilise":
+				error = 5
+				print("Le noeud DNS est déjà connu par le receveur.")
+			elif message == "=cmd SUCCESS":
+				print("Le noeud DNS a bien été ajouté à la base du receveur.")
+			else:
+				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				error += 1
+	else:
+		error += 1
 	return error
 
 def supprNDD(ipport, ndd, password):
-	ip = ipport[:ipport.find(":")]
-	port = ipport[ipport.find(":")+1:]
 	error = 0
-	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-	if str(connexion_avec_serveur) == "=cmd ERROR":
-		error += 1
-	else:
-		logs.ajtLogs("Connexion établie avec le DNS sur le port {}".format(port))
-		# =cmd DNS supprNDD ndd ****** pass ******
-		commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
-		commande = commande.encode()
-		connexion_avec_serveur.send(commande)
-		message = connexion_avec_serveur.recv(1024)
-		if message != "=cmd SUCCESS":
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(ipport): # Si ipport est un ip:port
+		ip = ipport[:ipport.find(":")]
+		port = ipport[ipport.find(":")+1:]
+		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
-		connexion_avec_serveur.close()
+		else:
+			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			# =cmd DNS supprNDD ndd ****** pass ******
+			commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
+			commande = commande.encode()
+			connexion_avec_serveur.send(commande)
+			message = connexion_avec_serveur.recv(1024)
+			if message != "=cmd SUCCESS":
+				error += 1
+			connexion_avec_serveur.close()
+	else:
+		error += 1
 	return error
 
 ######################################################################
@@ -135,7 +152,7 @@ def creerBase():
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (creerBase()) :" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (creerBase()) :" + str(e))
 	conn.close()
 
 def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
@@ -153,10 +170,10 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 		elif nomTable == "DNSExt":
 			cursor.execute("""SELECT id FROM DNSExt WHERE IPPORT = ?""", (entree,))
 		else:
-			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (ajouterEntree()) : " + str(nomTable))
+			logs.ajtLogs("DNS : ERROR: The table name was not recognized (ajouterEntree()) : " + str(nomTable))
 			problem += 1
 	except Exception as e:
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
 		problem += 1
 	else:
 		nbRes = 0
@@ -167,7 +184,7 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 			# L'entrée existe déjà
 			problem = 5
 			if nbRes > 1:
-				logs.ajtLogs("DNS : ERREUR : Entrée présente plusieurs fois dans la base. (ajouterEntree())")
+				logs.ajtLogs("DNS : ERROR: Entry is multiple times in the database. (ajouterEntree())")
 				problem = 7
 		else:
 			datetimeAct = str(time.time())
@@ -183,14 +200,14 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 						except Exception as e:
 							logs.ajtLogs("DNS : ERREUR :" + str(e))
 					else:
-						logs.ajtLogs("DNS : ERREUR : Il manque des paramètres lors de l'appel de la fonction (ajouterEntree())")
+						logs.ajtLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
 						problem += 1
 				elif nomTable == "DNSExt":
 					cursor.execute("""INSERT INTO DNSExt (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
 					conn.commit()
 			except Exception as e:
 				conn.rollback()
-				logs.ajtLogs("DNS : ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
+				logs.ajtLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
 				problem += 1
 	conn.close()
 	return problem
@@ -208,9 +225,9 @@ def envLste(nomTable, nbreEntrees = 150):
 		elif nomTable == "DNSExt":
 			cursor.execute("""SELECT IPPORT FROM DNSExt LIMIT ? ORDER BY id DESC""", (nbreEntrees,))
 		else:
-			logs.ajtLogs("DNS : Erreur : Nom de la table non reconnu (envLste()) : " + str(nomTable))
+			logs.ajtLogs("DNS : ERROR: The table name was not recognized (envLste()) : " + str(nomTable))
 	except Exception as e:
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (envLste()):" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (envLste()):" + str(e))
 	rows = cursor.fetchall()
 	nbRes = 0
 	for row in rows:
@@ -249,21 +266,24 @@ def supprEntree(nomTable, entree, entree1 = ""):
 						# Le mot de passe n'est pas valide
 						problem = 5
 			else:
-				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (supprEntree())")
+				logs.ajtLogs("DNS : ERROR: There is a missing parameter to perform this action (supprEntree())")
 				problem += 1
 		elif nomTable == "DNSExt":
 			cursor.execute("""DELETE FROM DNSExt WHERE IPPORT = ?""", (entree,))
 			conn.commit()
 		else:
-			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (supprEntree()) : " + str(nomTable))
+			logs.ajtLogs("DNS : ERROR: The table name was not recognized (supprEntree()) : " + str(nomTable))
 			problem += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (supprEntree()):" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (supprEntree()):" + str(e))
 		problem += 1
 	else:
-		logs.ajtLogs("DNS : INFO : L'entrée' " + entree + " de la table " + nomTable + " a bien été supprimé.")
+		if problem == 0:
+			logs.ajtLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
+		else:
+			logs.ajtLogs("DNS : ERROR : The " + entree + " entry of the " + nomTable + " table could not be deleted")
 	conn.close()
 	return problem
 
@@ -291,22 +311,22 @@ def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 						# Le mot de passe n'est pas valide.
 						problem = 5
 				if nbRes == 0:
-					logs.ajtLogs("DNS : ERREUR : Le nom de domaine à modifier n'existe pas (modifEntree())")
+					logs.ajtLogs("DNS : ERROR: The domain name to modify does not exist (modifEntree())")
 					problem = 8
 					problem += ajouterEntree("DNS", entree1, entree, entree2)
 			else:
-				logs.ajtLogs("DNS : ERREUR : Il manque un paramètre pour effectuer cette action (modifEntree())")
+				logs.ajtLogs("DNS : ERROR: There is a missing parameter to perform this action (modifEntree())")
 				problem += 1
 		else:
-			logs.ajtLogs("DNS : ERREUR : Nom de la table non reconnu (modifEntree()) : " + str(nomTable))
+			logs.ajtLogs("DNS : ERROR: The table name was not recognized (modifEntree()) : " + str(nomTable))
 			problem += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (modifEntree()):" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (modifEntree()):" + str(e))
 		problem += 1
 	else:
-		logs.ajtLogs("DNS : INFO : Le nom de domaine " + entree1 + " a bien été modifiée.")
+		logs.ajtLogs("DNS : INFO : The domain name "+ entree1 +" has been modified.")
 	conn.close()
 	return problem
 
@@ -316,7 +336,7 @@ def verifExistBDD():
 		with open('WTPDNS.db'):
 			pass
 	except IOError:
-		logs.ajtLogs("DNS : ERREUR : Base introuvable... Création d'une nouvelle base.")
+		logs.ajtLogs("DNS : ERROR: Base not found ... Creating a new database.")
 		creerBase()
 
 def searchSHA(ndd):
@@ -332,7 +352,7 @@ def searchSHA(ndd):
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERREUR : Problème avec base de données (searchSHA()):" + str(e))
+		logs.ajtLogs("DNS : ERROR : Problem with the database (searchSHA()):" + str(e))
 		problem += 1
 	else:
 		nbRes = 0
@@ -341,7 +361,7 @@ def searchSHA(ndd):
 			if nbRes > 1:
 				# On trouve plusieurs fois le même nom de domaine dans la base
 				problem = 5
-				logs.ajtLogs("DNS : ERREUR : Le nom de domaine " + ndd + " est présent plusieurs fois dans la base de données")
+				logs.ajtLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
 			sha256 = row[0]
 	conn.close()
 	if problem > 1:
@@ -349,5 +369,3 @@ def searchSHA(ndd):
 	if sha256 == "0":
 		return "INCONNU"
 	return sha256
-
-creerBase()

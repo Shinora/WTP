@@ -63,8 +63,8 @@ def verifMAJ(force = 0):
 			fichier = open(oldFichier, "w")
 			fichier.write(contenuNewFichier)
 			fichier.close()
-			logs.ajtLogs("INFO : Le fichier " + oldFichier + " a été mis à jour")
-		logs.ajtLogs("INFO : La mise à jour est terminée")
+			logs.ajtLogs("INFO : The file " + oldFichier + " has been updated")
+		logs.ajtLogs("INFO : The update is complete")
 		# Il faut redemarrer le protocol
 		os.popen("python3 reload.py", 'r')
 	else:
@@ -85,5 +85,5 @@ def verifSources():
 		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest()
 		if online_sha != sha_fichier:
 			# On lance la MAJ en mode forcé
-			logs.ajtLogs("ERROR : Lors de la vérification des sources, le fichier " + en_cours + " a été décecté comme incorrect. De nouvelles sources vont être téléchargées.")
+			logs.ajtLogs("ERROR : When checking sources, the file " + en_cours + " was found to be incorrect. New sources will be downloaded.")
 			verifMAJ(1)
