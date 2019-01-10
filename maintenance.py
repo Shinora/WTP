@@ -89,7 +89,7 @@ while 1:
 		f.close()
 		derMtnc5M = tmpsAct
 		fctsMntc.creerFichier()
-		logs.ajtLogs("INFO : Vérification des nouveaux fichiers effectée avec succès.")
+		logs.ajtLogs("INFO : Verification of new files completed successfully.")
 	time.sleep(300) # Se reveille toutes les 5 minutes.
 	tmpsActuel = str(time.time())
 	point = tmpsActuel.find('.')

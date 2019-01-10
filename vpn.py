@@ -25,7 +25,7 @@ port = int(autresFonctions.readConfFile("Port VPN"))
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))
 connexion_principale.listen(5)
-logs.ajtLogs("INFO : Le service VPN est démarré, il ecoute à présent sur le port " + str(port))
+logs.ajtLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
 
 serveur_lance = True
 clients_connectes = []
@@ -88,12 +88,12 @@ while serveur_lance:
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
 				else:
-					logs.ajtLogs("ERREUR : Commande non-reconnue (vpn.py) : " + str(commande))
+					logs.ajtLogs("ERROR : Unknown request (vpn.py) : " + str(commande))
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
 				if msg_recu != '':
-					logs.ajtLogs("ERREUR : Commande non-reconnue (vpn.py) : " + str(msg_recu))
+					logs.ajtLogs("ERROR : Unknown request (vpn.py) : " + str(msg_recu))
 					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
@@ -111,4 +111,4 @@ while serveur_lance:
 for client in clients_connectes:
 	client.close()
 connexion_principale.close()
-logs.ajtLogs("INFO : WTP s'est correctement arrèté.")
+logs.ajtLogs("INFO : WTP service has been stoped successfully.")

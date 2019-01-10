@@ -31,7 +31,7 @@ else:
 		error = dns.addNDD(ipport, sha, ndd, password)
 		if error != 0:
 			# Error occured
-			print("An error occurred")
+			print("An error occurred : " + str(error))
 		else:
 			print("Wonderful ! It succeeded !")
 	elif action == 2:
@@ -42,7 +42,7 @@ else:
 		error = dns.modifNDD(ipport, ndd, adress, password)
 		if error != 0:
 			# Error occurred
-			print("An error occurred")
+			print("An error occurred : " + str(error))
 		else:
 			print("Wonderful ! It succeeded !")
 	elif action == 3:
@@ -52,7 +52,7 @@ else:
 		error = dns.supprNDD(ipport, ndd, password)
 		if error != 0:
 			# Error occurred
-			print("An error occurred")
+			print("An error occurred : " + str(error))
 		else:
 			print("Wonderful ! It succeeded !")
 	else:

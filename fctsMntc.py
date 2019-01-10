@@ -34,7 +34,7 @@ def verifNoeud():
 			# Le noeud est injoignable, on le déplace dans une autre table.
 			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
 			BDD.supprEntree("Noeuds", IpPortNoeud)
-			logs.ajtLogs("ERREUR : Connection au noeud impossible : '" + str(erreur) + "' verifNoeud() --> fctsMntc.py")
+			logs.ajtLogs("ERROR : Connection to the peer impossible : '" + str(erreur) + "' (verifNoeud())")
 		else:
 			cmdAEnvoyer = "=cmd DemandePresence"
 			cmdAEnvoyer = cmdAEnvoyer.encode()
@@ -70,7 +70,7 @@ def verifNoeudHS():
 		try:
 			c.connect((IPNoeud, PortNoeud))
 		except:
-			logs.ajtLogs("INFO : Connection au noeud HS impossible. verifNoeudHS() --> fctsMntc.py")
+			logs.ajtLogs("ERROR : Connection to the peer out of service impossible. (verifNoeudHS())")
 			# Le noeud n'est pas connecté au réseau
 			# On incrémente son nombre de vérifs et on le supprime si besoin
 			BDD.incrNbVerifsHS(IpPortNoeud)
@@ -121,12 +121,12 @@ def verifFichier():
 		if SHAFichier == SHAContenuFichier:
 			# Le fichier a le même hash que son nom, c'est bon.
 			# Si le programme est arrivé jusqu'à là, c'est que le fichier existe egalement.
-			logs.ajtLogs("INFO : Le fichier " + nomFichier + " a bien été vérifié, sans erreurs.")
+			logs.ajtLogs("INFO : The file " + nomFichier + " has been verified without errors.")
 		else:
 			#Il y a une erreur. Le fichier doit être supprimé,
 			# car il peut nuire au bon fonctionnement du réseau.
 			BDD.supprEntree("Fichiers", nomFichier)
-			logs.ajtLogs("ERREUR : Le fichier " + nomFichier + " contenait des erreurs. Il a été supprimé.")
+			logs.ajtLogs("ERROR : The file " + nomFichier + " contained errors. It has been deleted.")
 
 def creerFichier():
 	# Fonction qui va s'executer via la maintenance assez régulièrement
@@ -166,4 +166,4 @@ def creerFichier():
 			os.remove(fichier)
 			# L'ajouter à la BDD
 			BDD.ajouterEntree("Fichiers", filename)
-			logs.ajtLogs("INFO : Un nouveau fichier hébergé a été ajouté avec succès : " + filename)
+			logs.ajtLogs("INFO : A new hosted file has been added successfully : " + filename)

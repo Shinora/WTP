@@ -29,7 +29,7 @@ def portLibre(premierPort):
 		    premierPort += 1
 		if premierPort < int(readConfFile("Port Max")):
 			return premierPort
-		logs.ajtLogs("ERROR : Tous les ports sont déjà utilisés")
+		logs.ajtLogs("ERROR: All ports already in use")
 		time.sleep(1)
 
 def lsteFichiers(fichiersExternes = 0): 
@@ -122,7 +122,7 @@ def lireListeNoeuds(nomFichier):
 			BDD.ajouterEntree("Noeuds", ligne)
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
-	logs.ajtLogs("INFO : Un fichier contenant une liste de noeuds a été parsé puis supprimé.")
+	logs.ajtLogs("INFO : A file containing a peer list was parsed and deleted.")
 
 def lireListeFichiers(nomFichier):
 	# Fonction qui lit la liste de fichiers ligne par ligne et qui ajoute les noeuds dans la base de données
@@ -137,7 +137,7 @@ def lireListeFichiers(nomFichier):
 		BDD.ajouterEntree("FichiersExt", nomFichier, ipPort)
 	# Puis on supprime le fichier car on en n'a plus besoin
 	os.remove(cheminFichier)
-	logs.ajtLogs("INFO : Un fichier contenant une liste de fichiers a été parsé puis supprimé.")
+	logs.ajtLogs("INFO : A file containing a list of files was parsed and deleted.")
 
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
@@ -152,19 +152,19 @@ def fillConfFile():
 	supprContenu = open("wtp.conf", "w")
 	supprContenu.write("")
 	supprContenu.close()
-	def_port = input("Entrez votre port principal (defaut:5555) : ")
+	def_port = input("Enter your main port (default:5555) : ")
 	if def_port == "":
 		# L'utilisateur veut laisser la valeur par défaut
 		def_port = 5555
 	else:
 		def_port = int(def_port)
-	portVPN = input("Entrez votre port VPN (defaut:5556) : ")
+	portVPN = input("Enter your VPN port (default:5556) : ")
 	if portVPN == "":
 		# L'utilisateur veut laisser la valeur par défaut
 		portVPN = 5556
 	else:
 		portVPN = int(portVPN)
-	portDNS = input("Entrez votre port DNS (defaut:5557) : ")
+	portDNS = input("Enter your DNS port (default:5557) : ")
 	if portDNS == "":
 		# L'utilisateur veut laisser la valeur par défaut
 		portDNS = 5557
@@ -173,14 +173,14 @@ def fillConfFile():
 	min_port = 1
 	max_port = 0
 	while min_port > max_port:
-		print("Le port minimal doit être plus petit que le port maximal")
-		min_port = input("Entrez le port minimal utilisable (defaut:5550): ")
+		print("The minimum port must be smaller than the maximum port")
+		min_port = input("Enter the minimum usable port (default:5550): ")
 		if min_port == "":
 			# L'utilisateur veut laisser la valeur par défaut
 			min_port = 5550
 		else:
 			min_port = int(min_port)
-		max_port = input("Entrez le port maximal utilisable (defaut:5600): ")
+		max_port = input("Enter the maximum usable port (default:5600): ")
 		if max_port == "":
 			# L'utilisateur veut laisser la valeur par défaut
 			max_port = 5600
@@ -188,15 +188,15 @@ def fillConfFile():
 			max_port = int(max_port)
 	blacklist = []
 	loop_blacklist = 1
-	while loop_blacklist ==1:
-		black_ip = str(input("Entrez une ip que vous souhaitez blacklister : "))
+	while loop_blacklist == 1:
+		black_ip = str(input("Enter an IP that you want to blacklist : "))
 		blacklist.append(black_ip)
-		loop_request = int(input("Voulez vous blacklister une autre ip ? (1 = Oui / O = Non) "))
-		if loop_request != 0:
+		loop_request = int(input("Do you want to blacklist another IP ? (1 = Yes / O = No) "))
+		if loop_request == 1:
 			loop_blacklist = 1
 		else:
 			loop_blacklist = 0
-	autostart = input("Voulez vous activer le démarrage automatique ? ( 0 = Non / 1 = Oui ) : ")
+	autostart = input("Do you want to enable autostart ? ( 0 = Yes / 1 = No ) : ")
 	conf_file = open("wtp.conf", "a")
 	conf_file.write("Port par defaut : "+str(def_port)+"\n")
 	conf_file.write("Port VPN : "+str(portVPN)+"\n")
@@ -249,13 +249,16 @@ def afficherLogo():
 	print("")
 
 def connectionClient(ip, port):
-	try:
-		connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		connexion_avec_serveur.connect((ip, int(port)))
-	except ConnectionRefusedError as e:
-		logs.ajtLogs("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
-	except ConnectionResetError as e:
-		logs.ajtLogs("ERREUR : Impossible de se connecter à " + str(ip) + ":" + str(port) + " Raison : " + str(e))
-	else:
-		return connexion_avec_serveur
+	ipPort = str(ip) + ":" + str(port)
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(ipPort):
+		try:
+			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			connexion_avec_serveur.connect((ip, int(port)))
+		except ConnectionRefusedError as e:
+			logs.ajtLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+		except ConnectionResetError as e:
+			logs.ajtLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+		else:
+			return connexion_avec_serveur
 	return "=cmd ERROR"

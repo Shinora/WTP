@@ -26,7 +26,7 @@ port = int(autresFonctions.readConfFile("Port DNS"))
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))
 connexion_principale.listen(5)
-logs.ajtLogs("INFO : Le service DNS est démarré, il ecoute à présent sur le port " + str(port))
+logs.ajtLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
 
 serveur_lance = True
 clients_connectes = []
@@ -138,7 +138,7 @@ while serveur_lance:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
 				if msg_recu != '':
-					logs.ajtLogs("ERROR : Commande non-reconnue (serveurDNS.py) : " + str(msg_recu))
+					logs.ajtLogs("ERROR : Unknown error (serveurDNS.py) : " + str(msg_recu))
 					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
@@ -156,4 +156,4 @@ while serveur_lance:
 for client in clients_connectes:
 	client.close()
 connexion_principale.close()
-logs.ajtLogs("INFO : Le serveur DNS s'est correctement arrèté.")
+logs.ajtLogs("INFO : The DNS service has been stoped successfully.")

@@ -15,7 +15,7 @@ def comptTaillFchsTtl():
 		cursor.execute("""SELECT Taille FROM Fichiers WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (comptTaillFchsTtl()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with the database (comptTaillFchsTtl()):" + str(e))
 	tailleTotale = 0
 	for row in rows:
 		tailleTotale += row[0]
@@ -32,7 +32,7 @@ def comptNbFichiers():
 		cursor.execute("""SELECT id FROM Fichiers WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (comptNbFichiers()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with the database (comptNbFichiers()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1
@@ -49,7 +49,7 @@ def comptNbFichiersExt():
 		cursor.execute("""SELECT id FROM FichiersExt WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (comptNbFichiersExt()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with the database (comptNbFichiersExt()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1
@@ -66,7 +66,7 @@ def comptNbNoeuds():
 		cursor.execute("""SELECT id FROM Noeuds WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (comptNbNoeuds()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with the database (comptNbNoeuds()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1

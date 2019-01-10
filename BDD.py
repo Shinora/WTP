@@ -71,7 +71,7 @@ def creerBase():
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (creerBase()) :" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (creerBase()) :" + str(e))
 	conn.close()
 	ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
 	ajouterEntree("FichiersExt", "BBDEFA2950F49882F295B1285D4FA9DEC45FC4144BFB07EE6ACC68762D12C2E3", "127.0.0.1:5555")
@@ -94,7 +94,7 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 		elif nomTable == "NoeudsHorsCo":
 			cursor.execute("""SELECT id FROM NoeudsHorsCo WHERE IP = ?""", (entree,))
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
 	else:
 		nbRes = 0
 		rows = cursor.fetchall()
@@ -103,7 +103,7 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 		if nbRes != 0:
 			# L'entrée existe déjà
 			if nbRes > 1:
-				logs.ajtLogs("ERREUR : Entrée présente plusieurs fois dans la base. (ajouterEntree())")
+				logs.ajtLogs("ERROR : Entry presents several times in the database. (ajouterEntree())")
 		else:
 			datetimeAct = str(time.time())
 			datetimeAct = datetimeAct[:datetimeAct.find(".")]
@@ -123,7 +123,7 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 				conn.commit()
 			except Exception as e:
 				conn.rollback()
-				logs.ajtLogs("ERREUR : Problème avec base de données (ajouterEntree()):" + str(e))
+				logs.ajtLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
 	conn.close()
 
 def envNoeuds(nbreNoeuds):
@@ -139,7 +139,7 @@ def envNoeuds(nbreNoeuds):
 	try:
 		cursor.execute("""SELECT IP FROM Noeuds WHERE DerSync > ? LIMIT ?""", (datetimeAct24H, nbreNoeuds))
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (envNoeuds()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (envNoeuds()):" + str(e))
 	rows = cursor.fetchall()
 	nbRes = 0
 	for row in rows:
@@ -168,18 +168,18 @@ def supprEntree(nomTable, entree, entree1 = ""):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (supprEntree()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (supprEntree()):" + str(e))
 	else:
 		if nomTable == "Noeuds":
-			logs.ajtLogs("INFO : Le noeud " + entree + " a bien été supprimé de la base.")
+			logs.ajtLogs("INFO : The peer " + entree + " has been removed from the database.")
 		elif nomTable == "Fichiers":
 			chemin = "HOSTEDFILES/" + entree
 			os.remove(chemin)
-			logs.ajtLogs("INFO : Le fichier " + entree + " a bien été supprimé")
+			logs.ajtLogs("INFO : The file " + entree + " has been removed.")
 		elif nomTable == "FichiersExt":
-			logs.ajtLogs("INFO : Le fichier Externe " + entree + " a bien été supprimé")
+			logs.ajtLogs("INFO : The External file " + entree + " has been removed.")
 		elif nomTable == "NoeudsHorsCo":
-			logs.ajtLogs("INFO : Le noeud HS " + entree + " a bien été supprimé définitivement de la base.")
+			logs.ajtLogs("INFO : The peer off " + entree + " has been permanently deleted from the database.")
 	conn.close()
 
 def incrNbVerifsHS(ipPort):
@@ -193,7 +193,7 @@ def incrNbVerifsHS(ipPort):
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (incrNbVerifsHS()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (incrNbVerifsHS()):" + str(e))
 	nbRes = 0
 	for row in rows:
 		nbRes += 1
@@ -204,11 +204,11 @@ def incrNbVerifsHS(ipPort):
 			conn.commit()
 		except Exception as e:
 			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (incrNbVerifsHS()):" + str(e))
-		logs.ajtLogs("INFO : Le nombre de verifications de " + ipPort + " a bien été incrémenté de 1.")
+			logs.ajtLogs("ERROR : Problem with database (incrNbVerifsHS()):" + str(e))
+		logs.ajtLogs("INFO : The number of verifications of "+ ipPort +" has been incremented by 1.")
 	else:
 		# Le noeud n'existe pas, juste un warning dans les logs.
-		logs.ajtLogs("ERREUR : Le noeud HS " + ipPort + " n'a pas pu etre incrémenté car il n'existe plus.")
+		logs.ajtLogs("ERREUR : The peer off "+ ipPort +" could not be incremented because it no longer exists.")
 	conn.close()
 
 def verifNbVerifsHS(ipPort):
@@ -222,7 +222,7 @@ def verifNbVerifsHS(ipPort):
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (verifNbVerifsHS()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database(verifNbVerifsHS()):" + str(e))
 	nbRes = 0
 	for row in rows:
 		nbRes = row[0]
@@ -233,8 +233,8 @@ def verifNbVerifsHS(ipPort):
 			conn.commit()
 		except Exception as e:
 			conn.rollback()
-			logs.ajtLogs("ERREUR : Problème avec base de données (verifNbVerifsHS()):" + str(e))
-		logs.ajtLogs("INFO : Le noeud HS " + ipPort + " a bien été supprimé, il ne répond plus.")
+			logs.ajtLogs("ERROR : Problem with database (verifNbVerifsHS()):" + str(e))
+		logs.ajtLogs("INFO : The peer off "+ ipPort +" has been removed, it no longer responds.")
 	conn.close()
 
 def verifFichier(nomFichier):
@@ -247,7 +247,7 @@ def verifFichier(nomFichier):
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données dans verifFichier() : " + str(e))
+		logs.ajtLogs("ERROR : Problem with database (verifFichier()) : " + str(e))
 	FichierExiste = False
 	for row in rows:
 		FichierExiste = True
@@ -268,7 +268,7 @@ def modifStats(colonne, valeur=-1):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (modifStats()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (modifStats()):" + str(e))
 		logs.ajtLogs(str(valeur) + colonne)
 	conn.close()
 
@@ -281,7 +281,7 @@ def compterStats(colonne):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (compterStats()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (compterStats()):" + str(e))
 	conn.close()
 
 def searchFileBDD(nomFichier):
@@ -295,7 +295,7 @@ def searchFileBDD(nomFichier):
 	try:
 		cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (nomFichier,))
 	except Exception as e:
-		logs.ajtLogs("ERREUR : Problème avec base de données (searchFile()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (searchFile()):" + str(e))
 	rows = cursor.fetchall()
 	for row in rows:
 		# Le fichier est hébergé par le noeud qui le cherche
@@ -307,7 +307,7 @@ def searchFileBDD(nomFichier):
 		try:
 			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (nomFichier,))
 		except Exception as e:
-			logs.ajtLogs("ERREUR : Problème avec base de données (searchFile()):" + str(e))
+			logs.ajtLogs("ERROR : Problem with database (searchFile()):" + str(e))
 		rows = cursor.fetchall()
 		for row in rows:
 			# Le fichier est hébergé par un noeud connu
@@ -325,7 +325,7 @@ def nbEntrees(nomTable):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (nbEntrees()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (nbEntrees()):" + str(e))
 	for row in cursor.fetchall():
 		conn.close()
 		return row
@@ -342,7 +342,7 @@ def aleatoire(nomTable, entree, nbEntrees):
 			conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (aleatoire()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (aleatoire()):" + str(e))
 	rows = cursor.fetchall()
 	tableau = []
 	for row in rows:
@@ -366,7 +366,7 @@ def chercherInfo(nomTable, info):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (chercherInfo()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (chercherInfo()):" + str(e))
 	for row in cursor.fetchall():
 		conn.close()
 		return row[0]
@@ -377,7 +377,7 @@ def verifExistBDD():
 		with open('WTP.db'):
 			pass
 	except IOError:
-		logs.ajtLogs("ERREUR : Base introuvable... Création d'une nouvelle base.")
+		logs.ajtLogs("ERROR : Base not found ... Creating a new base.")
 		creerBase()
 
 def searchNoeud(role, nbre = 10):
@@ -390,7 +390,7 @@ def searchNoeud(role, nbre = 10):
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("ERREUR : Problème avec base de données (aleatoire()):" + str(e))
+		logs.ajtLogs("ERROR : Problem with database (aleatoire()):" + str(e))
 	rows = cursor.fetchall()
 	tableau = []
 	for row in rows:

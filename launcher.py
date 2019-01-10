@@ -43,7 +43,7 @@ port = int(autresFonctions.readConfFile("Port par defaut"))
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))
 connexion_principale.listen(5)
-logs.ajtLogs("INFO : WTP a démarré, il ecoute à présent sur le port " + str(port))
+logs.ajtLogs("INFO : WTP has started, he is now listening to the port " + str(port))
 
 serveur_lance = True
 clients_connectes = []
@@ -133,7 +133,10 @@ while serveur_lance:
 			else:
 				# Oups... Demande non-reconnue...
 				if msg_recu != '':
-					logs.ajtLogs("ERREUR : Commande non reconnue : " + msg_recu)
+					logs.ajtLogs("ERROR : Unknown request : " + msg_recu)
+					cmdAEnvoyer = "=cmd UNKNOW"
+					cmdAEnvoyer = cmdAEnvoyer.encode()
+					client.send(cmdAEnvoyer)
 	# Vérifier si WTP a recu une demande d'extinction
 	fExt = open(".extinctionWTP", "r")
 	contenu = fExt.read()
@@ -148,4 +151,4 @@ while serveur_lance:
 for client in clients_connectes:
 	client.close()
 connexion_principale.close()
-logs.ajtLogs("INFO : WTP s'est correctement arrèté.")
+logs.ajtLogs("INFO : WTP has correctly stopped.")
