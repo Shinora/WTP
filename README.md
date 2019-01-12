@@ -1,26 +1,23 @@
 # WTP
 
-Web Transfert Protocol [IN PROGRESS]
+Web Transfer Protocol [IN PROGRESS]
 
    ![Logo WTP](https://static.myrasp.fr/WTP/logo.png)
 
 
-## What is Web Transfert Protocol ? 
+## What is Web Transfer Protocol ? 
 
-  - WTP is a new internet protocol which will be used to replace the actual internet for people who are "anti-GAFAM", 
-people who wants to contribute on a completely new, secure and P2P ( Peer to Peer ) Internet. You will be able to keep using internet and WTP. 
-The main goal of the WTP is to navigate and use a new internet free from ads and stupid distractions, create new inedite things and build together a better network.
-  
+A protocol for decentralized internet, peer-to-peer and open sources in Python  
+Web Transfer Protocol is a new Internet protocol that will complement the current Internet for all Internet users who want to contribute to a totally new, secure, untraceable and P2P (peer-to-peer) Internet. You will be able to continue using the current internet, in addition to Web Transfer Protocol. The main goal of WTP is to navigate freely, without geographic, political or other restrictions and to use a new Internet free of ads and silly distractions, to create new things and build a better network together.
   
 ## How to install it? 
 
-  - WTP is a Python protocol which only uses basic Python modules.
-  You will only need an up to date Python version and an internet access.
+  - WTP is a Python protocol which only uses basic Python modules, and request ('pip3 install request')
+  You will only need an up to date Python version and an internet access (Python 3.0 or later)
   
 ## How to use it? 
 
-  - A tutorial will be released soon when the WTP will be finished. 
-   Stay on touch :) 
+  - A wiki is being created, you can see it in the wiki part of the repository
 
   - For those who wants to test or try it: 
     - Clone the repository;
