@@ -10,6 +10,8 @@ import re
 import hashlib
 import sqlite3
 import autresFonctions
+from Crypto import Random
+from Crypto.Cipher import AES
 
 def addNDD(ipport, sha, ndd, password):
 	error = 0
@@ -18,6 +20,7 @@ def addNDD(ipport, sha, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -47,6 +50,7 @@ def addNoeudDNS(ipport, ipportNoeud):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -76,6 +80,7 @@ def modifNDD(ipport, ndd, adress, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -106,6 +111,7 @@ def supprNDD(ipport, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -121,6 +127,7 @@ def supprNDD(ipport, ndd, password):
 	else:
 		error += 1
 	return error
+
 
 ######################################################################
 ##########################  BASE DE DONNÉES ##########################
@@ -363,6 +370,31 @@ def searchSHA(ndd):
 				problem = 5
 				logs.ajtLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
 			sha256 = row[0]
+	conn.close()
+	if problem > 1:
+		return problem
+	if sha256 == "0":
+		return "INCONNU"
+	return sha256
+
+def majDNS():
+	# Fonction pour noeud DNS qui permet de mettre à jour toute sa base avec un autre noeud
+	verifExistBDD()
+	problem = 0
+	conn = sqlite3.connect('WTPDNS.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT IPPORT FROM DNSExt ORDER BY RANDOM() LIMIT 1""")
+		rows = cursor.fetchall()
+	except Exception as e:
+		conn.rollback()
+		logs.ajtLogs("DNS : ERROR : Problem with the database (majDNS()):" + str(e))
+		problem += 1
+	else:
+		for row in rows:
+			ipport = row[0]
+		# Maintenant on va demander au noeud DNS distant d'envoyer toutes ses entrées DNS pour
+		# Que l'on puisse ensuite analyser, et ajouter/mettre à jour notre base
 	conn.close()
 	if problem > 1:
 		return problem

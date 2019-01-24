@@ -11,6 +11,8 @@ import BDD
 import hashlib
 import re
 import time
+from Crypto import Random
+from Crypto.Cipher import AES
 from urllib.request import *
 
 def portLibre(premierPort):
@@ -191,8 +193,8 @@ def fillConfFile():
 	while loop_blacklist == 1:
 		black_ip = str(input("Enter an IP that you want to blacklist : "))
 		blacklist.append(black_ip)
-		loop_request = int(input("Do you want to blacklist another IP ? (1 = Yes / O = No) "))
-		if loop_request == 1:
+		loop_request = input("Do you want to blacklist another IP ? (1 = Yes / O = No) ")
+		if loop_request == "1":
 			loop_blacklist = 1
 		else:
 			loop_blacklist = 0
@@ -203,6 +205,8 @@ def fillConfFile():
 	conf_file.write("Port DNS : "+str(portDNS)+"\n")
 	conf_file.write("Port Min : "+str(min_port)+"\n")
 	conf_file.write("Port Max : "+str(max_port)+"\n")
+	conf_file.write("AESKey : aeosiekrjeklkrj\n")
+	conf_file.write("Path : "+str(os.getcwd())+"\n")
 	if autostart == "1":
 		conf_file.write("Autostart : Oui\n")
 	else:
@@ -262,3 +266,9 @@ def connectionClient(ip, port):
 		else:
 			return connexion_avec_serveur
 	return "=cmd ERROR"
+
+def createCipherAES(key):
+	block_size = 16
+	mode = AES.MODE_CFB
+	iv = Random.new().read(block_size)
+	return AES.new(key, mode, iv)

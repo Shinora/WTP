@@ -9,6 +9,9 @@ import hashlib
 import logs
 import BDD
 import autresFonctions
+from Crypto import Random
+from Crypto.Cipher import AES
+import re
 
  ####################################################
 #                          #

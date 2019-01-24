@@ -6,6 +6,8 @@ import select
 import logs
 import BDD
 import re
+from Crypto import Random
+from Crypto.Cipher import AES
 
  ####################################################
 #                                                    #
@@ -38,6 +40,7 @@ def DemandeNoeuds(IpPortNoeud):
 		ip = IpPortNoeud[:IpPortNoeud.find(":")]
 		port = IpPortNoeud[IpPortNoeud.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -90,6 +93,7 @@ def EnvoiNoeuds(IpPortNoeud):
 		connexion_principale.bind((hote, int(port)))
 		connexion_principale.listen(5)
 		logs.ajtLogs("INFO : Listen on port " + str(port) + ". (EnvoiNoeuds())")
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		serveur_lance = True
 		clients_connectes = []
 		while serveur_lance:

@@ -74,6 +74,8 @@ def creerBase():
 		logs.ajtLogs("ERROR : Problem with database (creerBase()) :" + str(e))
 	conn.close()
 	ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
+	ajouterEntree("Noeuds", "88.189.108.233:5557", "DNS")
+	ajouterEntree("Noeuds", "88.189.108.233:5556", "VPN")
 	ajouterEntree("FichiersExt", "BBDEFA2950F49882F295B1285D4FA9DEC45FC4144BFB07EE6ACC68762D12C2E3", "127.0.0.1:5555")
 
 def ajouterEntree(nomTable, entree, entree1 = ""):
@@ -262,9 +264,9 @@ def modifStats(colonne, valeur=-1):
 	try:
 		if valeur == -1:
 			colonne2 = colonne
-			cursor.execute("""UPDATE Statistiques SET ? = 1 WHERE 1""", (colonne, colonne2))
+			cursor.execute("UPDATE Statistiques SET "+colonne+" = 1 WHERE 1")
 		else:
-			cursor.execute("""UPDATE Statistiques SET ? = ? WHERE 1""", (colonne, int(valeur)))
+			cursor.execute("UPDATE Statistiques SET "+colonne+" = "+str(valeur)+" WHERE 1")
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
@@ -298,21 +300,22 @@ def searchFileBDD(nomFichier):
 		logs.ajtLogs("ERROR : Problem with database (searchFile()):" + str(e))
 	rows = cursor.fetchall()
 	for row in rows:
+		boucle += 1
 		# Le fichier est hébergé par le noeud qui le cherche
 		ipPortIci = "127.0.0.1:"+str(autresFonctions.readConfFile("Port par defaut"))
-		IPPortNoeud = ipPortIci
-	if IPPortNoeud != ipPortIci:
-		# Si le fichier n'a pas été trouvé
-		# Il faut chercher dans les fichiers connus externes
-		try:
-			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (nomFichier,))
-		except Exception as e:
-			logs.ajtLogs("ERROR : Problem with database (searchFile()):" + str(e))
+		return ipPortIci
+	# Si le fichier n'a pas été trouvé
+	# Il faut chercher dans les fichiers connus externes
+	try:
+		cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (nomFichier,))
+	except Exception as e:
+		logs.ajtLogs("ERROR : Problem with database (searchFile()):" + str(e))
+	else:
 		rows = cursor.fetchall()
 		for row in rows:
 			# Le fichier est hébergé par un noeud connu
 			IPPortNoeud = str(row)
-	return IPPortNoeud
+		return IPPortNoeud
 
 def nbEntrees(nomTable):
 	# Fonction qui a pour seul but de compter toutes les entrées de la table

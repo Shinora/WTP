@@ -15,18 +15,23 @@ import time
 import maj
 import search
 import fctsClient
+from Crypto import Random
+from Crypto.Cipher import AES
 
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
 
 hote = '127.0.0.1'
 port = int(autresFonctions.readConfFile("Port VPN"))
+fExtW = open(".extinctionWTP", "w")
+fExtW.write("ALLUMER")
+fExtW.close()
 
 connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))
 connexion_principale.listen(5)
 logs.ajtLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
-
+cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 serveur_lance = True
 clients_connectes = []
 while serveur_lance:
