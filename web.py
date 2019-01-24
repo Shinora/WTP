@@ -10,6 +10,8 @@ import echangeFichiers
 import re
 import search
 import fctsClient
+from Crypto import Random
+from Crypto.Cipher import AES
 
 hostName = ""
 hostPort = 8888
@@ -35,7 +37,7 @@ class MyServer(BaseHTTPRequestHandler):
 				port = int(ipport[ipport.find(":")+1:])
 				error = fctsClient.CmdDemandeFichier(ip, port, sha)
 				if error == 0:
-					resultat = "=cmd SUCCESS : " + sha
+					resultat = "=cmd SUCCESS : " + str(autresFonctions.readConfFile("Path"))[:-1] + "/HOSTEDFILES/" + sha
 				elif error == 5:
 					resultat = "=cmd ERROR NO FILE"
 				else:

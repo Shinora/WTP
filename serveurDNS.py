@@ -15,6 +15,8 @@ import time
 import maj
 import search
 import dns
+from Crypto import Random
+from Crypto.Cipher import AES
 
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
@@ -27,7 +29,7 @@ connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connexion_principale.bind((hote, port))
 connexion_principale.listen(5)
 logs.ajtLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
-
+cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 serveur_lance = True
 clients_connectes = []
 while serveur_lance:

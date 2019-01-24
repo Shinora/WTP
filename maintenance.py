@@ -6,6 +6,8 @@ import logs
 import fctsMntc
 import stats
 import maj
+from Crypto import Random
+from Crypto.Cipher import AES
 
 
  ####################################################
@@ -25,12 +27,9 @@ except IOError:
 	f = open(".TempMaintenance24H", "w")
 	f.write("0")
 	f.close()
-
 f = open(".TempMaintenance24H", "r")
 derMtnc = f.read()
 f.close()
-
-
 # Et pareil pour l'importation de fichiers
 try:
 	with open(".TempMaintenance5M", "r"):
@@ -42,23 +41,22 @@ except IOError:
 	f = open(".TempMaintenance5M", "w")
 	f.write("0")
 	f.close()
-
 f = open(".TempMaintenance5M", "r")
 derMtnc5M = f.read()
 f.close()
-
-
 tmpsActuel = str(time.time())
 point = tmpsActuel.find('.')
 tmpsAct = int(tmpsActuel[0:point])
-
+fExtW = open(".extinctionWTP", "w")
+fExtW.write("ALLUMER")
+fExtW.close()
 # En cas de fichier vide, on attribue la valeur 0 pour ne pas avoir de problèmes
 if derMtnc == "":
 	derMtnc = 0
 if derMtnc5M == "":
 	derMtnc5M = 0
-
-while 1:
+serveur_lance = True
+while serveur_lance:
 	if int(derMtnc)+86400 < tmpsAct: # 24h = 86 400 sec
 		# On peut lancer les fonctions
 		# Puis on change le contenu du fichier temporel
@@ -75,7 +73,7 @@ while 1:
 		stats.comptNbFichiersExt()
 		stats.comptNbNoeuds()
 		# Fonction rapport des erreurs
-		logs.rapportErreur()
+		# logs.rapportErreur()
 		# Fonction Mise A Jour
 		# maj.verifMAJ()
 		# maj.verifSources()
@@ -94,3 +92,14 @@ while 1:
 	tmpsActuel = str(time.time())
 	point = tmpsActuel.find('.')
 	tmpsAct = int(tmpsActuel[0:point])
+	# Vérifier si WTP a recu une demande d'extinction
+	fExt = open(".extinctionWTP", "r")
+	contenu = fExt.read()
+	fExt.close()
+	if contenu == "ETEINDRE":
+		# On doit éteindre WTP.
+		serveur_lance = False
+	elif contenu != "ALLUMER":
+		fExtW = open(".extinctionWTP", "w")
+		fExtW.write("ALLUMER")
+		fExtW.close()

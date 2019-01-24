@@ -8,10 +8,13 @@ import echangeFichiers
 import re
 import search
 import logs
+from Crypto import Random
+from Crypto.Cipher import AES
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
 	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connexion_avec_serveur) == "=cmd ERROR":
 		error += 1
 	else:
@@ -31,6 +34,7 @@ def CmdDemandeFichier(ip, port, fichier, special = "non"):
 	# L'IP et le port du noeud qui va envoyer le fichier (sous forme IP:PORT)
 	error = 0
 	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connexion_avec_serveur) == "=cmd ERROR":
 		error += 1
 	else:
@@ -70,6 +74,7 @@ def CmdDemandeListeNoeuds(ip, port):
 	msg_a_envoyer = "=cmd DemandeListeNoeuds"
 	error = 0
 	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connexion_avec_serveur) == "=cmd ERROR":
 		error += 1
 	else:
@@ -88,6 +93,7 @@ def CmdDemandeListeFichiers(ip, port, ext = 0):
 		msg_a_envoyer = "=cmd DemandeListeFichiers"
 	error = 0
 	connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connexion_avec_serveur) == "=cmd ERROR":
 		error += 1
 	else:
@@ -106,6 +112,7 @@ def VPN(demande, ipPortVPN, ipPortExt):
 		ip = ipPortVPN[:ipPortVPN.find(":")]
 		port = ipPortVPN[ipPortVPN.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:

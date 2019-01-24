@@ -8,12 +8,13 @@ import echangeFichiers
 import re
 import search
 import fctsClient
+from Crypto import Random
+from Crypto.Cipher import AES
 
 hote = "127.0.0.1"
-port = int(input("Port : "))
+port = int(autresFonctions.readConfFile("Port par defaut"))
 
 autresFonctions.afficherLogo()
-
 msg_a_envoyer = b""
 while msg_a_envoyer != b"fin":
 	msg_a_envoyer = input(">>> ")
@@ -39,19 +40,16 @@ while msg_a_envoyer != b"fin":
 			fctsClient.CmdDemandeFichier(hote, port, sha)
 		else:
 			# C'est une erreur
-			print("AHH")
 			print(sortie)
-			print(ipport)
 	else:
 		error = 0
 		connexion_avec_serveur = autresFonctions.connectionClient(hote, port)
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			commande = msg_a_envoyer
-			commande = commande.encode()
-			connexion_avec_serveur.send(commande)
-			msg_recu = connexion_avec_serveur.recv(1024)
+			connexion_avec_serveur.send(msg_a_envoyer.encode())
+			msg_recu = connexion_avec_serveur.recv(1024).decode()
 			connexion_avec_serveur.close()
-			print(msg_recu.decode())
+			print(msg_recu)
 print("Fait.")

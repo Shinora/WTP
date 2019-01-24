@@ -6,6 +6,8 @@ import sys
 import os
 import dns
 import autresFonctions
+from Crypto import Random
+from Crypto.Cipher import AES
 
 def ask(question):
 	try:
@@ -15,6 +17,7 @@ def ask(question):
 		sys.exit()
 	return result
 
+cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 autresFonctions.afficherLogo()
 print("Welcome in the DNS center !\nWhat do you want to do ?")
 print("1 : Add a domain name\n2 : Modify a domain name\n3 : Delete a domain name")

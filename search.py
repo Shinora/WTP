@@ -4,6 +4,9 @@
 import socket
 import BDD
 import autresFonctions
+import logs
+from Crypto import Random
+from Crypto.Cipher import AES
 
 # Les fonctions ici servent à chercher des fichiers sur le réseau
 
@@ -40,6 +43,7 @@ def searchFile(nomFichier):
 			# Maintenant on se connecte au noeud
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(IPNoeudActuel, PortNoeudActuel)
+			cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -81,6 +85,7 @@ def searchNDD(url):
 			port = int(noeud[noeud.find(":")+1:])
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -101,7 +106,7 @@ def rechercheFichierEntiere(donnee):
 	# Fonction qui cherche jusqu'à trouver l'IpPort d'un noeud qui héberge le fichier
 	# La donnée passée en paramètres peut etre un nom de domaine, ou un sha256
 	# Renvoi une erreur ou IP:Port;sha256
-	retour = ""
+	retour = donnee
 	if len(str(donnee)) <= 63:
 		# C'est un nom de domaine
 		retour = ""
