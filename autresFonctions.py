@@ -199,6 +199,7 @@ def fillConfFile():
 		else:
 			loop_blacklist = 0
 	autostart = input("Do you want to enable autostart ? ( 0 = Yes / 1 = No ) : ")
+	parser = input("Do you want to enable parser mode ? ( 0 = Yes / 1 = No ) : ") # Parser = SuperNoeud
 	conf_file = open("wtp.conf", "a")
 	conf_file.write("Port par defaut : "+str(def_port)+"\n")
 	conf_file.write("Port VPN : "+str(portVPN)+"\n")
@@ -207,11 +208,14 @@ def fillConfFile():
 	conf_file.write("Port Max : "+str(max_port)+"\n")
 	conf_file.write("AESKey : aeosiekrjeklkrj\n")
 	conf_file.write("Path : "+str(os.getcwd())+"\n")
-	if autostart == "1":
+	if autostart == "0":
 		conf_file.write("Autostart : Oui\n")
 	else:
 		conf_file.write("Autostart : Non\n")
-	conf_file.write("SuperNoeud : Non\n")
+	if parser == "0":
+		conf_file.write("Parser : Oui\n")
+	else:
+		conf_file.write("Parser : Non\n")
 	conf_file.write("Blacklist [\n")
 	for ip in blacklist:
 		conf_file.write(ip + " ; \n")

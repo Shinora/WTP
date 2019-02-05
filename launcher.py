@@ -18,8 +18,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 
 # On vérifie que les sources sont correctes et pas modifiées
-# maj.verifSources()
-# Ligne commentée pour le dev, trop pénible
+maj.verifSources()
 
 # On vérifie que le fichier de config existe
 try:
@@ -38,6 +37,10 @@ autresFonctions.afficherLogo()
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
+
+if(autresFonctions.readConfFile("Parser") == "Oui"):
+	# Le noeud est un parseur, on lance la fonction.
+	os.popen('python3 parser.py', 'r')
 
 hote = '127.0.0.1'
 port = int(autresFonctions.readConfFile("Port par defaut"))
@@ -130,6 +133,14 @@ try:
 					donnee = msg_recu[20:]
 					cmdAEnvoyer = str(search.rechercheFichierEntiere(donnee))
 					client.send(cmdAEnvoyer.encode())
+				elif msg_recu[:11] == "=cmd status":
+					# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
+					if(autresFonctions.readConfFile("Parser") == "Oui"):
+						cmdAEnvoyer = "=cmd Parser"
+						client.send(cmdAEnvoyer.encode())
+					else:
+						cmdAEnvoyer = "=cmd Simple"
+						client.send(cmdAEnvoyer.encode())
 				else:
 					# Oups... Demande non-reconnue...
 					if msg_recu != '':

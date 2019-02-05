@@ -72,14 +72,14 @@ def verifMAJ(force = 0):
 
 def verifSources():
 	i = 0
-	fichiers = ["autresFonctions", "BDD", "clientCMD", "echangeFichiers", "echangeListes", "echangeNoeuds", "fctsMntc", "launcher", "logs", "maintenance", "reload", "search", "stats"]
+	fichiers = [ f for f in os.listdir('.') if os.path.isfile(os.path.join('.',f)) ]
 	for en_cours in fichiers:
 		class AppURLopener(FancyURLopener):
 			version = "Mozilla/5.0"
 		opener = AppURLopener()
 		page = opener.open("https://myrasp.fr/WTPStatic/"+en_cours)
 		online_sha = page.read().decode("utf-8")
-		acces_file = open(en_cours + ".py", "r")
+		acces_file = open(en_cours, "r")
 		contenu = acces_file.read()
 		acces_file.close()
 		sha_fichier = hashlib.sha256(contenu.encode()).hexdigest()
