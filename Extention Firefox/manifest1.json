@@ -1,0 +1,7 @@
+{
+  "name": "wtp_bridge",
+  "description": "Serves as a bridge between the wtp extension and the network",
+  "path": "/home/rudy/Documents/Programmation/WTP/bridge.py",
+  "type": "stdio",
+  "allowed_extensions": [ "wtp@myrasp.fr" ]
+}

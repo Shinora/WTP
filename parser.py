@@ -6,10 +6,14 @@ import fctsClient
 import BDD
 import re
 
-# Ici sont regroupées toutes les fonctions liées uniquement aux super-noeuds
+# Fonctionnalité qui permet de connaitre l'intégralité du réseau
 
-def parseAll():
-	# Fonction qui permet de connaitre l'intégralité du réseau
+fExtW = open(".extinctionWTP", "w")
+fExtW.write("ALLUMER")
+fExtW.close()
+
+allume = True
+while allume:
 	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
@@ -32,3 +36,14 @@ def parseAll():
 			# tous les noeuds qu'il connait (=cmd DemandeListeNoeuds)
 			fctsClient.CmdDemandeListeNoeuds(hote, port)
 	conn.close()
+	# Vérifier si WTP a recu une demande d'extinction
+	fExt = open(".extinctionWTP", "r")
+	contenu = fExt.read()
+	fExt.close()
+	if contenu == "ETEINDRE":
+		# On doit éteindre WTP.
+		allume = False
+	elif contenu != "ALLUMER":
+		fExtW = open(".extinctionWTP", "w")
+		fExtW.write("ALLUMER")
+		fExtW.close()

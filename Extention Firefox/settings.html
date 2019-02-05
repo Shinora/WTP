@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WTP Settings</title>
+</head>
+<body>
+	<h1>Settings</h1>
+	<form>
+		<p>
+			<input type="checkbox" id="vpn" name="vpn" onclick="showVPN();" ><label for="vpn">Use a VPN</label><br>
+			<input type="text" id="ipportvpn" name="ipportvpn" required minlength="10" maxlength="25" size="15" placeholder="IP:Port of the VPN">
+			<script type="text/javascript">
+				document.getElementById("ipportvpn").style.display = "none";
+				function showVPN() {
+					if (vpn.checked) {
+						document.getElementById("ipportvpn").style.display = "block";
+					}
+					else{
+						document.getElementById("ipportvpn").style.display = "none";
+					}
+				}
+			</script>
+		</p>
+	</form>
+</body>
+</html>

@@ -49,7 +49,7 @@ while serveur_lance:
 		for client in clients_a_lire:
 			msg_recu = client.recv(1024)
 			msg_recu = msg_recu.decode()
-			if msg_recu[:19] == "=cmd VPN noeud ":
+			if msg_recu[:15] == "=cmd VPN noeud ":
 				# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
 				ipport = msg_recu[15:msg_recu.find(" commande ")]
 				commande = msg_recu[msg_recu.find(" commande ")+10:]
@@ -92,6 +92,10 @@ while serveur_lance:
 					cmdAEnvoyer = "=cmd TravailFini"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+				elif commande[:11] == "=cmd status":
+					# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
+					cmdAEnvoyer = "=cmd VPN"
+					client.send(cmdAEnvoyer.encode())
 				else:
 					logs.ajtLogs("ERROR : Unknown request (vpn.py) : " + str(commande))
 			else:

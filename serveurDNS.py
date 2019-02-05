@@ -128,6 +128,10 @@ while serveur_lance:
 							cmdAEnvoyer = "=cmd ERROR"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
 					client.send(cmdAEnvoyer)
+				elif commande[:11] == "=cmd status":
+					# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
+					cmdAEnvoyer = "=cmd DNS"
+					client.send(cmdAEnvoyer.encode())
 				else:
 					cmdAEnvoyer = "=cmd Inconnu"
 					cmdAEnvoyer = cmdAEnvoyer.encode()
