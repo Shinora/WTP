@@ -9,6 +9,7 @@ import logs
 import zipfile
 import time
 import hashlib
+from urllib.request import *
 
 def verifMAJ(force = 0):
 	# Fonction qui a pour but de vérifier si il y a des mises à jour à faire

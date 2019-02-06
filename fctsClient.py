@@ -27,7 +27,7 @@ def CmdDemandeNoeud(ip, port):
 		echangeNoeuds.DemandeNoeuds(str(msg_recu))
 	return error
 
-def CmdDemandeFichier(ip, port, fichier, special = "non"):
+def CmdDemandeFichier(ip, port, fichier, special = "fichiers"):
 	# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
 	# Dirriger vers la fonction DownloadFichier()
 	# On va chercher l'info qu'il nous faut :

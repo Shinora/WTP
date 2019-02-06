@@ -52,4 +52,4 @@ while msg_a_envoyer != b"fin":
 			msg_recu = connexion_avec_serveur.recv(1024).decode()
 			connexion_avec_serveur.close()
 			print(msg_recu)
-print("Fait.")
+	print("Fait.")

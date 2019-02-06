@@ -43,4 +43,3 @@ def rapportErreur(selection = " "):
 	f.close()
 	data = {"text":megaStr}
 	r = requests.post("https://myrasp.fr/WTPStatic/rapport.php", data = data)
-	supprLogs()
