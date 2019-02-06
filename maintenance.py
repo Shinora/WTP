@@ -75,8 +75,8 @@ while serveur_lance:
 		# Fonction rapport des erreurs
 		logs.rapportErreur()
 		# Fonction Mise A Jour
-		maj.verifMAJ()
-		maj.verifSources()
+		#maj.verifMAJ()
+		#maj.verifSources()
 		logs.ajtLogs("INFO : Maintenance of the database completed successfully.")
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions

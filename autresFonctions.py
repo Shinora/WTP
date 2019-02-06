@@ -207,6 +207,7 @@ def fillConfFile():
 	conf_file.write("Port Min : "+str(min_port)+"\n")
 	conf_file.write("Port Max : "+str(max_port)+"\n")
 	conf_file.write("AESKey : aeosiekrjeklkrj\n")
+	conf_file.write("MyIP : "+str(connaitreIP())+"\n")
 	conf_file.write("Path : "+str(os.getcwd())+"\n")
 	if autostart == "0":
 		conf_file.write("Autostart : Oui\n")

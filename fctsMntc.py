@@ -169,3 +169,31 @@ def creerFichier():
 			# L'ajouter à la BDD
 			BDD.ajouterEntree("Fichiers", filename)
 			logs.ajtLogs("INFO : A new hosted file has been added successfully : " + filename)
+			# On transmet à quelques noeuds l'information
+			tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
+			if len(tableau) == 15:
+				# On envoi la commande à chaque noeud sélectionné
+				for IPNoeud in tableau:
+					ip = IPNoeud[:IPNoeud.find(":")]
+					port = IPNoeud[IPNoeud.find(":")+1:]
+					connNoeud = autresFonctions.connectionClient(ip, port)
+					cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+					if str(connNoeud) != "=cmd ERROR":
+						logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
+						commande = "=cmd newFileNetwork name " + filename + " ip " + str(autresFonctions.readConfFile("MyIP")) + str(autresFonctions.readConfFile("Port par defaut"))
+						commande = commande.encode()
+						connNoeud.send(commande)
+						msg_recu = connNoeud.recv(1024)
+						connNoeud.close()
+						if msg_recu == "=cmd noParser":
+							# Il faut changer le paramètre du noeud, il n'est pas parseur mais simple
+							BDD.supprEntree("Noeuds", IPNoeud)
+							BDD.ajouterEntree("Noeuds", IPNoeud)
+						elif msg_recu != "=cmd fileAdded":
+							# Une erreur s'est produite
+							logs.ajtLogs("ERROR : The request was not recognized in creerFichier() : "+str(msg_recu))
+					else:
+						logs.ajtLogs("ERROR : An error occured in creerFichier() : "+str(connNoeud))
+			else:
+				# Une erreur s'est produite
+				logs.ajtLogs("ERROR : There is not enough IP in creerFichier() : "+str(tableau))

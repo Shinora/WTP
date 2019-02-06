@@ -36,7 +36,7 @@ def creerBase():
 			CREATE TABLE IF NOT EXISTS Noeuds(
 				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 				IP TEXT,
-				Fonction TEXT default simple,
+				Fonction TEXT default Simple,
 				DerSync TEXT,
 				DateAjout TEXT
 			)
@@ -267,7 +267,6 @@ def modifStats(colonne, valeur=-1):
 	cursor = conn.cursor()
 	try:
 		if valeur == -1:
-			colonne2 = colonne
 			cursor.execute("UPDATE Statistiques SET "+colonne+" = 1 WHERE 1")
 		else:
 			cursor.execute("UPDATE Statistiques SET "+colonne+" = "+str(valeur)+" WHERE 1")
@@ -337,25 +336,35 @@ def nbEntrees(nomTable):
 		conn.close()
 		return row
 
-def aleatoire(nomTable, entree, nbEntrees):
+def aleatoire(nomTable, entree, nbEntrees, fonction = ""):
 	# Fonction qui a pour but de renvoyer sour forme d'un tableau nbEntrees lignes
 	# contenues dans nomTable de façon aléatoire.
+	error = 0
 	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
 		if nomTable == "Noeuds":
-			cursor.execute("""SELECT IP FROM Noeuds ORDER BY RANDOM() LIMIT ?""", (nbEntrees,))
+			if fonction == "":
+				fonction = "Simple"
+			cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = ? ORDER BY RANDOM() LIMIT ?""", (fonction, nbEntrees))
 			conn.commit()
 	except Exception as e:
 		conn.rollback()
 		logs.ajtLogs("ERROR : Problem with database (aleatoire()):" + str(e))
+		error += 1
 	rows = cursor.fetchall()
 	tableau = []
 	for row in rows:
 		tableau.append(row)
 		# On remplit le tableau avant de le retourner
 	conn.close()
+	if len(tableau) != nbEntrees:
+		error += 1
+		print("Dans Aleatoire :")
+		print(len(tableau))
+		print(nbEntrees)
+		return error
 	return tableau
 
 def chercherInfo(nomTable, info):

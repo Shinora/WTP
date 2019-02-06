@@ -18,7 +18,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 
 # On vérifie que les sources sont correctes et pas modifiées
-maj.verifSources()
+#maj.verifSources()
 
 # On vérifie que le fichier de config existe
 try:
@@ -140,6 +140,26 @@ try:
 						client.send(cmdAEnvoyer.encode())
 					else:
 						cmdAEnvoyer = "=cmd Simple"
+						client.send(cmdAEnvoyer.encode())
+				elif msg_recu[:25] == "=cmd newFileNetwork name ":
+					# =cmd newFileNetwork name ****** ip ******
+					# Un nouveau fichier est envoyé sur le réseau
+					fileName = msg_recu[25:]
+					ipport = msg_recu[msg_recu.find(" ip ")+4:]
+					if(autresFonctions.readConfFile("Parser") == "Oui"):
+						# On prend en charge l'import de fichiers,
+						# On l'ajoute à la base de données et on le télécharge
+						BDD.ajouterEntree("FichiersExt", fileName, ipport)
+						cmdAEnvoyer = "=cmd fileAdded"
+						client.send(cmdAEnvoyer.encode())
+						ip = ipport[:ipport.find(":")]
+						port = ipport[ipport.find(":")+1:]
+						fctsClient.CmdDemandeFichier(ip, port, fileName)
+					else:
+						# On ne prend pas en charge l'import de fichiers, 
+						# Mais on l'ajoute quand même à la base de données
+						BDD.ajouterEntree("FichiersExt", fileName, ipport)
+						cmdAEnvoyer = "=cmd noParser"
 						client.send(cmdAEnvoyer.encode())
 				else:
 					# Oups... Demande non-reconnue...
