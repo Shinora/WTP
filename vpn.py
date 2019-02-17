@@ -21,21 +21,21 @@ from Crypto.Cipher import AES
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
 
-hote = '127.0.0.1'
-port = int(autresFonctions.readConfFile("Port VPN"))
+host = '127.0.0.1'
+port = int(autresFonctions.readConfFile("VPNPort"))
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
 
-connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connexion_principale.bind((hote, port))
-connexion_principale.listen(5)
-logs.ajtLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
+mainConn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+mainConn.bind((host, port))
+mainConn.listen(5)
+logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
 cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 serveur_lance = True
 clients_connectes = []
 while serveur_lance:
-	connexions_demandees, wlist, xlist = select.select([connexion_principale],
+	connexions_demandees, wlist, xlist = select.select([mainConn],
 		[], [], 0.05)
 	for connexion in connexions_demandees:
 		connexion_avec_client, infos_connexion = connexion.accept()
@@ -47,65 +47,65 @@ while serveur_lance:
 		pass
 	else:
 		for client in clients_a_lire:
-			msg_recu = client.recv(1024)
-			msg_recu = msg_recu.decode()
-			if msg_recu[:15] == "=cmd VPN noeud ":
-				# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
-				ipport = msg_recu[15:msg_recu.find(" commande ")]
-				commande = msg_recu[msg_recu.find(" commande ")+10:]
+			rcvCmd = client.recv(1024)
+			rcvCmd = rcvCmd.decode()
+			if rcvCmd[:15] == "=cmd VPN noeud ":
+				# =cmd VPN noeud 127.0.0.1:5555 request =cmd DemandeFichier
+				ipport = rcvCmd[15:rcvCmd.find(" request ")]
+				request = rcvCmd[rcvCmd.find(" request ")+10:]
 				ip = ipport[:ipport.find(":")]
 				port = ipport[ipport.find(":")+1:]
-				if commande[:19] == "=cmd DemandeFichier":
-					fctsClient.CmdDemandeFichier(ip, port, commande[24:])
+				if request[:19] == "=cmd DemandeFichier":
+					fctsClient.CmdDemandeFichier(ip, port, request[24:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:17] == "=cmd DemandeNoeud":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:17] == "=cmd DemandeNoeud":
 					fctsClient.CmdDemandeNoeud(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:28] == "=cmd DemandeListeFichiersExt":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:28] == "=cmd DemandeListeFichiersExt":
 					fctsClient.CmdDemandeListeFichiers(ip, port, 1)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:25] == "=cmd DemandeListeFichiers":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:25] == "=cmd DemandeListeFichiers":
 					fctsClient.CmdDemandeListeFichiers(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:23] == "=cmd DemandeListeNoeuds":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:23] == "=cmd DemandeListeNoeuds":
 					fctsClient.CmdDemandeListeNoeuds(ip, port)
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:22] == "=cmd rechercher":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:22] == "=cmd rechercher":
 					# =cmd rechercher nom ******
-					search.rechercheFichierEntiere(commande[20:])
+					search.rechercheFichierEntiere(request[20:])
 					# Manque du code pour transmettre les infos au noeud qui les demandait
-					cmdAEnvoyer = "=cmd TravailFini"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:11] == "=cmd status":
+					sendCmd = "=cmd TravailFini"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:11] == "=cmd status":
 					# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
-					cmdAEnvoyer = "=cmd VPN"
-					client.send(cmdAEnvoyer.encode())
+					sendCmd = "=cmd VPN"
+					client.send(sendCmd.encode())
 				else:
-					logs.ajtLogs("ERROR : Unknown request (vpn.py) : " + str(commande))
+					logs.addLogs("ERROR : Unknown request (vpn.py) : " + str(request))
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
-				if msg_recu != '':
-					logs.ajtLogs("ERROR : Unknown request (vpn.py) : " + str(msg_recu))
-					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+				if rcvCmd != '':
+					logs.addLogs("ERROR : Unknown request (vpn.py) : " + str(rcvCmd))
+					sendCmd = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("defaultPort"))
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 	# Vérifier si WTP a recu une demande d'extinction
 	fExt = open(".extinctionWTP", "r")
 	contenu = fExt.read()
@@ -119,5 +119,5 @@ while serveur_lance:
 		fExtW.close()
 for client in clients_connectes:
 	client.close()
-connexion_principale.close()
-logs.ajtLogs("INFO : WTP service has been stoped successfully.")
+mainConn.close()
+logs.addLogs("INFO : WTP service has been stoped successfully.")

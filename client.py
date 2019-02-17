@@ -11,45 +11,45 @@ import fctsClient
 from Crypto import Random
 from Crypto.Cipher import AES
 
-hote = "127.0.0.1"
-port = int(autresFonctions.readConfFile("Port par defaut"))
+host = "127.0.0.1"
+port = int(autresFonctions.readConfFile("defaultPort"))
 
 autresFonctions.afficherLogo()
-msg_a_envoyer = b""
-while msg_a_envoyer != b"fin":
-	msg_a_envoyer = input(">>> ")
-	if msg_a_envoyer == "=cmd DemandeNoeud":
-		fctsClient.CmdDemandeNoeud(hote, port)
-	elif msg_a_envoyer[:19] == "=cmd DemandeFichier":
+sendCmd = b""
+while sendCmd != b"fin":
+	sendCmd = input(">>> ")
+	if sendCmd == "=cmd DemandeNoeud":
+		fctsClient.CmdDemandeNoeud(host, port)
+	elif sendCmd[:19] == "=cmd DemandeFichier":
 		# =cmd DemandeFichier nom sha256.ext
-		fctsClient.CmdDemandeFichier(hote, port, msg_a_envoyer[24:])
-	elif msg_a_envoyer == "=cmd DemandeListeNoeuds":
-		fctsClient.CmdDemandeListeNoeuds(hote, port)
-	elif msg_a_envoyer == "=cmd DemandeListeFichiers":
-		fctsClient.CmdDemandeListeFichiers(hote, port)
-	elif msg_a_envoyer[:19] == "=cmd rechercher nom":
+		fctsClient.CmdDemandeFichier(host, port, sendCmd[24:])
+	elif sendCmd == "=cmd DemandeListeNoeuds":
+		fctsClient.CmdDemandeListeNoeuds(host, port)
+	elif sendCmd == "=cmd DemandeListeFichiers":
+		fctsClient.CmdDemandeListeFichiers(host, port)
+	elif sendCmd[:19] == "=cmd rechercher nom":
 		# =cmd rechercher nom SHA256.ext
-		sortie = search.rechercheFichierEntiere(msg_a_envoyer[20:])
+		sortie = search.rechercheFichierEntiere(sendCmd[20:])
 		ipport = sortie[:sortie.find(";")]
 		sha = sortie[sortie.find(";")+1:]
 		if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
 			# C'est un IPPort
-			# On envoi vers la fonction qui télécharge le fichier
+			# On envoi vers la fonction qui télécharge le file
 			ip = ipport[:ipport.find(":")]
 			port = int(ipport[ipport.find(":")+1:])
-			fctsClient.CmdDemandeFichier(hote, port, sha)
+			fctsClient.CmdDemandeFichier(host, port, sha)
 		else:
 			# C'est une erreur
 			print(sortie)
 	else:
 		error = 0
-		connexion_avec_serveur = autresFonctions.connectionClient(hote, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(host, port)
 		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			connexion_avec_serveur.send(msg_a_envoyer.encode())
-			msg_recu = connexion_avec_serveur.recv(1024).decode()
+			connexion_avec_serveur.send(sendCmd.encode())
+			rcvCmd = connexion_avec_serveur.recv(1024).decode()
 			connexion_avec_serveur.close()
-			print(msg_recu)
+			print(rcvCmd)
 	print("Fait.")

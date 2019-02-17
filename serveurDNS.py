@@ -22,18 +22,18 @@ fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
 
-hote = '127.0.0.1'
-port = int(autresFonctions.readConfFile("Port DNS"))
+host = '127.0.0.1'
+port = int(autresFonctions.readConfFile("DNSPort"))
 
-connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connexion_principale.bind((hote, port))
-connexion_principale.listen(5)
-logs.ajtLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
+mainConn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+mainConn.bind((host, port))
+mainConn.listen(5)
+logs.addLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
 cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 serveur_lance = True
 clients_connectes = []
 while serveur_lance:
-	connexions_demandees, wlist, xlist = select.select([connexion_principale],
+	connexions_demandees, wlist, xlist = select.select([mainConn],
 		[], [], 0.05)
 	for connexion in connexions_demandees:
 		connexion_avec_client, infos_connexion = connexion.accept()
@@ -45,109 +45,109 @@ while serveur_lance:
 		pass
 	else:
 		for client in clients_a_lire:
-			msg_recu = client.recv(1024)
-			msg_recu = msg_recu.decode()
-			if msg_recu[:9] == "=cmd DNS ":
+			rcvCmd = client.recv(1024)
+			rcvCmd = rcvCmd.decode()
+			if rcvCmd[:9] == "=cmd DNS ":
 				# =cmd DNS ...
-				commande = msg_recu[9:]
-				if commande[:7] == "AddNDD ":
+				request = rcvCmd[9:]
+				if request[:7] == "AddNDD ":
 					# =cmd DNS AddNDD sha ******* ndd ******* pass *******
-					sha256 = commande[11:commande.find(" ndd ")]
-					ndd = commande[commande.find(" ndd ")+5:commande.find(" pass ")]
-					password = commande[commande.find(" pass ")+6:]
+					sha256 = request[11:request.find(" ndd ")]
+					ndd = request[request.find(" ndd ")+5:request.find(" pass ")]
+					password = request[request.find(" pass ")+6:]
 					erreur = dns.ajouterEntree("DNS", ndd, sha256, password)
 					if erreur != 0:
 						# Une erreur s'est produite et le nom de domaine n'a pas été ajouté
 						if erreur == 5:
 							# Le nom de domaine ets déjà pris
-							cmdAEnvoyer = "=cmd NDDDejaUtilise"
+							sendCmd = "=cmd NDDDejaUtilise"
 						else:
-							cmdAEnvoyer = "=cmd ERROR"
+							sendCmd = "=cmd ERROR"
 					else:
-						cmdAEnvoyer = "=cmd SUCCESS"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+						sendCmd = "=cmd SUCCESS"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 					print(erreur)
-				elif commande[:9] == "AddDNSExt":
+				elif request[:9] == "AddDNSExt":
 					# =cmd DNS AddDNSExt ipport ******
-					erreur = dns.ajouterEntree("DNSExt", commande[17:])
+					erreur = dns.ajouterEntree("DNSExt", request[17:])
 					if erreur != 0:
 						# Une erreur s'est produite et le noeud DNS n'a pas été ajouté
 						if erreur == 5:
 							# Le noeud est déjà connu
-							cmdAEnvoyer = "=cmd IPPORTDejaUtilise"
+							sendCmd = "=cmd IPPORTDejaUtilise"
 						else:
-							cmdAEnvoyer = "=cmd ERROR"
+							sendCmd = "=cmd ERROR"
 					else:
-						cmdAEnvoyer = "=cmd SUCCESS"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+						sendCmd = "=cmd SUCCESS"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 					print(erreur)
-				elif commande[:8] == "modifNDD":
+				elif request[:8] == "modifNDD":
 					# =cmd DNS modifNDD ndd ****** adress ****** pass ******
-					ndd = commande[13:commande.find(" adress ")]
-					adress = commande[commande.find(" adress ")+8:commande.find(" pass ")]
-					password = commande[commande.find(" pass ")+6:]
+					ndd = request[13:request.find(" adress ")]
+					adress = request[request.find(" adress ")+8:request.find(" pass ")]
+					password = request[request.find(" pass ")+6:]
 					erreur = dns.modifEntree("DNS", adress, ndd, password)
 					if erreur > 0:
 						if erreur == 5:
-							cmdAEnvoyer = "=cmd MDPInvalide"
+							sendCmd = "=cmd MDPInvalide"
 						elif erreur == 8:
-							cmdAEnvoyer = "=cmd NDDInconnuCree"
+							sendCmd = "=cmd NDDInconnuCree"
 						else:
-							cmdAEnvoyer = "=cmd ERROR"
+							sendCmd = "=cmd ERROR"
 					else:
-						cmdAEnvoyer = "=cmd SUCCESS"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+						sendCmd = "=cmd SUCCESS"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 					print(erreur)
-				elif commande[:8] == "supprNDD":
+				elif request[:8] == "supprNDD":
 					# =cmd DNS supprNDD ndd ****** pass ******
-					ndd = commande[22:commande.find(" pass ")]
-					password = commande[commande.find(" pass ")+6:]
+					ndd = request[22:request.find(" pass ")]
+					password = request[request.find(" pass ")+6:]
 					erreur = dns.supprEntree("DNS", ndd, password)
 					if erreur > 0:
 						if erreur == 5:
-							cmdAEnvoyer = "=cmd MDPInvalide"
+							sendCmd = "=cmd MDPInvalide"
 						else:
-							cmdAEnvoyer = "=cmd ERROR"
+							sendCmd = "=cmd ERROR"
 					else:
-						cmdAEnvoyer = "=cmd SUCCESS"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+						sendCmd = "=cmd SUCCESS"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 					print(erreur)
-				elif commande[:9] == "searchSHA":
+				elif request[:9] == "searchSHA":
 					# =cmd DNS searchSHA ndd ******
-					sortie = str(dns.searchSHA(commande[14:]))
+					sortie = str(dns.searchSHA(request[14:]))
 					if len(sortie) >= 64:
-						cmdAEnvoyer = sortie
+						sendCmd = sortie
 					else:
 						if sortie == "INCONNU":
-							cmdAEnvoyer = "=cmd NNDInconnu"
+							sendCmd = "=cmd NNDInconnu"
 						else:
-							cmdAEnvoyer = "=cmd ERROR"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-				elif commande[:11] == "=cmd status":
+							sendCmd = "=cmd ERROR"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+				elif request[:11] == "=cmd status":
 					# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
-					cmdAEnvoyer = "=cmd DNS"
-					client.send(cmdAEnvoyer.encode())
+					sendCmd = "=cmd DNS"
+					client.send(sendCmd.encode())
 				else:
-					cmdAEnvoyer = "=cmd Inconnu"
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
-			elif msg_recu == "=cmd DemandePresence":
-				cmdAEnvoyer = "=cmd Present"
-				cmdAEnvoyer = cmdAEnvoyer.encode()
-				client.send(cmdAEnvoyer)
+					sendCmd = "=cmd Inconnu"
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
+			elif rcvCmd == "=cmd DemandePresence":
+				sendCmd = "=cmd Present"
+				sendCmd = sendCmd.encode()
+				client.send(sendCmd)
 			else:
 				# Oups... Demande non-reconnue
 				# On envoie le port par défaut du noeud
-				if msg_recu != '':
-					logs.ajtLogs("ERROR : Unknown error (serveurDNS.py) : " + str(msg_recu))
-					cmdAEnvoyer = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("Port par defaut"))
-					cmdAEnvoyer = cmdAEnvoyer.encode()
-					client.send(cmdAEnvoyer)
+				if rcvCmd != '':
+					logs.addLogs("ERROR : Unknown error (serveurDNS.py) : " + str(rcvCmd))
+					sendCmd = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("defaultPort"))
+					sendCmd = sendCmd.encode()
+					client.send(sendCmd)
 	# Vérifier si WTP a recu une demande d'extinction
 	fExt = open(".extinctionWTP", "r")
 	contenu = fExt.read()
@@ -161,5 +161,5 @@ while serveur_lance:
 		fExtW.close()
 for client in clients_connectes:
 	client.close()
-connexion_principale.close()
-logs.ajtLogs("INFO : The DNS service has been stoped successfully.")
+mainConn.close()
+logs.addLogs("INFO : The DNS service has been stoped successfully.")

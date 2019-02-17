@@ -6,7 +6,7 @@ import BDD
 import sqlite3
 
 def comptTaillFchsTtl():
-	# Fonction qui compte la taille totale de tous les fichiers hébergés sur le noeud,
+	# Fonction qui compte la taille totale de tous les files hébergés sur le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
@@ -15,7 +15,7 @@ def comptTaillFchsTtl():
 		cursor.execute("""SELECT Taille FROM Fichiers WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERROR : Problem with the database (comptTaillFchsTtl()):" + str(e))
+		logs.addLogs("ERROR : Problem with the database (comptTaillFchsTtl()):" + str(e))
 	tailleTotale = 0
 	for row in rows:
 		tailleTotale += row[0]
@@ -23,7 +23,7 @@ def comptTaillFchsTtl():
 	BDD.modifStats("PoidsFichiers", tailleTotale)
 
 def comptNbFichiers():
-	# Fonction qui compte le nombre total de fichiers hébergés par le noeud,
+	# Fonction qui compte le nombre total de files hébergés par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
@@ -32,7 +32,7 @@ def comptNbFichiers():
 		cursor.execute("""SELECT id FROM Fichiers WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERROR : Problem with the database (comptNbFichiers()):" + str(e))
+		logs.addLogs("ERROR : Problem with the database (comptNbFichiers()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1
@@ -40,7 +40,7 @@ def comptNbFichiers():
 	BDD.modifStats("NbFichiers", nbTotal)
 
 def comptNbFichiersExt():
-	# Fonction qui compte le nombre total de fichiers connus par le noeud,
+	# Fonction qui compte le nombre total de files connus par le noeud,
 	# Puis qui met à jour la base de données avec la fonction adéquate
 	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
@@ -49,7 +49,7 @@ def comptNbFichiersExt():
 		cursor.execute("""SELECT id FROM FichiersExt WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERROR : Problem with the database (comptNbFichiersExt()):" + str(e))
+		logs.addLogs("ERROR : Problem with the database (comptNbFichiersExt()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1
@@ -66,7 +66,7 @@ def comptNbNoeuds():
 		cursor.execute("""SELECT id FROM Noeuds WHERE 1""")
 		rows = cursor.fetchall()
 	except Exception as e:
-		logs.ajtLogs("ERROR : Problem with the database (comptNbNoeuds()):" + str(e))
+		logs.addLogs("ERROR : Problem with the database (comptNbNoeuds()):" + str(e))
 	nbTotal = 0
 	for row in rows:
 		nbTotal += 1

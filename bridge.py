@@ -47,7 +47,7 @@ while True:
 		sha = sortie[sortie.find(";")+1:]
 		if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
 			# C'est un IPPort
-			# On envoi vers la fonction qui télécharge le fichier
+			# On envoi vers la fonction qui télécharge le file
 			ip = ipport[:ipport.find(":")]
 			port = int(ipport[ipport.find(":")+1:])
 			error = fctsClient.CmdDemandeFichier(ip, port, sha)
@@ -63,12 +63,12 @@ while True:
 			print(sortie)
 			print(ipport)
 			resultat = sortie
-	elif requete[:15] == "=cmd VPN noeud " and requete.find(" commande =cmd DemandeFichier") != -1:
-		# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
-		ipport = requete[requete.find("=cmd VPN noeud ")+15:requete.find(" commande ")]
-		commande = requete[requete.find(" commande ")+10:]
+	elif requete[:15] == "=cmd VPN noeud " and requete.find(" request =cmd DemandeFichier") != -1:
+		# =cmd VPN noeud 127.0.0.1:5555 request =cmd DemandeFichier
+		ipport = requete[requete.find("=cmd VPN noeud ")+15:requete.find(" request ")]
+		request = requete[requete.find(" request ")+10:]
 	else:
 		resultat = "=cmd CommandeInconnue :"+requete+":"
 	print(resultat)
-	logs.ajtLogs(resultat)
+	logs.addLogs(resultat)
 	sendMessage(encodeMessage(resultat))

@@ -21,7 +21,7 @@ try:
 	with open(".TempMaintenance24H", "r"):
 		pass
 except IOError:
-	# Le fichier n'existe pas.
+	# Le file n'existe pas.
 	# On va donc le créer, et dans le doute mettre 0 pour le datetime,
 	# de sorte à ce que la maintenance soit faite juste après
 	f = open(".TempMaintenance24H", "w")
@@ -30,12 +30,12 @@ except IOError:
 f = open(".TempMaintenance24H", "r")
 derMtnc = f.read()
 f.close()
-# Et pareil pour l'importation de fichiers
+# Et pareil pour l'importation de files
 try:
 	with open(".TempMaintenance5M", "r"):
 		pass
 except IOError:
-	# Le fichier n'existe pas.
+	# Le file n'existe pas.
 	# On va donc le créer, et dans le doute mettre 0 pour le datetime,
 	# de sorte à ce que la maintenance soit faite juste après
 	f = open(".TempMaintenance5M", "w")
@@ -50,7 +50,7 @@ tmpsAct = int(tmpsActuel[0:point])
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
-# En cas de fichier vide, on attribue la valeur 0 pour ne pas avoir de problèmes
+# En cas de file vide, on attribue la valeur 0 pour ne pas avoir de problèmes
 if derMtnc == "":
 	derMtnc = 0
 if derMtnc5M == "":
@@ -59,7 +59,7 @@ serveur_lance = True
 while serveur_lance:
 	if int(derMtnc)+86400 < tmpsAct: # 24h = 86 400 sec
 		# On peut lancer les fonctions
-		# Puis on change le contenu du fichier temporel
+		# Puis on change le contenu du file temporel
 		f = open(".TempMaintenance24H", "w")
 		f.write(str(tmpsAct))
 		f.close()
@@ -77,16 +77,16 @@ while serveur_lance:
 		# Fonction Mise A Jour
 		#maj.verifMAJ()
 		#maj.verifSources()
-		logs.ajtLogs("INFO : Maintenance of the database completed successfully.")
+		logs.addLogs("INFO : Maintenance of the database completed successfully.")
 	if int(derMtnc5M)+275 < tmpsAct: # Moins de 5Min
 		# On peut lancer les fonctions
-		# Puis on change le contenu du fichier temporel
+		# Puis on change le contenu du file temporel
 		f = open(".TempMaintenance5M", "w")
 		f.write(str(tmpsAct))
 		f.close()
 		derMtnc5M = tmpsAct
 		fctsMntc.creerFichier()
-		logs.ajtLogs("INFO : Verification of new files completed successfully.")
+		logs.addLogs("INFO : Verification of new files completed successfully.")
 	time.sleep(300) # Se reveille toutes les 5 minutes.
 	tmpsActuel = str(time.time())
 	point = tmpsActuel.find('.')

@@ -18,91 +18,91 @@ def CmdDemandeNoeud(ip, port):
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
-		commande = "=cmd DemandeNoeud"
-		commande = commande.encode()
-		connNoeud.send(commande)
-		msg_recu = connNoeud.recv(1024)
+		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+		request = "=cmd DemandeNoeud"
+		request = request.encode()
+		connNoeud.send(request)
+		rcvCmd = connNoeud.recv(1024)
 		connNoeud.close()
-		echangeNoeuds.DemandeNoeuds(str(msg_recu))
+		echangeNoeuds.DemandeNoeuds(str(rcvCmd))
 	return error
 
-def CmdDemandeFichier(ip, port, fichier, special = "fichiers"):
+def CmdDemandeFichier(ip, port, file, special = "files"):
 	# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
 	# Dirriger vers la fonction DownloadFichier()
 	# On va chercher l'info qu'il nous faut :
-	# L'IP et le port du noeud qui va envoyer le fichier (sous forme IP:PORT)
+	# L'IP et le port du noeud qui va envoyer le file (sous forme IP:PORT)
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
 	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
+		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
 		# Il faut trouver un port libre pour que le noeud donneur
 		# puisse se connecter à ce noeud sur le bon port
-		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("Port Min"))))
-		msg_a_envoyer = "=cmd DemandeFichier  nom " + fichier
-		msg_a_envoyer += " ipPort " + newIPPort
-		msg_a_envoyer = msg_a_envoyer.encode()
-		connNoeud.send(msg_a_envoyer)
-		msg_recu = connNoeud.recv(1024)
+		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("miniPort"))))
+		sendCmd = "=cmd DemandeFichier  nom " + file
+		sendCmd += " ipPort " + newIPPort
+		sendCmd = sendCmd.encode()
+		connNoeud.send(sendCmd)
+		rcvCmd = connNoeud.recv(1024)
 		connNoeud.close()
-		if msg_recu.decode() == "=cmd OK":
-			# Le noeud distant a le fichier que l'on veut
+		if rcvCmd.decode() == "=cmd OK":
+			# Le noeud distant a le file que l'on veut
 			if echangeFichiers.DownloadFichier(newIPPort) == 0:
 				if special == "noeuds":
-					# C'est un fichier qui contient une liste de noeuds
-					# Récuperer le nom du fichier
-					nomFichier = msg_a_envoyer[msg_a_envoyer.find(" nom ")+5:msg_a_envoyer.find(" ipPort ")]
-					autresFonctions.lireListeNoeuds(nomFichier)
-				if special == "fichiers":
-					# C'est un fichier qui contient une liste de fichiers
-					# Récuperer le nom du fichier
-					nomFichier = msg_a_envoyer[msg_a_envoyer.find(" nom ")+5:msg_a_envoyer.find(" ipPort ")]
-					autresFonctions.lireListeFichiers(nomFichier)
+					# C'est un file qui contient une liste de noeuds
+					# Récuperer le nom du file
+					fileName = sendCmd[sendCmd.find(" nom ")+5:sendCmd.find(" ipPort ")]
+					autresFonctions.lireListeNoeuds(fileName)
+				if special == "files":
+					# C'est un file qui contient une liste de files
+					# Récuperer le nom du file
+					fileName = sendCmd[sendCmd.find(" nom ")+5:sendCmd.find(" ipPort ")]
+					autresFonctions.lireListeFichiers(fileName)
 			else:
 				error += 1
-				logs.ajtLogs("ERROR : Download failed")
+				logs.addLogs("ERROR : Download failed")
 		else:
-			# Le noeud distant n'a pas le fichier que l'on veut
-			logs.ajtLogs("ERROR : The peer doesn't have the file")
+			# Le noeud distant n'a pas le file que l'on veut
+			logs.addLogs("ERROR : The peer doesn't have the file")
 			error = 5
 	return error
 
 def CmdDemandeListeNoeuds(ip, port):
-	msg_a_envoyer = "=cmd DemandeListeNoeuds"
+	sendCmd = "=cmd DemandeListeNoeuds"
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
 	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
-		msg_a_envoyer = msg_a_envoyer.encode()
-		connNoeud.send(msg_a_envoyer)
-		nomFichier = connNoeud.recv(1024)
+		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+		sendCmd = sendCmd.encode()
+		connNoeud.send(sendCmd)
+		fileName = connNoeud.recv(1024)
 		connNoeud.close()
-		CmdDemandeFichier(ip, port, nomFichier.decode(), "noeuds")
+		CmdDemandeFichier(ip, port, fileName.decode(), "noeuds")
 	return error
 
 def CmdDemandeListeFichiers(ip, port, ext = 0):
 	if ext == 1:
-		msg_a_envoyer = "=cmd DemandeListeFichiersExt"
+		sendCmd = "=cmd DemandeListeFichiersExt"
 	else:
-		msg_a_envoyer = "=cmd DemandeListeFichiers"
+		sendCmd = "=cmd DemandeListeFichiers"
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
 	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
-		msg_a_envoyer = msg_a_envoyer.encode()
-		connNoeud.send(msg_a_envoyer)
-		nomFichier = connNoeud.recv(1024)
+		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+		sendCmd = sendCmd.encode()
+		connNoeud.send(sendCmd)
+		fileName = connNoeud.recv(1024)
 		connNoeud.close()
-		CmdDemandeFichier(ip, port, nomFichier.decode(), "fichiers")
+		CmdDemandeFichier(ip, port, fileName.decode(), "files")
 	return error
 
 def CmdDemandeStatut(ip, port):
@@ -113,9 +113,9 @@ def CmdDemandeStatut(ip, port):
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
-		msg_a_envoyer = "=cmd status"
-		connNoeud.send(msg_a_envoyer.encode())
+		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+		sendCmd = "=cmd status"
+		connNoeud.send(sendCmd.encode())
 		statut = connNoeud.recv(1024)
 		connNoeud.close()
 		if(statut[:5] == "=cmd "):
@@ -137,32 +137,51 @@ def VPN(demande, ipPortVPN, ipPortExt):
 		if str(connNoeud) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.ajtLogs("INFO : Connection with VPN peer etablished on port {}".format(port))
-			# =cmd VPN noeud 127.0.0.1:5555 commande =cmd DemandeFichier
-			commande = "=cmd VPN noeud " + ipPortExt + " commande " + demande
-			commande = commande.encode()
-			connNoeud.send(commande)
+			logs.addLogs("INFO : Connection with VPN peer etablished on port {}".format(port))
+			# =cmd VPN noeud 127.0.0.1:5555 request =cmd DemandeFichier
+			request = "=cmd VPN noeud " + ipPortExt + " request " + demande
+			request = request.encode()
+			connNoeud.send(request)
 			print(connNoeud.recv(1024))
 			connNoeud.close()
 			# Maintenant que l'on a demandé au VPN d'executer la demande, il faut recuperer les donnnées
-			# Pour cela, il faut analyser la commande initiale
-			if commande[:19] == "=cmd DemandeFichier":
+			# Pour cela, il faut analyser la request initiale
+			if request[:19] == "=cmd DemandeFichier":
 				# =cmd DemandeFichier nom sha256.ext
-				CmdDemandeFichier(ip, port, commande[24:])
-			elif commande[:17] == "=cmd DemandeNoeud":
-				CmdDemandeNoeud(hote, port)
-			elif commande[:28] == "=cmd DemandeListeFichiersExt":
+				CmdDemandeFichier(ip, port, request[24:])
+			elif request[:17] == "=cmd DemandeNoeud":
+				CmdDemandeNoeud(host, port)
+			elif request[:28] == "=cmd DemandeListeFichiersExt":
 				CmdDemandeListeFichiers(ip, port, 1)
-			elif commande[:25] == "=cmd DemandeListeFichiers":
+			elif request[:25] == "=cmd DemandeListeFichiers":
 				CmdDemandeListeFichiers(ip, port)
-			elif commande[:23] == "=cmd DemandeListeNoeuds":
-				CmdDemandeListeNoeuds(hote, port)
-			elif commande[:22] == "=cmd rechercher":
+			elif request[:23] == "=cmd DemandeListeNoeuds":
+				CmdDemandeListeNoeuds(host, port)
+			elif request[:22] == "=cmd rechercher":
 				# =cmd rechercher nom SHA256.ext
-				search.rechercheFichierEntiere(msg_a_envoyer[20:])
+				search.rechercheFichierEntiere(sendCmd[20:])
 			else:
-				logs.ajtLogs("ERROR : Unknown request (VPN()) : " + str(commande))
+				logs.addLogs("ERROR : Unknown request (VPN()) : " + str(request))
 				error += 1
 	else:
 		error += 1
+	return error
+
+def sayHello():
+	# Fonction dont le but est d'avertir des noeuds importants de sa présence
+	error = 0
+	ipPortMe = autresFonctions.connaitreIP()
+	ip = ipport[:ipport.find(":")]
+	port = ipport[ipport.find(":")+1:]
+	connNoeud = autresFonctions.connectionClient(ip, port)
+	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	if str(connNoeud) == "=cmd ERROR":
+		error += 1
+	else:
+		logs.addLogs("INFO : Connection with VPN peer etablished on port {}".format(port))
+		request = "=cmd HELLO " + ipPortMe
+		request = request.encode()
+		connNoeud.send(request)
+		print(connNoeud.recv(1024))
+		connNoeud.close()
 	return error
