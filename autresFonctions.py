@@ -22,25 +22,25 @@ def portLibre(premierPort):
 	while port:
 		clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
-		    clientsocket.connect(('127.0.0.1' , int(premierPort)))
+			clientsocket.connect(('127.0.0.1' , int(premierPort)))
 		except ConnectionRefusedError:
-		    # Le port est libre !
-		    port = False
+			# Le port est libre !
+			port = False
 		else:
-		    # Le port est déjà utilisé !
-		    premierPort += 1
-		if premierPort < int(readConfFile("Port Max")):
+			# Le port est déjà utilisé !
+			premierPort += 1
+		if premierPort < int(readConfFile("MaxPort")):
 			return premierPort
-		logs.ajtLogs("ERROR: All ports already in use")
+		logs.addLogs("ERROR: All ports already in use")
 		time.sleep(1)
 
-def lsteFichiers(fichiersExternes = 0): 
+def lsteFichiers(filesExternes = 0): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
-	# CAR CHAQUE LIGNE EST DE TYPE SHA256fichier.ext @ IP:Port
-	# Fonction qui retourne un fichier qui contient tous les
+	# CAR CHAQUE LIGNE EST DE TYPE SHA256file.ext @ IP:Port
+	# Fonction qui retourne un file qui contient tous les
 	# noms des fichers hébergés par le noeud,
 	# et qui sont dans la BDD, un par ligne
-	# Si fichiersExternes = 1, on doit faire la liste des focihers externes connus et non des fichiers hébergés
+	# Si filesExternes = 1, on doit faire la liste des focihers externes connus et non des files hébergés
 	BDD.verifExistBDD()
 	try: 
 		os.makedirs("HOSTEDFILES")
@@ -49,13 +49,13 @@ def lsteFichiers(fichiersExternes = 0):
 			raise
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
-	if fichiersExternes == 0:
+	if filesExternes == 0:
 		cursor.execute("""SELECT Nom FROM Fichiers WHERE 1""")
 	else:
 		cursor.execute("""SELECT Nom FROM FichiersExt WHERE 1""")
 	rows = cursor.fetchall()
 	fileDir = "HOSTEDFILES/listeFichiers"
-	# On vide le fichier au cas où
+	# On vide le file au cas où
 	vidage = open(fileDir, "w")
 	vidage.write("")
 	vidage.close()
@@ -64,22 +64,22 @@ def lsteFichiers(fichiersExternes = 0):
 	# Puis on commence l'importation
 	fluxEcriture = open(fileDir, "a")
 	for row in rows:
-		if fichiersExternes == 0:
-			fluxEcriture.write(row[0]+" @ "+monIP+":"+str(readConfFile("Port par defaut"))+"\n")
+		if filesExternes == 0:
+			fluxEcriture.write(row[0]+" @ "+monIP+":"+str(readConfFile("defaultPort"))+"\n")
 		else:
 			fluxEcriture.write(row[0]+" @ "+row[1]+"\n")
 	fluxEcriture.close()
-	# Maintenant on va trouver le SHA256 du fichier
+	# Maintenant on va trouver le SHA256 du file
 	fluxSHA = open(fileDir, "r")
 	contenu = fluxSHA.read()
 	fluxSHA.close()
-	nomFichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
-	cheminFichier = "HOSTEDFILES/" + nomFichier
-	os.rename(fileDir, cheminFichier)
-	return nomFichier
+	fileName = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+	pathFichier = "HOSTEDFILES/" + fileName
+	os.rename(fileDir, pathFichier)
+	return fileName
 
 def lsteNoeuds():
-	# Fonction qui retourne un fichier qui contient toutes les
+	# Fonction qui retourne un file qui contient toutes les
 	# IP+PORT des noeuds connus par ce noeud
 	# et qui sont dans la BDD, un par ligne
 	BDD.verifExistBDD()
@@ -93,7 +93,7 @@ def lsteNoeuds():
 	cursor.execute("""SELECT IP FROM Noeuds WHERE 1""")
 	rows = cursor.fetchall()
 	fileDir = "HOSTEDFILES/listeNoeuds"
-	# On vide le fichier au cas où
+	# On vide le file au cas où
 	vidage = open(fileDir, "w")
 	vidage.write("")
 	vidage.close()
@@ -102,19 +102,19 @@ def lsteNoeuds():
 	for row in rows:
 		fluxEcriture.write(row[0]+"\n")
 	fluxEcriture.close()
-	# Maintenant on va trouver le SHA256 du fichier
+	# Maintenant on va trouver le SHA256 du file
 	fluxSHA = open(fileDir, "r")
 	contenu = fluxSHA.read()
 	fluxSHA.close()
-	nomFichier = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
-	cheminFichier = "HOSTEDFILES/" + nomFichier
-	os.rename(fileDir, cheminFichier)
-	return nomFichier
+	fileName = hashlib.sha256(contenu.encode()).hexdigest() + ".extwtp"
+	pathFichier = "HOSTEDFILES/" + fileName
+	os.rename(fileDir, pathFichier)
+	return fileName
 
-def lireListeNoeuds(nomFichier):
+def lireListeNoeuds(fileName):
 	# Fonction qui lit la liste de noeuds ligne par ligne et qui ajoute les noeuds dans la base de données
-	cheminFichier = "HOSTEDFILES/"+nomFichier
-	f = open(cheminFichier,'r')
+	pathFichier = "HOSTEDFILES/"+fileName
+	f = open(pathFichier,'r')
 	lignes  = f.readlines()
 	f.close()
 	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
@@ -122,24 +122,24 @@ def lireListeNoeuds(nomFichier):
 		if reg.match(ligne):
 			# Si la ligne est une IP
 			BDD.ajouterEntree("Noeuds", ligne)
-	# Puis on supprime le fichier car on en n'a plus besoin
-	os.remove(cheminFichier)
-	logs.ajtLogs("INFO : A file containing a peer list was parsed and deleted.")
+	# Puis on supprime le file car on en n'a plus besoin
+	os.remove(pathFichier)
+	logs.addLogs("INFO : A file containing a peer list was parsed and deleted.")
 
-def lireListeFichiers(nomFichier):
-	# Fonction qui lit la liste de fichiers ligne par ligne et qui ajoute les noeuds dans la base de données
-	# Chaque ligne est de type SHA256fichier.ext @ IP:Port
-	cheminFichier = "HOSTEDFILES/"+nomFichier
-	f = open(cheminFichier,'r')
+def lireListeFichiers(fileName):
+	# Fonction qui lit la liste de files ligne par ligne et qui ajoute les noeuds dans la base de données
+	# Chaque ligne est de type SHA256file.ext @ IP:Port
+	pathFichier = "HOSTEDFILES/"+fileName
+	f = open(pathFichier,'r')
 	lignes  = f.readlines()
 	f.close()
 	for ligne in lignes:
-		nomFichier = ligne[:ligne.find(" @ ")]
+		fileName = ligne[:ligne.find(" @ ")]
 		ipPort = ligne[ligne.find(" @ ")+3:]
-		BDD.ajouterEntree("FichiersExt", nomFichier, ipPort)
-	# Puis on supprime le fichier car on en n'a plus besoin
-	os.remove(cheminFichier)
-	logs.ajtLogs("INFO : A file containing a list of files was parsed and deleted.")
+		BDD.ajouterEntree("FichiersExt", fileName, ipPort)
+	# Puis on supprime le file car on en n'a plus besoin
+	os.remove(pathFichier)
+	logs.addLogs("INFO : A file containing a list of files was parsed and deleted.")
 
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
@@ -150,7 +150,7 @@ def connaitreIP():
 	return page.read().decode("utf-8")
 
 def fillConfFile():
-	# On vide le fichier avant de le remplir de nouveau
+	# On vide le file avant de le remplir de nouveau
 	supprContenu = open("wtp.conf", "w")
 	supprContenu.write("")
 	supprContenu.close()
@@ -200,12 +200,14 @@ def fillConfFile():
 			loop_blacklist = 0
 	autostart = input("Do you want to enable autostart ? ( 0 = Yes / 1 = No ) : ")
 	parser = input("Do you want to enable parser mode ? ( 0 = Yes / 1 = No ) : ") # Parser = SuperNoeud
+	vpn = input("Do you want to enable VPN ? ( 0 = Yes / 1 = No ) : ")
+	dns = input("Do you want to enable DNS ? ( 0 = Yes / 1 = No ) : ")
 	conf_file = open("wtp.conf", "a")
-	conf_file.write("Port par defaut : "+str(def_port)+"\n")
-	conf_file.write("Port VPN : "+str(portVPN)+"\n")
-	conf_file.write("Port DNS : "+str(portDNS)+"\n")
-	conf_file.write("Port Min : "+str(min_port)+"\n")
-	conf_file.write("Port Max : "+str(max_port)+"\n")
+	conf_file.write("defaultPort : "+str(def_port)+"\n")
+	conf_file.write("VPNPort : "+str(portVPN)+"\n")
+	conf_file.write("DNSPort : "+str(portDNS)+"\n")
+	conf_file.write("miniPort : "+str(min_port)+"\n")
+	conf_file.write("MaxPort : "+str(max_port)+"\n")
 	conf_file.write("AESKey : aeosiekrjeklkrj\n")
 	conf_file.write("MyIP : "+str(connaitreIP())+"\n")
 	conf_file.write("Path : "+str(os.getcwd())+"\n")
@@ -214,9 +216,17 @@ def fillConfFile():
 	else:
 		conf_file.write("Autostart : Non\n")
 	if parser == "0":
-		conf_file.write("Parser : Oui\n")
+		conf_file.write("Parser : True\n")
 	else:
-		conf_file.write("Parser : Non\n")
+		conf_file.write("Parser : False\n")
+	if vpn == "0":
+		conf_file.write("VPN : True\n")
+	else:
+		conf_file.write("VPN : False\n")
+	if dns == "0":
+		conf_file.write("DNS : True\n")
+	else:
+		conf_file.write("DNS : False\n")
 	conf_file.write("Blacklist [\n")
 	for ip in blacklist:
 		conf_file.write(ip + " ; \n")
@@ -224,22 +234,22 @@ def fillConfFile():
 	conf_file.close()
 
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
-	# Fonction qui lit le fichier de configuration et qui retourne l'information demandée en paramètres
+	# Fonction qui lit le file de configuration et qui retourne l'information demandée en paramètres
 	try:
 		with open('wtp.conf'):
 			pass
 	except IOError:
-		# Le fichier n'existe pas
+		# Le file n'existe pas
 		fillConfFile()
 	if os.path.getsize("wtp.conf") < 80:
-		# Le fichier est très léger, il ne peut contenir les informations
+		# Le file est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer
 		fillConfFile()
 	f = open("wtp.conf",'r')
 	lignes  = f.readlines()
 	f.close()
 	for ligne in lignes:
-		# On lit le fichier ligne par ligne et si on trouve le paramètre dans la ligne,
+		# On lit le file ligne par ligne et si on trouve le paramètre dans la ligne,
 		# on renvoie ce qui se trouva après
 		if ligne[:len(parametre)] == parametre:
 			# On a trouvé ce que l'on cherchait
@@ -265,9 +275,9 @@ def connectionClient(ip, port):
 			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			connexion_avec_serveur.connect((ip, int(port)))
 		except ConnectionRefusedError as e:
-			logs.ajtLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+			logs.addLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
 		except ConnectionResetError as e:
-			logs.ajtLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+			logs.addLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
 		else:
 			return connexion_avec_serveur
 	return "=cmd ERROR"

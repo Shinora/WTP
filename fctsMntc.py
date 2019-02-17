@@ -9,6 +9,7 @@ import sqlite3
 import os
 from Crypto import Random
 from Crypto.Cipher import AES
+import base64
 
 def verifNoeud():
 	BDD.verifExistBDD()
@@ -17,37 +18,37 @@ def verifNoeud():
 	cursor.execute("""SELECT IP FROM Noeuds WHERE 1""")
 	rows = cursor.fetchall()
 	for row in rows:
-		# Prend un à un chaque noeud de la liste, et lui envoie une commande.
+		# Prend un à un chaque noeud de la liste, et lui envoie une request.
 		# Si le noeud répond, on le laisse tranquille, sinon on le met dans une autre table.
-		IpPortNoeud = row[0]
+		IppeerPort = row[0]
 		#Départager l'IP et le port
-		pos1 = IpPortNoeud.find(":")
+		pos1 = IppeerPort.find(":")
 		pos1 = pos1+1
-		pos2 = len(IpPortNoeud)
-		PortNoeud = int(IpPortNoeud[pos1:pos2])
+		pos2 = len(IppeerPort)
+		peerPort = int(IppeerPort[pos1:pos2])
 		pos1 = pos1-1
-		IPNoeud = IpPortNoeud[0:pos1]
+		peerIP = IppeerPort[0:pos1]
 		# Liaison tcp/ip
 		c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		# Connection au receveur
 		try:
-			c.connect((IPNoeud, PortNoeud))
+			c.connect((peerIP, peerPort))
 		except Exception as erreur:
 			# Le noeud est injoignable, on le déplace dans une autre table.
-			BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
-			BDD.supprEntree("Noeuds", IpPortNoeud)
-			logs.ajtLogs("ERROR : Connection to the peer impossible : '" + str(erreur) + "' (verifNoeud())")
+			BDD.ajouterEntree("NoeudsHorsCo", IppeerPort)
+			BDD.supprEntree("Noeuds", IppeerPort)
+			logs.addLogs("ERROR : Connection to the peer impossible : '" + str(erreur) + "' (verifNoeud())")
 		else:
-			cmdAEnvoyer = "=cmd DemandePresence"
-			cmdAEnvoyer = cmdAEnvoyer.encode()
+			sendCmd = "=cmd DemandePresence"
+			sendCmd = sendCmd.encode()
 			# On envoie le message
-			c.send(cmdAEnvoyer)
-			dataRecu = c.recv(1024)
-			dataRecu = dataRecu.decode()
-			if dataRecu != '=cmd Present':
+			c.send(sendCmd)
+			rcvData = c.recv(1024)
+			rcvData = rcvData.decode()
+			if rcvData != '=cmd Present':
 				# Le noeud n'est pas connecté au réseau, on le déplace dans une autre table.
-				BDD.ajouterEntree("NoeudsHorsCo", IpPortNoeud)
-				BDD.supprEntree("Noeuds", IpPortNoeud)
+				BDD.ajouterEntree("NoeudsHorsCo", IppeerPort)
+				BDD.supprEntree("Noeuds", IppeerPort)
 
 def verifNoeudHS():
 	BDD.verifExistBDD()
@@ -56,86 +57,92 @@ def verifNoeudHS():
 	cursor.execute("""SELECT IP FROM NoeudsHorsCo WHERE 1""")
 	rows = cursor.fetchall()
 	for row in rows:
-		# Prend un à un chaque noeud de la liste, et lui envoie une commande.
+		# Prend un à un chaque noeud de la liste, et lui envoie une request.
 		# Si le noeud répond, on le laisse tranquille, sinon on le met dans une autre table.
-		IpPortNoeud = row[0]
+		IppeerPort = row[0]
 		#Départager l'IP et le port
-		pos1 = IpPortNoeud.find(':')
+		pos1 = IppeerPort.find(':')
 		pos1 = pos1+1
-		pos2 = len(IpPortNoeud)
-		PortNoeud = int(IpPortNoeud[pos1:pos2])
+		pos2 = len(IppeerPort)
+		peerPort = int(IppeerPort[pos1:pos2])
 		pos1 = pos1-1
-		IPNoeud = IpPortNoeud[0:pos1]
+		peerIP = IppeerPort[0:pos1]
 		# Liaison tcp/ip
 		c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		# Connection au receveur
 		try:
-			c.connect((IPNoeud, PortNoeud))
+			c.connect((peerIP, peerPort))
 		except:
-			logs.ajtLogs("ERROR : Connection to the peer out of service impossible. (verifNoeudHS())")
+			logs.addLogs("ERROR : Connection to the peer out of service impossible. (verifNoeudHS())")
 			# Le noeud n'est pas connecté au réseau
 			# On incrémente son nombre de vérifs et on le supprime si besoin
-			BDD.incrNbVerifsHS(IpPortNoeud)
-			BDD.verifNbVerifsHS(IpPortNoeud)
+			BDD.incrNbVerifsHS(IppeerPort)
+			BDD.verifNbVerifsHS(IppeerPort)
 		else:
-			cmdAEnvoyer = b""
-			cmdAEnvoyer = "=cmd DemandePresence"
-			cmdAEnvoyer = cmdAEnvoyer.encode()
+			sendCmd = b""
+			sendCmd = "=cmd DemandePresence"
+			sendCmd = sendCmd.encode()
 			# On envoie le message
-			c.send(cmdAEnvoyer)
-			dataRecu = c.recv(1024)
-			dataRecu = dataRecu.decode()
-			if dataRecu == '=cmd Present':
+			c.send(sendCmd)
+			rcvData = c.recv(1024)
+			rcvData = rcvData.decode()
+			if rcvData == '=cmd Present':
 				# C'est bon, le noeud est connecté au reseau, 
 				# on l'ajoute à la table normale et on le supprime de la table des noeuds HS
-				BDD.ajouterEntree("Noeuds", IpPortNoeud)
-				BDD.supprEntree("NoeudsHorsCo", IpPortNoeud)
+				BDD.ajouterEntree("Noeuds", IppeerPort)
+				BDD.supprEntree("NoeudsHorsCo", IppeerPort)
 			else:
 				# Le noeud n'est pas connecté au réseau, on incrémente de 1 son nombre de vérifications.
-				BDD.incrNbVerifsHS(IpPortNoeud)
+				BDD.incrNbVerifsHS(IppeerPort)
 				# On vérifie si le noeud a un nombre de vérifications inférieur à 10.
 				# Si ce n'est pas le cas, il est supprimé définitivement.
-				BDD.verifNbVerifsHS(IpPortNoeud)
+				BDD.verifNbVerifsHS(IppeerPort)
 
 def verifFichier():
-	# Prend les fichiers un à un dans la BDD, puis les vérifie.
+	# Prend les files un à un dans la BDD, puis les vérifie.
 	# Il doit être présent sur le disque.
 	# LE SHA256 doit être identique au nom.
-	# Sinon on envoie vers la fonction qui supprime le fichier de la BDD et du disque
+	# Sinon on envoie vers la fonction qui supprime le file de la BDD et du disque
 	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	cursor.execute("""SELECT Chemin FROM Fichiers WHERE 1""")
 	rows = cursor.fetchall()
 	for row in rows:
-		nomFichier = row[0]
-		chemin = row[0]
-		while nomFichier.find('/') != -1:
-			nomFichier = nomFichier[nomFichier.find('/')+1:]
-		SHAFichier = nomFichier[:nomFichier.find('.')]
-		# Et voilà, on a juste le nom du fichier, sans extention,
+		fileName = row[0]
+		path = row[0]
+		while fileName.find('/') != -1:
+			fileName = fileName[fileName.find('/')+1:]
+		fileSHA = fileName[:fileName.find('.')]
+		# Et voilà, on a juste le nom du file, sans extention,
 		# ce qui correspond normalement au SHA256 du contenu de celui-ci
-		fichier = open(chemin, "r")
-		contenu = fichier.read()
-		fichier.close()
-		# On vérifie si le SHA256 correspond au contenu du fichier.
-		SHAContenuFichier = hashlib.sha256(contenu.encode('utf-8')).hexdigest()
-		if SHAFichier == SHAContenuFichier:
-			# Le fichier a le même hash que son nom, c'est bon.
-			# Si le programme est arrivé jusqu'à là, c'est que le fichier existe egalement.
-			logs.ajtLogs("INFO : The file " + nomFichier + " has been verified without errors.")
+		try:
+			file = open(path, "r")
+			contenu = file.read()
+			file.close()
+		except FileNotFoundError:
+			logs.addLogs("INFO : The file isn't founded : "+str(path))
+			BDD.supprEntree("Fichiers", fileName)
+			logs.addLogs("ERROR : The file " + fileName + " has been deleted from the database.")
 		else:
-			#Il y a une erreur. Le fichier doit être supprimé,
-			# car il peut nuire au bon fonctionnement du réseau.
-			BDD.supprEntree("Fichiers", nomFichier)
-			logs.ajtLogs("ERROR : The file " + nomFichier + " contained errors. It has been deleted.")
+			# On vérifie si le SHA256 correspond au contenu du file.
+			SHAContenuFichier = hashlib.sha256(contenu.encode('utf-8')).hexdigest()
+			if fileSHA == SHAContenuFichier:
+				# Le file a le même hash que son nom, c'est bon.
+				# Si le programme est arrivé jusqu'à là, c'est que le file existe egalement.
+				logs.addLogs("INFO : The file " + fileName + " has been verified without errors.")
+			else:
+				#Il y a une erreur. Le file doit être supprimé,
+				# car il peut nuire au bon fonctionnement du réseau.
+				BDD.supprEntree("Fichiers", fileName)
+				logs.addLogs("ERROR : The file " + fileName + " contained errors. It has been deleted.")
 
 def creerFichier():
 	# Fonction qui va s'executer via la maintenance assez régulièrement
-	# Elle regarde dans le dossier ADDFILES si il y a des fichiers
+	# Elle regarde dans le dossier ADDFILES si il y a des files
 	# Si oui, elle les copie dans le dossier HOSTEDFILES, les renomme de type SHA256.extention
-	# Elle envoie vers la fonction contenue dans BDD.py qui va ajouter les fichiers à la base de données
-	# Et pour finir, elle supprime les fichiers ajoutés de façon à ce que le dossier ADDFILES soit vide.
+	# Elle envoie vers la fonction contenue dans BDD.py qui va ajouter les files à la base de données
+	# Et pour finir, elle supprime les files ajoutés de façon à ce que le dossier ADDFILES soit vide.
 	repertoire = "ADDFILES"
 	# Vérifier si le dossier ADDFILES existe, sinon le créer
 	try:
@@ -152,48 +159,53 @@ def creerFichier():
 	dirs = os.listdir(repertoire)
 	# This would print all the files and directories
 	for file in dirs:
-		fichier = repertoire + "/" + file
-		if os.path.isfile(fichier):
-			# L'élément est un fichier, c'est bon (et pas un dossier)
-			with open(fichier, "r", encoding="utf-8") as fluxLecture:
-				contenu = fluxLecture.read()
-				fluxLecture.close()
-			shaFichier = hashlib.sha256(contenu.encode()).hexdigest()
-			osef, extention = os.path.splitext(fichier)
-			filename = shaFichier + extention
-			fileDir = "HOSTEDFILES/" + filename
-			fluxEcriture = open(fileDir, "w")
-			fluxEcriture.write(contenu)
-			fluxEcriture.close()
-			os.remove(fichier)
-			# L'ajouter à la BDD
-			BDD.ajouterEntree("Fichiers", filename)
-			logs.ajtLogs("INFO : A new hosted file has been added successfully : " + filename)
-			# On transmet à quelques noeuds l'information
-			tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
-			if len(tableau) == 15:
-				# On envoi la commande à chaque noeud sélectionné
-				for IPNoeud in tableau:
-					ip = IPNoeud[:IPNoeud.find(":")]
-					port = IPNoeud[IPNoeud.find(":")+1:]
-					connNoeud = autresFonctions.connectionClient(ip, port)
-					cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
-					if str(connNoeud) != "=cmd ERROR":
-						logs.ajtLogs("INFO : Connection with peer etablished on port {}".format(port))
-						commande = "=cmd newFileNetwork name " + filename + " ip " + str(autresFonctions.readConfFile("MyIP")) + str(autresFonctions.readConfFile("Port par defaut"))
-						commande = commande.encode()
-						connNoeud.send(commande)
-						msg_recu = connNoeud.recv(1024)
-						connNoeud.close()
-						if msg_recu == "=cmd noParser":
-							# Il faut changer le paramètre du noeud, il n'est pas parseur mais simple
-							BDD.supprEntree("Noeuds", IPNoeud)
-							BDD.ajouterEntree("Noeuds", IPNoeud)
-						elif msg_recu != "=cmd fileAdded":
-							# Une erreur s'est produite
-							logs.ajtLogs("ERROR : The request was not recognized in creerFichier() : "+str(msg_recu))
-					else:
-						logs.ajtLogs("ERROR : An error occured in creerFichier() : "+str(connNoeud))
+		file = repertoire + "/" + file
+		if os.path.isfile(file):
+			# L'élément est un file, c'est bon (et pas un dossier)
+			try:
+				with open(file, "r", encoding="utf-8") as fluxLecture:
+					contenu = fluxLecture.read()
+					fluxLecture.close()
+			except:
+				logs.addLogs("ERROR : The file is not supported : "+str(file))
+				os.remove(file)
 			else:
-				# Une erreur s'est produite
-				logs.ajtLogs("ERROR : There is not enough IP in creerFichier() : "+str(tableau))
+				shaFichier = hashlib.sha256(contenu.encode()).hexdigest()
+				osef, extention = os.path.splitext(file)
+				filename = shaFichier + extention
+				fileDir = "HOSTEDFILES/" + filename
+				fluxEcriture = open(fileDir, "w")
+				fluxEcriture.write(contenu)
+				fluxEcriture.close()
+				os.remove(file)
+				# L'ajouter à la BDD
+				BDD.ajouterEntree("Fichiers", filename)
+				logs.addLogs("INFO : A new hosted file has been added successfully : " + filename)
+				# On transmet à quelques noeuds l'information
+				tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
+				if type(tableau) != int and len(tableau) == 15:
+					# On envoi la request à chaque noeud sélectionné
+					for peerIP in tableau:
+						ip = peerIP[:peerIP.find(":")]
+						port = peerIP[peerIP.find(":")+1:]
+						connNoeud = autresFonctions.connectionClient(ip, port)
+						cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+						if str(connNoeud) != "=cmd ERROR":
+							logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+							request = "=cmd newFileNetwork name " + filename + " ip " + str(autresFonctions.readConfFile("MyIP")) + str(autresFonctions.readConfFile("defaultPort"))
+							request = request.encode()
+							connNoeud.send(request)
+							rcvCmd = connNoeud.recv(1024)
+							connNoeud.close()
+							if rcvCmd == "=cmd noParser":
+								# Il faut changer le paramètre du noeud, il n'est pas parseur mais simple
+								BDD.supprEntree("Noeuds", peerIP)
+								BDD.ajouterEntree("Noeuds", peerIP)
+							elif rcvCmd != "=cmd fileAdded":
+								# Une erreur s'est produite
+								logs.addLogs("ERROR : The request was not recognized in creerFichier() : "+str(rcvCmd))
+						else:
+							logs.addLogs("ERROR : An error occured in creerFichier() : "+str(connNoeud))
+				else:
+					# Une erreur s'est produite
+					logs.addLogs("ERROR : There is not enough IP in creerFichier() : "+str(tableau))

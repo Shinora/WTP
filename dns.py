@@ -24,11 +24,11 @@ def addNDD(ipport, sha, ndd, password):
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS on the port {}".format(port))
 			# =cmd DNS AddDNS sha ******* ndd ******* pass *******
-			commande = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
-			commande = commande.encode()
-			connexion_avec_serveur.send(commande)
+			request = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
+			request = request.encode()
+			connexion_avec_serveur.send(request)
 			message = connexion_avec_serveur.recv(1024)
 			connexion_avec_serveur.close()
 			if message == "=cmd NDDDejaUtilise":
@@ -54,11 +54,11 @@ def addNoeudDNS(ipport, ipportNoeud):
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS on the port {}".format(port))
 			# =cmd DNS AddDNSExt ipport ******
-			commande = "=cmd DNS AddDNSExt ipport " + ipportNoeud
-			commande = commande.encode()
-			connexion_avec_serveur.send(commande)
+			request = "=cmd DNS AddDNSExt ipport " + ipportNoeud
+			request = request.encode()
+			connexion_avec_serveur.send(request)
 			message = connexion_avec_serveur.recv(1024)
 			connexion_avec_serveur.close()
 			if message == "=cmd IPPORTDejaUtilise":
@@ -84,11 +84,11 @@ def modifNDD(ipport, ndd, adress, password):
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS on the port {}".format(port))
 			# =cmd DNS modifNDD ndd ****** adress ****** pass ******
-			commande = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
-			commande = commande.encode()
-			connexion_avec_serveur.send(commande)
+			request = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
+			request = request.encode()
+			connexion_avec_serveur.send(request)
 			message = connexion_avec_serveur.recv(1024)
 			connexion_avec_serveur.close()
 			error = 0
@@ -115,11 +115,11 @@ def supprNDD(ipport, ndd, password):
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.ajtLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS on the port {}".format(port))
 			# =cmd DNS supprNDD ndd ****** pass ******
-			commande = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
-			commande = commande.encode()
-			connexion_avec_serveur.send(commande)
+			request = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
+			request = request.encode()
+			connexion_avec_serveur.send(request)
 			message = connexion_avec_serveur.recv(1024)
 			if message != "=cmd SUCCESS":
 				error += 1
@@ -135,7 +135,7 @@ def supprNDD(ipport, ndd, password):
 
 def creerBase():
 	# Fonction qui a pour seul but de créer la base de données
-	# si le fichier la contenant n'existe pas.
+	# si le file la contenant n'existe pas.
 	conn = sqlite3.connect('WTPDNS.db')
 	cursor = conn.cursor()
 	try:
@@ -159,7 +159,7 @@ def creerBase():
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERROR : Problem with the database (creerBase()) :" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (creerBase()) :" + str(e))
 	conn.close()
 
 def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
@@ -177,10 +177,10 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 		elif nomTable == "DNSExt":
 			cursor.execute("""SELECT id FROM DNSExt WHERE IPPORT = ?""", (entree,))
 		else:
-			logs.ajtLogs("DNS : ERROR: The table name was not recognized (ajouterEntree()) : " + str(nomTable))
+			logs.addLogs("DNS : ERROR: The table name was not recognized (ajouterEntree()) : " + str(nomTable))
 			problem += 1
 	except Exception as e:
-		logs.ajtLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
 		problem += 1
 	else:
 		nbRes = 0
@@ -191,7 +191,7 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 			# L'entrée existe déjà
 			problem = 5
 			if nbRes > 1:
-				logs.ajtLogs("DNS : ERROR: Entry is multiple times in the database. (ajouterEntree())")
+				logs.addLogs("DNS : ERROR: Entry is multiple times in the database. (ajouterEntree())")
 				problem = 7
 		else:
 			datetimeAct = str(time.time())
@@ -205,16 +205,16 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 							cursor.execute("""INSERT INTO DNS (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (entree1, entree, passwordHash, datetimeAct))
 							conn.commit()
 						except Exception as e:
-							logs.ajtLogs("DNS : ERREUR :" + str(e))
+							logs.addLogs("DNS : ERREUR :" + str(e))
 					else:
-						logs.ajtLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
+						logs.addLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
 						problem += 1
 				elif nomTable == "DNSExt":
 					cursor.execute("""INSERT INTO DNSExt (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
 					conn.commit()
 			except Exception as e:
 				conn.rollback()
-				logs.ajtLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
+				logs.addLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
 				problem += 1
 	conn.close()
 	return problem
@@ -232,9 +232,9 @@ def envLste(nomTable, nbreEntrees = 150):
 		elif nomTable == "DNSExt":
 			cursor.execute("""SELECT IPPORT FROM DNSExt LIMIT ? ORDER BY id DESC""", (nbreEntrees,))
 		else:
-			logs.ajtLogs("DNS : ERROR: The table name was not recognized (envLste()) : " + str(nomTable))
+			logs.addLogs("DNS : ERROR: The table name was not recognized (envLste()) : " + str(nomTable))
 	except Exception as e:
-		logs.ajtLogs("DNS : ERROR : Problem with the database (envLste()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (envLste()):" + str(e))
 	rows = cursor.fetchall()
 	nbRes = 0
 	for row in rows:
@@ -273,24 +273,24 @@ def supprEntree(nomTable, entree, entree1 = ""):
 						# Le mot de passe n'est pas valide
 						problem = 5
 			else:
-				logs.ajtLogs("DNS : ERROR: There is a missing parameter to perform this action (supprEntree())")
+				logs.addLogs("DNS : ERROR: There is a missing parameter to perform this action (supprEntree())")
 				problem += 1
 		elif nomTable == "DNSExt":
 			cursor.execute("""DELETE FROM DNSExt WHERE IPPORT = ?""", (entree,))
 			conn.commit()
 		else:
-			logs.ajtLogs("DNS : ERROR: The table name was not recognized (supprEntree()) : " + str(nomTable))
+			logs.addLogs("DNS : ERROR: The table name was not recognized (supprEntree()) : " + str(nomTable))
 			problem += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERROR : Problem with the database (supprEntree()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (supprEntree()):" + str(e))
 		problem += 1
 	else:
 		if problem == 0:
-			logs.ajtLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
+			logs.addLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
 		else:
-			logs.ajtLogs("DNS : ERROR : The " + entree + " entry of the " + nomTable + " table could not be deleted")
+			logs.addLogs("DNS : ERROR : The " + entree + " entry of the " + nomTable + " table could not be deleted")
 	conn.close()
 	return problem
 
@@ -318,22 +318,22 @@ def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 						# Le mot de passe n'est pas valide.
 						problem = 5
 				if nbRes == 0:
-					logs.ajtLogs("DNS : ERROR: The domain name to modify does not exist (modifEntree())")
+					logs.addLogs("DNS : ERROR: The domain name to modify does not exist (modifEntree())")
 					problem = 8
 					problem += ajouterEntree("DNS", entree1, entree, entree2)
 			else:
-				logs.ajtLogs("DNS : ERROR: There is a missing parameter to perform this action (modifEntree())")
+				logs.addLogs("DNS : ERROR: There is a missing parameter to perform this action (modifEntree())")
 				problem += 1
 		else:
-			logs.ajtLogs("DNS : ERROR: The table name was not recognized (modifEntree()) : " + str(nomTable))
+			logs.addLogs("DNS : ERROR: The table name was not recognized (modifEntree()) : " + str(nomTable))
 			problem += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERROR : Problem with the database (modifEntree()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (modifEntree()):" + str(e))
 		problem += 1
 	else:
-		logs.ajtLogs("DNS : INFO : The domain name "+ entree1 +" has been modified.")
+		logs.addLogs("DNS : INFO : The domain name "+ entree1 +" has been modified.")
 	conn.close()
 	return problem
 
@@ -343,7 +343,7 @@ def verifExistBDD():
 		with open('WTPDNS.db'):
 			pass
 	except IOError:
-		logs.ajtLogs("DNS : ERROR: Base not found ... Creating a new database.")
+		logs.addLogs("DNS : ERROR: Base not found ... Creating a new database.")
 		creerBase()
 
 def searchSHA(ndd):
@@ -359,7 +359,7 @@ def searchSHA(ndd):
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERROR : Problem with the database (searchSHA()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (searchSHA()):" + str(e))
 		problem += 1
 	else:
 		nbRes = 0
@@ -368,7 +368,7 @@ def searchSHA(ndd):
 			if nbRes > 1:
 				# On trouve plusieurs fois le même nom de domaine dans la base
 				problem = 5
-				logs.ajtLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
+				logs.addLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
 			sha256 = row[0]
 	conn.close()
 	if problem > 1:
@@ -388,7 +388,7 @@ def majDNS():
 		rows = cursor.fetchall()
 	except Exception as e:
 		conn.rollback()
-		logs.ajtLogs("DNS : ERROR : Problem with the database (majDNS()):" + str(e))
+		logs.addLogs("DNS : ERROR : Problem with the database (majDNS()):" + str(e))
 		problem += 1
 	else:
 		for row in rows:
