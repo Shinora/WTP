@@ -16,7 +16,12 @@ import maj
 import search
 from Crypto import Random
 from Crypto.Cipher import AES
+from loader import loader
+import threading
 
+
+status = loader("Start Up")
+status.start()
 
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
@@ -32,18 +37,152 @@ try:
 except IOError:
 	# Le file n'existe pas, on lance le créateur
 	autresFonctions.fillConfFile()
-BDD.ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
-
-autresFonctions.afficherLogo()
+BDD.ajouterEntree("Noeuds", "88.189.108.233:5555", "Parser")
+BDD.ajouterEntree("Noeuds", "88.189.108.233:5556")
+BDD.ajouterEntree("Noeuds", "88.189.108.233:5557")
 
 host = '127.0.0.1'
 port = int(autresFonctions.readConfFile("defaultPort"))
 
+class ClientThread(threading.Thread):
+
+	def __init__(self, ip, port, clientsocket):
+		threading.Thread.__init__(self)
+		self.ip = ip
+		self.port = port
+		self.clientsocket = clientsocket
+		print("[+] Nouveau thread pour %s %s" % (self.ip, self.port, ))
+	
+	def run(self): 
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		rcvCmd = self.clientsocket.recv(1024)
+		rcvCmd = rcvCmd.decode()
+		# Maintenant, vérifions la demande du client.
+		if rcvCmd != '':
+			status = loader("Connection with a peer")
+			status.start()
+			if rcvCmd[:19] == "=cmd DemandeFichier": # Fonction Client OPPÉRATIONNEL
+				# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
+				# Dirriger vers la fonction UploadFichier()
+				# Le noeud distant demande le file, donc on lui envoi, Up !
+				# On va chercher les deux informations qu'il nous faut :
+				# Le nom du file (sous forme sha256.ext)
+				# L'IP et le port du noeud qui a fait la demande (sous forme IP:PORT)
+				pos1 = rcvCmd.find(" nom ")
+				pos1 = pos1+5
+				pos2 = rcvCmd.find(" ipPort ")
+				fileName = rcvCmd[pos1:pos2]
+				pos2 = pos2+8
+				pos3 = len(rcvCmd)
+				IppeerPort = rcvCmd[pos2:pos3]
+				if BDD.verifFichier(fileName):
+					# Le file est présent dans la BDD, on peut l'envoyer
+					self.clientsocket.send("=cmd OK".encode())
+					time.sleep(0.5) # Le temps que le noeud distant mette en place son serveur
+					if echangeFichiers.UploadFichier(fileName, IppeerPort) != 0:
+						self.clientsocket.send("=cmd ERROR".encode())
+					else:
+						self.clientsocket.send(")cmd SUCCESS".encode())
+						BDD.modifStats("NbEnvsFichiers")
+				else:
+					self.clientsocket.send("=cmd ERROR".encode())
+			elif rcvCmd[:17] == "=cmd DemandeNoeud": # Fonction Serveur
+				# Dirriger vers la fonction EnvoiNoeuds()
+				# Le noeud distant a demandé les noeuds, on lui envoi !
+				# On trouve le premier port qui peut être attribué
+				IppeerPort = "127.0.0.1:" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("miniPort"))))
+				sendCmd = IppeerPort # On envoie au demandeur l'adresse à contacter
+				self.clientsocket.send(sendCmd.encode())
+				echangeNoeuds.EnvoiNoeuds(IppeerPort)
+				BDD.modifStats("NbEnvsLstNoeuds")
+			elif rcvCmd[:25] == "=cmd DemandeListeFichiers":
+				# On va récuperer le nom du file qui contient la liste
+				# Ensuite, on la transmet au noeud distant pour qu'il puisse
+				# faire la demande de réception du file pour qu'il puisse l'analyser
+				if rcvCmd[:28] == "=cmd DemandeListeFichiersExt":
+					file = autresFonctions.lsteFichiers(1)
+					BDD.modifStats("NbEnvsLstFichiers")
+				else:
+					file = autresFonctions.lsteFichiers()
+					BDD.modifStats("NbEnvsLstFichiersExt")
+				self.clientsocket.send(file.encode())
+			elif rcvCmd[:23] == "=cmd DemandeListeNoeuds":
+				# On va récuperer le nom du file qui contient la liste
+				# Ensuite, on la transmet au noeud distant pour qu'il puisse
+				# faire la demande de réception du file pour qu'il puisse l'analyser
+				file = autresFonctions.lsteNoeuds()
+				self.clientsocket.send(file.encode())
+				BDD.modifStats("NbEnvsLstNoeuds")
+			elif rcvCmd[:20] == "=cmd DemandePresence": # OPPÉRATIONNEL
+				# C'est tout bête, pas besoin de fonction
+				# Il suffit de renvoyer la request informant que l'on est connecté au réseau.
+				sendCmd = "=cmd Present"
+				self.clientsocket.send(sendCmd.encode())
+				BDD.modifStats("NbPresence")
+			elif rcvCmd[:15] == "=cmd rechercher": 
+				# =cmd rechercher nom SHA256.ext
+				# Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
+				# Chercher le nom du file
+				donnee = rcvCmd[20:]
+				sendCmd = str(search.rechercheFichierEntiere(donnee))
+				self.clientsocket.send(sendCmd.encode())
+			elif rcvCmd[:11] == "=cmd status":
+				# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
+				if(autresFonctions.readConfFile("Parser") == "Oui"):
+					sendCmd = "=cmd Parser"
+					self.clientsocket.send(sendCmd.encode())
+				else:
+					sendCmd = "=cmd Simple"
+					self.clientsocket.send(sendCmd.encode())
+			elif rcvCmd[:25] == "=cmd newFileNetwork name ":
+				# =cmd newFileNetwork name ****** ip ******
+				# Un nouveau file est envoyé sur le réseau
+				fileName = rcvCmd[25:]
+				ipport = rcvCmd[rcvCmd.find(" ip ")+4:]
+				if(autresFonctions.readConfFile("Parser") == "Oui"):
+					# On prend en charge l'import de files,
+					# On l'ajoute à la base de données et on le télécharge
+					BDD.ajouterEntree("FichiersExt", fileName, ipport)
+					sendCmd = "=cmd fileAdded"
+					self.clientsocket.send(sendCmd.encode())
+					ip = ipport[:ipport.find(":")]
+					port = ipport[ipport.find(":")+1:]
+					fctsClient.CmdDemandeFichier(ip, port, fileName)
+				else:
+					# On ne prend pas en charge l'import de files, 
+					# Mais on l'ajoute quand même à la base de données
+					BDD.ajouterEntree("FichiersExt", fileName, ipport)
+					sendCmd = "=cmd noParser"
+					self.clientsocket.send(sendCmd.encode())
+			elif rcvCmd[:23] == "=cmd newPeerNetwork ip ":
+				# =cmd newPeerNetwork ip ******
+				# Un nouveau peer est envoyé sur le réseau
+				ipport = rcvCmd[23:]
+				if(autresFonctions.readConfFile("Parser") == "True"):
+					# On prend en charge l'ajout de peers
+					# On l'ajoute à la base de données
+					BDD.ajouterEntree("Noeuds", ipport)
+					sendCmd = "=cmd peerAdded"
+					self.clientsocket.send(sendCmd.encode())
+				else:
+					# On ne prend pas en charge l'import de files, 
+					# Mais on l'ajoute quand même à la base de données
+					BDD.ajouterEntree("FichiersExt", fileName, ipport)
+					sendCmd = "=cmd noParser"
+					self.clientsocket.send(sendCmd.encode())
+			else:
+				# Oups... Demande non-reconnue...
+				logs.addLogs("ERROR : Unknown request : " + str(rcvCmd))
+				self.clientsocket.send("=cmd UNKNOW".encode())
+			status.stop()
+			status.join()
+
 try:
 	try:
-		mainConn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		mainConn.bind((host, port))
-		mainConn.listen(5)
+		tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		tcpsock.bind((host, port))
+		serveur_lance = True
 	except OSError as e:
 		logs.addLogs("ERROR : In launcher.py : "+str(e))
 		logs.addLogs("Stop everything and restart after...")
@@ -55,15 +194,6 @@ try:
 		fExtW = open(".extinctionWTP", "w")
 		fExtW.write("ETEINDRE")
 		fExtW.close()
-		try:
-			mainConn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			mainConn.bind((host, port))
-			mainConn.listen(5)
-		except OSError as e:
-			logs.addLogs("ERROR : Unable to properly start WTP : "+str(e))
-			fExtW = open(".extinctionWTP", "w")
-			fExtW.write("ETEINDRE")
-			fExtW.close()
 	else:
 		# On lance les programmes externes
 		os.popen('python3 maintenance.py', 'r')
@@ -78,9 +208,10 @@ try:
 			os.popen('python3 vpn.py', 'r')
 		# On indique notre présence à quelques parseurs
 		tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
-		if type(tableau) != int and len(tableau) > 10:
+		if type(tableau) != int and len(tableau) > 0:
 			# On envoi la request à chaque noeud sélectionné
 			for peerIP in tableau:
+				peerIP = peerIP[0]
 				ip = peerIP[:peerIP.find(":")]
 				port = peerIP[peerIP.find(":")+1:]
 				connNoeud = autresFonctions.connectionClient(ip, port)
@@ -104,142 +235,17 @@ try:
 		else:
 			# Une erreur s'est produite
 			logs.addLogs("ERROR : There is not enough IP in launcher.py : "+str(tableau))
-
-
-
+			print(len(tableau))
+			print(str(tableau))
+		status.stop()
+		status.join()
+		autresFonctions.afficherLogo()
 		logs.addLogs("INFO : WTP has started, he is now listening to the port " + str(port))
-		serveur_lance = True
-		clients_connectes = []
 		while serveur_lance:
-			connexions_demandees, wlist, xlist = select.select([mainConn], [], [], 0.05)
-			for connexion in connexions_demandees:
-				connexion_avec_client, infos_connexion = connexion.accept()
-				clients_connectes.append(connexion_avec_client)
-			clients_a_lire = []
-			try:
-				clients_a_lire, wlist, xlist = select.select(clients_connectes, [], [], 0.05)
-			except select.error:
-				pass
-			else:
-				for client in clients_a_lire:
-					cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
-					rcvCmd = client.recv(1024)
-					rcvCmd = rcvCmd.decode()
-					# Maintenant, vérifions la demande du client.
-					if rcvCmd[:19] == "=cmd DemandeFichier": # Fonction Client OPPÉRATIONNEL
-						# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
-						# Dirriger vers la fonction UploadFichier()
-						# Le noeud distant demande le file, donc on lui envoi, Up !
-						# On va chercher les deux informations qu'il nous faut :
-						# Le nom du file (sous forme sha256.ext)
-						# L'IP et le port du noeud qui a fait la demande (sous forme IP:PORT)
-						pos1 = rcvCmd.find(" nom ")
-						pos1 = pos1+5
-						pos2 = rcvCmd.find(" ipPort ")
-						fileName = rcvCmd[pos1:pos2]
-						pos2 = pos2+8
-						pos3 = len(rcvCmd)
-						IppeerPort = rcvCmd[pos2:pos3]
-						if BDD.verifFichier(fileName):
-							# Le file est présent dans la BDD, on peut l'envoyer
-							client.send("=cmd OK".encode())
-							time.sleep(0.5) # Le temps que le noeud distant mette en place son serveur
-							if echangeFichiers.UploadFichier(fileName, IppeerPort) != 0:
-								client.send("=cmd ERROR".encode())
-							else:
-								client.send(")cmd SUCCESS".encode())
-								BDD.modifStats("NbEnvsFichiers")
-						else:
-							client.send("=cmd ERROR".encode())
-					elif rcvCmd[:17] == "=cmd DemandeNoeud": # Fonction Serveur
-						# Dirriger vers la fonction EnvoiNoeuds()
-						# Le noeud distant a demandé les noeuds, on lui envoi !
-						# On trouve le premier port qui peut être attribué
-						IppeerPort = "127.0.0.1:" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("miniPort"))))
-						sendCmd = IppeerPort # On envoie au demandeur l'adresse à contacter
-						client.send(sendCmd.encode())
-						echangeNoeuds.EnvoiNoeuds(IppeerPort)
-						BDD.modifStats("NbEnvsLstNoeuds")
-					elif rcvCmd[:25] == "=cmd DemandeListeFichiers":
-						# On va récuperer le nom du file qui contient la liste
-						# Ensuite, on la transmet au noeud distant pour qu'il puisse
-						# faire la demande de réception du file pour qu'il puisse l'analyser
-						if rcvCmd[:28] == "=cmd DemandeListeFichiersExt":
-							file = autresFonctions.lsteFichiers(1)
-							BDD.modifStats("NbEnvsLstFichiers")
-						else:
-							file = autresFonctions.lsteFichiers()
-							BDD.modifStats("NbEnvsLstFichiersExt")
-						client.send(file.encode())
-					elif rcvCmd[:23] == "=cmd DemandeListeNoeuds":
-						# On va récuperer le nom du file qui contient la liste
-						# Ensuite, on la transmet au noeud distant pour qu'il puisse
-						# faire la demande de réception du file pour qu'il puisse l'analyser
-						file = autresFonctions.lsteNoeuds()
-						client.send(file.encode())
-						BDD.modifStats("NbEnvsLstNoeuds")
-					elif rcvCmd[:20] == "=cmd DemandePresence": # OPPÉRATIONNEL
-						# C'est tout bête, pas besoin de fonction
-						# Il suffit de renvoyer la request informant que l'on est connecté au réseau.
-						sendCmd = "=cmd Present"
-						client.send(sendCmd.encode())
-						BDD.modifStats("NbPresence")
-					elif rcvCmd[:15] == "=cmd rechercher": 
-						# =cmd rechercher nom SHA256.ext
-						# Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
-						# Chercher le nom du file
-						donnee = rcvCmd[20:]
-						sendCmd = str(search.rechercheFichierEntiere(donnee))
-						client.send(sendCmd.encode())
-					elif rcvCmd[:11] == "=cmd status":
-						# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
-						if(autresFonctions.readConfFile("Parser") == "Oui"):
-							sendCmd = "=cmd Parser"
-							client.send(sendCmd.encode())
-						else:
-							sendCmd = "=cmd Simple"
-							client.send(sendCmd.encode())
-					elif rcvCmd[:25] == "=cmd newFileNetwork name ":
-						# =cmd newFileNetwork name ****** ip ******
-						# Un nouveau file est envoyé sur le réseau
-						fileName = rcvCmd[25:]
-						ipport = rcvCmd[rcvCmd.find(" ip ")+4:]
-						if(autresFonctions.readConfFile("Parser") == "Oui"):
-							# On prend en charge l'import de files,
-							# On l'ajoute à la base de données et on le télécharge
-							BDD.ajouterEntree("FichiersExt", fileName, ipport)
-							sendCmd = "=cmd fileAdded"
-							client.send(sendCmd.encode())
-							ip = ipport[:ipport.find(":")]
-							port = ipport[ipport.find(":")+1:]
-							fctsClient.CmdDemandeFichier(ip, port, fileName)
-						else:
-							# On ne prend pas en charge l'import de files, 
-							# Mais on l'ajoute quand même à la base de données
-							BDD.ajouterEntree("FichiersExt", fileName, ipport)
-							sendCmd = "=cmd noParser"
-							client.send(sendCmd.encode())
-					elif rcvCmd[:23] == "=cmd newPeerNetwork ip ":
-						# =cmd newPeerNetwork ip ******
-						# Un nouveau peer est envoyé sur le réseau
-						ipport = rcvCmd[23:]
-						if(autresFonctions.readConfFile("Parser") == "Oui"):
-							# On prend en charge l'ajout de peers
-							# On l'ajoute à la base de données
-							BDD.ajouterEntree("Noeuds", ipport)
-							sendCmd = "=cmd peerAdded"
-							client.send(sendCmd.encode())
-						else:
-							# On ne prend pas en charge l'import de files, 
-							# Mais on l'ajoute quand même à la base de données
-							BDD.ajouterEntree("FichiersExt", fileName, ipport)
-							sendCmd = "=cmd noParser"
-							client.send(sendCmd.encode())
-					else:
-						# Oups... Demande non-reconnue...
-						if rcvCmd != '':
-							logs.addLogs("ERROR : Unknown request : " + str(rcvCmd))
-							client.send("=cmd UNKNOW".encode())
+			tcpsock.listen(10)
+			(clientsocket, (ip, port)) = tcpsock.accept()
+			newthread = ClientThread(ip, port, clientsocket)
+			newthread.start()
 			# Vérifier si WTP a recu une demande d'extinction
 			fExt = open(".extinctionWTP", "r")
 			contenu = fExt.read()
@@ -252,13 +258,9 @@ try:
 				fExtW.write("ALLUMER")
 				fExtW.close()
 except KeyboardInterrupt:
-	print("")
-	print("^C pressed: Shutting down ...")
+	print(" pressed: Shutting down ...")
 	print("")
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ETEINDRE")
 fExtW.close()
-for client in clients_connectes:
-	client.close()
-mainConn.close()
 logs.addLogs("INFO : WTP has correctly stopped.")
