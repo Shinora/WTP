@@ -7,6 +7,7 @@ import math
 import time
 import logs
 import sqlite3
+import fctsClient
 
 def creerBase():
 	# Fonction qui a pour seul but de créer la base de données
@@ -73,10 +74,6 @@ def creerBase():
 		conn.rollback()
 		logs.addLogs("ERROR : Problem with database (creerBase()) :" + str(e))
 	conn.close()
-	ajouterEntree("Noeuds", "127.0.0.1:5557", "DNS")
-	ajouterEntree("Noeuds", "88.189.108.233:5557", "DNS")
-	ajouterEntree("Noeuds", "88.189.108.233:5556", "VPN")
-	ajouterEntree("FichiersExt", "BBDEFA2950F49882F295B1285D4FA9DEC45FC4144BFB07EE6ACC68762D12C2E3", "127.0.0.1:5555")
 
 def ajouterEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet d'ajouter une entrée à une table de la base
@@ -365,10 +362,8 @@ def aleatoire(nomTable, entree, nbEntrees, fonction = ""):
 	conn.close()
 	if len(tableau) != nbEntrees:
 		error += 1
-		print("Dans Aleatoire :")
-		print(len(tableau))
-		print(nbEntrees)
-		return error
+		# return error
+		# Ligne à activer seulement lorsque le réseau fonctionne
 	return tableau
 
 def chercherInfo(nomTable, info):
