@@ -18,8 +18,13 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from loader import loader
 import threading
+from maintenance import Maintenance
+from parser import Parser
+from serveurDNS import ServDNS
+from vpn import ServVPN
 
 
+logs.addLogs("\n\n\n")
 status = loader("Start Up")
 status.start()
 
@@ -51,7 +56,6 @@ class ClientThread(threading.Thread):
 		self.ip = ip
 		self.port = port
 		self.clientsocket = clientsocket
-		print("[+] Nouveau thread pour %s %s" % (self.ip, self.port, ))
 	
 	def run(self): 
 		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
@@ -196,19 +200,23 @@ try:
 		fExtW.close()
 	else:
 		# On lance les programmes externes
-		os.popen('python3 maintenance.py', 'r')
+		ThrdMntc = Maintenance()
+		ThrdMntc.start()
 		if(str(autresFonctions.readConfFile("Parser")) == "True"):
 			# Le noeud est un parseur, on lance la fonction.
-			os.popen('python3 parser.py', 'r')
+			ThrdParser = Parser()
+			ThrdParser.start()
 		if(str(autresFonctions.readConfFile("DNS")) == "True"):
 			# Le noeud est un DNS, on lance la fonction.
-			os.popen('python3 serveurDNS.py', 'r')
+			ThrdDNS = ServDNS()
+			ThrdDNS.start()
 		if(str(autresFonctions.readConfFile("VPN")) == "True"):
 			# Le noeud est un VPN, on lance la fonction.
-			os.popen('python3 vpn.py', 'r')
+			ThrdVPN = ServVPN()
+			ThrdVPN.start()
 		# On indique notre présence à quelques parseurs
 		tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
-		if type(tableau) != int and len(tableau) > 0:
+		if isinstance(tableau, list) and tableau:
 			# On envoi la request à chaque noeud sélectionné
 			for peerIP in tableau:
 				peerIP = peerIP[0]
@@ -231,7 +239,7 @@ try:
 						# Une erreur s'est produite
 						logs.addLogs("ERROR : The request was not recognized in launcher.py : "+str(rcvCmd))
 				else:
-					logs.addLogs("ERROR : An error occured in launcher.py : "+str(connNoeud))
+					logs.addLogs("INFO : Unable to connect to the peer in launcher.py : "+str(connNoeud))
 		else:
 			# Une erreur s'est produite
 			logs.addLogs("ERROR : There is not enough IP in launcher.py : "+str(tableau))
@@ -258,9 +266,24 @@ try:
 				fExtW.write("ALLUMER")
 				fExtW.close()
 except KeyboardInterrupt:
-	print(" pressed: Shutting down ...")
-	print("")
+	status = loader("Shutting down ...")
+	status.start()
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ETEINDRE")
 fExtW.close()
+if(str(autresFonctions.readConfFile("Parser")) == "True"):
+	# Le noeud est un parseur, on arrète le thread.
+	ThrdParser.stop()
+	ThrdParser.join()
+if(str(autresFonctions.readConfFile("DNS")) == "True"):
+	# Le noeud est un DNS, on arrète le thread.
+	ThrdDNS.stop()
+	ThrdDNS.join()
+if(str(autresFonctions.readConfFile("VPN")) == "True"):
+	# Le noeud est un VPN, on arrète le thread.
+	ThrdVPN.stop()
+	ThrdVPN.join()
+ThrdMntc.stop()
+ThrdMntc.join()
 logs.addLogs("INFO : WTP has correctly stopped.")
+status.stop()
