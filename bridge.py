@@ -17,7 +17,7 @@ import logs
 # Read a message from stdin and decode it.
 def getMessage():
 	rawLength = sys.stdin.read(4)
-	if len(rawLength) == 0:
+	if not rawLength:
 		sys.exit(0)
 	messageLength = struct.unpack('@I', rawLength)[0]
 	message = sys.stdin.read(messageLength)

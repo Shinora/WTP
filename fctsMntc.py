@@ -37,7 +37,7 @@ def verifNoeud():
 			# Le noeud est injoignable, on le déplace dans une autre table.
 			BDD.ajouterEntree("NoeudsHorsCo", IppeerPort)
 			BDD.supprEntree("Noeuds", IppeerPort)
-			logs.addLogs("ERROR : Connection to the peer impossible : '" + str(erreur) + "' (verifNoeud())")
+			logs.addLogs("INFO : Connection to the peer impossible : '" + str(erreur) + "' (verifNoeud())")
 		else:
 			sendCmd = "=cmd DemandePresence"
 			sendCmd = sendCmd.encode()
@@ -183,7 +183,7 @@ def creerFichier():
 				logs.addLogs("INFO : A new hosted file has been added successfully : " + filename)
 				# On transmet à quelques noeuds l'information
 				tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
-				if type(tableau) != int and len(tableau) == 15:
+				if isinstance(tableau, list) and len(tableau) == 15:
 					# On envoi la request à chaque noeud sélectionné
 					for peerIP in tableau:
 						ip = peerIP[:peerIP.find(":")]

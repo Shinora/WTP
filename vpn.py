@@ -23,17 +23,6 @@ import threading
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
 
-status = loader("The DNS service start")
-status.start()
-
-host = '127.0.0.1'
-port = int(autresFonctions.readConfFile("VPNPort"))
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ALLUMER")
-fExtW.close()
-
-logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
-cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
 
 class ClientThread(threading.Thread):
 	def __init__(self, ip, port, clientsocket):
@@ -108,47 +97,78 @@ class ClientThread(threading.Thread):
 		status.join()
 
 
-try:
-	try:
-		tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		tcpsock.bind((host,port))
-	except OSError as e:
-		logs.addLogs("ERROR : In vpn.py : "+str(e))
-		logs.addLogs("Stop everything and restart after...")
+class ServVPN(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.serveur_lance = True
+
+	def run(self):
+		status = loader("The DNS service start")
+		status.start()
+		host = '127.0.0.1'
+		port = int(autresFonctions.readConfFile("VPNPort"))
 		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
+		fExtW.write("ALLUMER")
 		fExtW.close()
-		time.sleep(15)
-		logs.addLogs("Try to restart...")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
-	else:
 		logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
-		serveur_lance = True
-		status.stop()
-		status.join()
-		while serveur_lance:
-			tcpsock.listen(10)
-			(clientsocket, (ip, port)) = tcpsock.accept()
-			newthread = ClientThread(ip, port, clientsocket)
-			newthread.start()
-			# Vérifier si WTP a recu une demande d'extinction
-			fExt = open(".extinctionWTP", "r")
-			contenu = fExt.read()
-			fExt.close()
-			if contenu == "ETEINDRE":
-				# On doit éteindre WTP.
-				serveur_lance = False
-			elif contenu != "ALLUMER":
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		try:
+			try:
+				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+				tcpsock.bind((host,port))
+				tcpsock.settimeout(5)
+			except OSError as e:
+				logs.addLogs("ERROR : In vpn.py : "+str(e))
+				logs.addLogs("Stop everything and restart after...")
 				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ALLUMER")
+				fExtW.write("ETEINDRE")
 				fExtW.close()
-except KeyboardInterrupt:
-	print(" pressed: Shutting down ...")
-	print("")
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ETEINDRE")
-fExtW.close()
-logs.addLogs("INFO : WTP service has been stoped successfully.")
+				time.sleep(15)
+				logs.addLogs("Try to restart...")
+				fExtW = open(".extinctionWTP", "w")
+				fExtW.write("ETEINDRE")
+				fExtW.close()
+			else:
+				logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
+				status.stop()
+				status.join()
+				while self.serveur_lance:
+					try:
+						tcpsock.listen(10)
+						(clientsocket, (ip, port)) = tcpsock.accept()
+					except socket.timeout:
+						fExt = open(".extinctionWTP", "r")
+						contenu = fExt.read()
+						fExt.close()
+						if contenu == "ETEINDRE":
+							# On doit éteindre WTP.
+							self.serveur_lance = False
+						elif contenu != "ALLUMER":
+							fExtW = open(".extinctionWTP", "w")
+							fExtW.write("ALLUMER")
+							fExtW.close()
+					else:
+						newthread = ClientThread(ip, port, clientsocket)
+						newthread.start()
+						# Vérifier si WTP a recu une demande d'extinction
+						fExt = open(".extinctionWTP", "r")
+						contenu = fExt.read()
+						fExt.close()
+						if contenu == "ETEINDRE":
+							# On doit éteindre WTP.
+							self.serveur_lance = False
+						elif contenu != "ALLUMER":
+							fExtW = open(".extinctionWTP", "w")
+							fExtW.write("ALLUMER")
+							fExtW.close()
+		except KeyboardInterrupt:
+			print(" pressed: Shutting down ...")
+			print("")
+		fExtW = open(".extinctionWTP", "w")
+		fExtW.write("ETEINDRE")
+		fExtW.close()
+		logs.addLogs("INFO : WTP service has been stoped successfully.")
+
+	def stop(self):
+		self.serveur_lance = False

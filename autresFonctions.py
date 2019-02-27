@@ -208,7 +208,7 @@ def fillConfFile():
 	conf_file.write("DNSPort : "+str(portDNS)+"\n")
 	conf_file.write("miniPort : "+str(min_port)+"\n")
 	conf_file.write("MaxPort : "+str(max_port)+"\n")
-	conf_file.write("AESKey : aeosiekrjeklkrj\n")
+	conf_file.write("AESKey : aeosiekrjeklkrjb\n")
 	conf_file.write("MyIP : "+str(connaitreIP())+"\n")
 	conf_file.write("Path : "+str(os.getcwd())+"\n")
 	if autostart == "0":
@@ -251,10 +251,10 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 	for ligne in lignes:
 		# On lit le file ligne par ligne et si on trouve le paramètre dans la ligne,
 		# on renvoie ce qui se trouva après
-		if ligne[:len(parametre)] == parametre:
+		if ligne[:len(parametre)] == parametre and ligne[len(parametre)+1:len(parametre)+2] == ":":
 			# On a trouvé ce que l'on cherchait
 			# Maintenant on enlève " : "
-			return ligne[len(parametre)+3:]
+			return ligne[len(parametre)+3:-1]
 
 def afficherLogo():
 	print("")
@@ -267,7 +267,7 @@ def afficherLogo():
 	print("")
 	print("")
 
-def connectionClient(ip, port):
+def connectionClient(ip, port, verify = 1):
 	ipPort = str(ip) + ":" + str(port)
 	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
 	if reg.match(ipPort):
@@ -275,11 +275,19 @@ def connectionClient(ip, port):
 			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			connexion_avec_serveur.connect((ip, int(port)))
 		except ConnectionRefusedError as e:
-			logs.addLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+			logs.addLogs("INFO : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
 		except ConnectionResetError as e:
+			logs.addLogs("INFO : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
+		except OSError as e:
 			logs.addLogs("ERROR : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
 		else:
 			return connexion_avec_serveur
+	if verify == 1:
+		# On ajoute le noeud dans la liste des noeuds Hors Connection s'il n'y est pas déjà
+		# (Mais on ne l'incrémente pas s'il l'est déjà)
+		IppeerPort = ip+":"+port
+		BDD.ajouterEntree("NoeudsHorsCo", IppeerPort)
+		BDD.supprEntree("Noeuds", IppeerPort)
 	return "=cmd ERROR"
 
 def createCipherAES(key):

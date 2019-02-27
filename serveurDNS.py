@@ -21,19 +21,6 @@ import threading
 from loader import loader
 
 
-status = loader("The DNS service start")
-status.start()
-
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ALLUMER")
-fExtW.close()
-
-host = '127.0.0.1'
-port = int(autresFonctions.readConfFile("DNSPort"))
-
-logs.addLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
-cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
-
 class ClientThread(threading.Thread):
 	def __init__(self, ip, port, clientsocket):
 		threading.Thread.__init__(self)
@@ -150,46 +137,82 @@ class ClientThread(threading.Thread):
 		status.stop()
 		status.join()
 
-try:
-	try:
-		tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		tcpsock.bind((host,port))
-	except OSError as e:
-		logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
-		logs.addLogs("Stop everything and restart after...")
+
+class ServDNS(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.serveur_lance = True
+
+	def run(self):
+		status = loader("The DNS service start")
+		status.start()
 		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
+		fExtW.write("ALLUMER")
 		fExtW.close()
-		time.sleep(15)
-		logs.addLogs("Try to restart...")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
-	else:
-		serveur_lance = True
-		status.stop()
-		status.join()
-		while serveur_lance:
-			tcpsock.listen(10)
-			(clientsocket, (ip, port)) = tcpsock.accept()
-			newthread = ClientThread(ip, port, clientsocket)
-			newthread.start()
-			# Vérifier si WTP a recu une demande d'extinction
-			fExt = open(".extinctionWTP", "r")
-			contenu = fExt.read()
-			fExt.close()
-			if contenu == "ETEINDRE":
-				# On doit éteindre WTP.
-				serveur_lance = False
-			elif contenu != "ALLUMER":
+		host = '127.0.0.1'
+		port = int(autresFonctions.readConfFile("DNSPort"))
+		logs.addLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
+		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		try:
+			try:
+				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+				tcpsock.bind((host,port))
+				tcpsock.settimeout(5)
+			except OSError as e:
+				logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
+				logs.addLogs("Stop everything and restart after...")
 				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ALLUMER")
+				fExtW.write("ETEINDRE")
 				fExtW.close()
-except KeyboardInterrupt:
-	print(" pressed: Shutting down ...")
-	print("")
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ETEINDRE")
-fExtW.close()
-logs.addLogs("INFO : The DNS service has been stoped successfully.")
+				time.sleep(15)
+				logs.addLogs("Try to restart...")
+				fExtW = open(".extinctionWTP", "w")
+				fExtW.write("ETEINDRE")
+				fExtW.close()
+			else:
+				status.stop()
+				status.join()
+				while self.serveur_lance:
+					try:
+						tcpsock.listen(10)
+						(clientsocket, (ip, port)) = tcpsock.accept()
+					except socket.timeout:
+						fExt = open(".extinctionWTP", "r")
+						contenu = fExt.read()
+						fExt.close()
+						if contenu == "ETEINDRE":
+							# On doit éteindre WTP.
+							self.serveur_lance = False
+						elif contenu != "ALLUMER":
+							fExtW = open(".extinctionWTP", "w")
+							fExtW.write("ALLUMER")
+							fExtW.close()
+					except OSError:
+						# Le port est déjà pris, impossible de se connecter
+						logs.addLogs("ERROR : The dns service failed to start because the port is already taken. The dns service will stop. If problems persist, restart your machine")
+						self.stop()
+					else:
+						newthread = ClientThread(ip, port, clientsocket)
+						newthread.start()
+						# Vérifier si WTP a recu une demande d'extinction
+						fExt = open(".extinctionWTP", "r")
+						contenu = fExt.read()
+						fExt.close()
+						if contenu == "ETEINDRE":
+							# On doit éteindre WTP.
+							self.serveur_lance = False
+						elif contenu != "ALLUMER":
+							fExtW = open(".extinctionWTP", "w")
+							fExtW.write("ALLUMER")
+							fExtW.close()
+		except KeyboardInterrupt:
+			print(" pressed: Shutting down ...")
+			print("")
+		fExtW = open(".extinctionWTP", "w")
+		fExtW.write("ETEINDRE")
+		fExtW.close()
+		logs.addLogs("INFO : The DNS service has been stoped successfully.")
+
+	def stop(self):
+		self.serveur_lance = False
