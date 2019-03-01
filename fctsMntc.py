@@ -88,7 +88,7 @@ def verifNoeudHS():
 			rcvData = c.recv(1024)
 			rcvData = rcvData.decode()
 			if rcvData == '=cmd Present':
-				# C'est bon, le noeud est connecté au reseau, 
+				# C'est bon, le noeud est connecté au reseau,
 				# on l'ajoute à la table normale et on le supprime de la table des noeuds HS
 				BDD.ajouterEntree("Noeuds", IppeerPort)
 				BDD.supprEntree("NoeudsHorsCo", IppeerPort)

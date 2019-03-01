@@ -1,13 +1,10 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import select
-import sys
 import os
 import os.path
 import logs
 import zipfile
-import time
 import hashlib
 from urllib.request import *
 
@@ -41,7 +38,7 @@ def verifMAJ(force = 0):
 		# Le téléchargement des nouvelles sources est terminé
 		# Extraction dans .MAJ/version Ex : .MAJ/0.0.1/
 		# Vérifier si le dossier .MAJ/version existe, sinon le créer
-		try: 
+		try:
 			os.makedirs(".MAJ/"+latest)
 		except OSError:
 			if not os.path.isdir(".MAJ/"+latest):
@@ -71,7 +68,6 @@ def verifMAJ(force = 0):
 		logs.addLogs("INFO : Pas de mise à jour disponible")
 
 def verifSources():
-	i = 0
 	files = [ f for f in os.listdir('.') if os.path.isfile(os.path.join('.',f)) ]
 	for en_cours in files:
 		class AppURLopener(FancyURLopener):

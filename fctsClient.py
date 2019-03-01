@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*-coding:Utf-8 -*
 
-import socket
 import autresFonctions
 import echangeNoeuds
 import echangeFichiers

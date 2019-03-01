@@ -2,13 +2,11 @@
 # -*- coding:utf-8 -*-
 
 import socket
-import sys
 import os
 import math
 import hashlib
 import logs
 import BDD
-import autresFonctions
 from Crypto import Random
 from Crypto.Cipher import AES
 import re
@@ -66,10 +64,10 @@ def UploadFichier(fileName, IppeerPort):
 					deplacementFichier = 0
 					while num < nbPaquets:
 						fich.seek(deplacementFichier, 0) # on se deplace par rapport au numero de caractere (de 1024 a 1024 octets)
-						donnees = fich.read(1024) # Lecture du file en 1024 octets   
+						donnees = fich.read(1024) # Lecture du file en 1024 octets 
 						c.send(donnees) # Envoi du file par paquet de 1024 octets
 						num = num + 1
-						deplacementFichier = deplacementFichier+1024   
+						deplacementFichier = deplacementFichier + 1024
 				else:
 					#Le file peut être envoyé en une seule fois
 					fich = open(pathFichier, "rb")
@@ -94,7 +92,7 @@ def DownloadFichier(IpPortReceveur):
 	error = 0
 	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})$")
 	if reg.match(IpPortReceveur): # Si ipport est un ip:port
-		try: 
+		try:
 			os.makedirs("HOSTEDFILES")
 		except OSError:
 			if not os.path.isdir("HOSTEDFILES"):
@@ -124,7 +122,7 @@ def DownloadFichier(IpPortReceveur):
 				cmdRecu = cmdRecu.replace("=cmd NomFichierUpload ", "")
 				cmd = cmdRecu.split(' Taille ')
 				cmdFSize = int(cmd[1])
-				# Et voilà, on a : 
+				# Et voilà, on a :
 				# Le nom du file : cmd[0]
 				# La taille du file : cmdFSize
 				# On envoi un paquet pour prévenir le noeud que l'on est pret
@@ -138,7 +136,7 @@ def DownloadFichier(IpPortReceveur):
 				f = open(pathFichier, "w")
 				f.write("")
 				f.close()
-				# On ouvre le file vide en mode append et binaire 
+				# On ouvre le file vide en mode append et binaire
 				# (donc les données n'ont pas besoin d'êtres converties et elles seront ajoutées à la fin du file)
 				f = open(pathFichier, "ab")
 				if cmdFSize > 1024:
