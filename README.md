@@ -1,6 +1,8 @@
 # WTP
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/93da357b2b304bb5adbca20de80798c5)](https://app.codacy.com/app/torzivalds/WTP?utm_source=github.com&utm_medium=referral&utm_content=Torzivalds/WTP&utm_campaign=Badge_Grade_Dashboard)
+[![CodeFactor](https://www.codefactor.io/repository/github/torzivalds/wtp/badge)](https://www.codefactor.io/repository/github/torzivalds/wtp)
+
 
 Web Transfer Protocol [IN PROGRESS]
 
