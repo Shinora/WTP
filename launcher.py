@@ -22,6 +22,9 @@ from maintenance import Maintenance
 from parser import Parser
 from serveurDNS import ServDNS
 from vpn import ServVPN
+from bridge import Bridge
+import config
+from clientDNS import DNSConfig
 
 
 logs.addLogs("\n\n\n")
@@ -41,16 +44,15 @@ try:
 		pass
 except IOError:
 	# Le file n'existe pas, on lance le créateur
-	autresFonctions.fillConfFile()
+	config.fillConfFile()
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5555", "Parser")
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5556")
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5557")
 
 host = '127.0.0.1'
-port = int(autresFonctions.readConfFile("defaultPort"))
+port = int(config.readConfFile("defaultPort"))
 
 class ClientThread(threading.Thread):
-
 	def __init__(self, ip, port, clientsocket):
 		threading.Thread.__init__(self)
 		self.ip = ip
@@ -58,7 +60,7 @@ class ClientThread(threading.Thread):
 		self.clientsocket = clientsocket
 	
 	def run(self): 
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		rcvCmd = self.clientsocket.recv(1024)
 		rcvCmd = rcvCmd.decode()
 		# Maintenant, vérifions la demande du client.
@@ -94,7 +96,7 @@ class ClientThread(threading.Thread):
 				# Dirriger vers la fonction EnvoiNoeuds()
 				# Le noeud distant a demandé les noeuds, on lui envoi !
 				# On trouve le premier port qui peut être attribué
-				IppeerPort = "127.0.0.1:" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("miniPort"))))
+				IppeerPort = "127.0.0.1:" + str(autresFonctions.portLibre(int(config.readConfFile("miniPort"))))
 				sendCmd = IppeerPort # On envoie au demandeur l'adresse à contacter
 				self.clientsocket.send(sendCmd.encode())
 				echangeNoeuds.EnvoiNoeuds(IppeerPort)
@@ -132,7 +134,7 @@ class ClientThread(threading.Thread):
 				self.clientsocket.send(sendCmd.encode())
 			elif rcvCmd[:11] == "=cmd status":
 				# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
-				if(autresFonctions.readConfFile("Parser") == "Oui"):
+				if(config.readConfFile("Parser") == "Oui"):
 					sendCmd = "=cmd Parser"
 					self.clientsocket.send(sendCmd.encode())
 				else:
@@ -143,7 +145,7 @@ class ClientThread(threading.Thread):
 				# Un nouveau file est envoyé sur le réseau
 				fileName = rcvCmd[25:]
 				ipport = rcvCmd[rcvCmd.find(" ip ")+4:]
-				if(autresFonctions.readConfFile("Parser") == "Oui"):
+				if(config.readConfFile("Parser") == "Oui"):
 					# On prend en charge l'import de files,
 					# On l'ajoute à la base de données et on le télécharge
 					BDD.ajouterEntree("FichiersExt", fileName, ipport)
@@ -162,7 +164,7 @@ class ClientThread(threading.Thread):
 				# =cmd newPeerNetwork ip ******
 				# Un nouveau peer est envoyé sur le réseau
 				ipport = rcvCmd[23:]
-				if(autresFonctions.readConfFile("Parser") == "True"):
+				if(config.readConfFile("Parser") == "True"):
 					# On prend en charge l'ajout de peers
 					# On l'ajoute à la base de données
 					BDD.ajouterEntree("Noeuds", ipport)
@@ -181,6 +183,26 @@ class ClientThread(threading.Thread):
 			status.stop()
 			status.join()
 
+class ServeurThread(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.serveur_lance = True
+	
+	def run(self): 
+		while self.serveur_lance:
+			tcpsock.listen(10)
+			tcpsock.settimeout(5)
+			try:
+				(clientsocket, (ip, port)) = tcpsock.accept()
+			except socket.timeout:
+				break
+			newthread = ClientThread(ip, port, clientsocket)
+			newthread.start()
+
+	def stop(self):
+		self.serveur_lance = False
+
+
 try:
 	try:
 		tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -189,31 +211,26 @@ try:
 		serveur_lance = True
 	except OSError as e:
 		logs.addLogs("ERROR : In launcher.py : "+str(e))
-		logs.addLogs("Stop everything and restart after...")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
-		time.sleep(15)
-		logs.addLogs("Try to restart...")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
+		logs.addLogs("INFO : Stop everything and restart after...")
+		os.popen("python3 reload.py", 'r')
 	else:
 		# On lance les programmes externes
 		ThrdMntc = Maintenance()
 		ThrdMntc.start()
-		if(str(autresFonctions.readConfFile("Parser")) == "True"):
+		if(str(config.readConfFile("Parser")) == "True"):
 			# Le noeud est un parseur, on lance la fonction.
 			ThrdParser = Parser()
 			ThrdParser.start()
-		if(str(autresFonctions.readConfFile("DNS")) == "True"):
+		if(str(config.readConfFile("DNS")) == "True"):
 			# Le noeud est un DNS, on lance la fonction.
 			ThrdDNS = ServDNS()
 			ThrdDNS.start()
-		if(str(autresFonctions.readConfFile("VPN")) == "True"):
+		if(str(config.readConfFile("VPN")) == "True"):
 			# Le noeud est un VPN, on lance la fonction.
 			ThrdVPN = ServVPN()
 			ThrdVPN.start()
+		#ThrdBrd = Bridge()
+		#ThrdBrd.start()
 		# On indique notre présence à quelques parseurs
 		tableau = BDD.aleatoire("Noeuds", "IP", 15, "Parser")
 		if isinstance(tableau, list) and tableau:
@@ -223,10 +240,10 @@ try:
 				ip = peerIP[:peerIP.find(":")]
 				port = peerIP[peerIP.find(":")+1:]
 				connNoeud = autresFonctions.connectionClient(ip, port)
-				cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+				cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 				if str(connNoeud) != "=cmd ERROR":
 					logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
-					request = "=cmd newPeerNetwork ip " + str(autresFonctions.readConfFile("MyIP")) + str(autresFonctions.readConfFile("defaultPort"))
+					request = "=cmd newPeerNetwork ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
 					request = request.encode()
 					connNoeud.send(request)
 					rcvCmd = connNoeud.recv(1024)
@@ -249,41 +266,81 @@ try:
 		status.join()
 		autresFonctions.afficherLogo()
 		logs.addLogs("INFO : WTP has started, he is now listening to the port " + str(port))
+		newServ = ServeurThread()
+		newServ.start()
+		serveur_lance = True
 		while serveur_lance:
-			tcpsock.listen(10)
-			(clientsocket, (ip, port)) = tcpsock.accept()
-			newthread = ClientThread(ip, port, clientsocket)
-			newthread.start()
-			# Vérifier si WTP a recu une demande d'extinction
-			fExt = open(".extinctionWTP", "r")
-			contenu = fExt.read()
-			fExt.close()
-			if contenu == "ETEINDRE":
-				# On doit éteindre WTP.
+			# Gérer les commandes utilisateur
+			userCmd = str(input())
+			if userCmd == "help":
+				# Afficher toutes les options
+				print("Here are the main functions:")
+				print("update		Check for updates")
+				print("stats 		Shows your peer statistics")
+				print("config 		Edit the configuration")
+				print("exit 		Stop WTP")
+				print("reload 		Restart WTP")
+				print("dns 			Edit the VPN configuration")
+			elif userCmd == "update":
+				# Vérifier les MAJ
+				#maj.verifMAJ()
+				#maj.verifSources()
+				print("Completed.")
+			elif userCmd == "stats":
+				# Affiche les statistiques
+				print("Number of peers in the database : " + str(BDD.compterStats("NbNoeuds")))
+				print("Number of special peers in the database : " + str(BDD.compterStats("NbSN")))
+				print("Number of external files in the database : " + str(BDD.compterStats("NbFichiersExt")))
+				print("Number of files on this hard drive : " + str(BDD.compterStats("NbFichiers")))
+				print("Size of all files : " + str(BDD.compterStats("PoidsFichiers")))
+				print("Number of peers lists sent : " + str(BDD.compterStats("NbEnvsLstNoeuds")))
+				print("Number of file lists sent : " + str(BDD.compterStats("NbEnvsLstFichiers")))
+				print("Number of external file lists sent : " + str(BDD.compterStats("NbEnvsLstFichiersExt")))
+				print("Number of files sent : " + str(BDD.compterStats("NbEnvsFichiers")))
+				print("Number of presence requests received : " + str(BDD.compterStats("NbPresence")))
+				print("Number of files received : " + str(BDD.compterStats("NbReceptFichiers")))
+			elif userCmd == "config":
+				# Modifier le fichier de configuration
+				config.modifConfig()
+			elif userCmd == "dns":
+				# Entrer dans le programme de configuration du DNS
+				thrdDNS = DNSConfig()
+				thrdDNS.start()
+				thrdDNS.join()
+			elif userCmd == "exit":
+				# On arrète WTP
+				print("Pro tip : You can also stop WTP at any time by pressing Ctrl + C.")
+				break
+			elif userCmd == "reload": # Ne fonctionne pas. Trouver une alternative à .extinctionWTP
+				os.popen("python3 reload.py", 'r')
 				serveur_lance = False
-			elif contenu != "ALLUMER":
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ALLUMER")
-				fExtW.close()
+			else:
+				print("Unknow request.")
+			print("") # Un saut de ligne entre chaque commande
 except KeyboardInterrupt:
-	status = loader("Shutting down ...")
-	status.start()
+	pass
+status = loader("Shutting down ...")
+status.start()
+newServ.stop()
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ETEINDRE")
 fExtW.close()
-if(str(autresFonctions.readConfFile("Parser")) == "True"):
+if(str(config.readConfFile("Parser")) == "True"):
 	# Le noeud est un parseur, on arrète le thread.
 	ThrdParser.stop()
 	ThrdParser.join()
-if(str(autresFonctions.readConfFile("DNS")) == "True"):
+if(str(config.readConfFile("DNS")) == "True"):
 	# Le noeud est un DNS, on arrète le thread.
 	ThrdDNS.stop()
 	ThrdDNS.join()
-if(str(autresFonctions.readConfFile("VPN")) == "True"):
+if(str(config.readConfFile("VPN")) == "True"):
 	# Le noeud est un VPN, on arrète le thread.
 	ThrdVPN.stop()
 	ThrdVPN.join()
 ThrdMntc.stop()
+# ThrdBrd.stop()
+newServ.join()
 ThrdMntc.join()
+# ThrdBrd.join()
 logs.addLogs("INFO : WTP has correctly stopped.")
 status.stop()

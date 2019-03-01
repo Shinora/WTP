@@ -8,6 +8,7 @@ import BDD
 import re
 from Crypto import Random
 from Crypto.Cipher import AES
+import config
 
 def demandeListeFichiers(IppeerPort):
 	# Fonction qui demande l'intégralité de la liste de files que contient le noeud.
@@ -19,7 +20,7 @@ def demandeListeFichiers(IppeerPort):
 		ip = IppeerPort[:IppeerPort.find(":")]
 		port = IppeerPort[IppeerPort.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:

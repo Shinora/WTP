@@ -10,6 +10,7 @@ import os
 from Crypto import Random
 from Crypto.Cipher import AES
 import base64
+import config
 
 def verifNoeud():
 	BDD.verifExistBDD()
@@ -189,10 +190,10 @@ def creerFichier():
 						ip = peerIP[:peerIP.find(":")]
 						port = peerIP[peerIP.find(":")+1:]
 						connNoeud = autresFonctions.connectionClient(ip, port)
-						cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+						cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 						if str(connNoeud) != "=cmd ERROR":
 							logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
-							request = "=cmd newFileNetwork name " + filename + " ip " + str(autresFonctions.readConfFile("MyIP")) + str(autresFonctions.readConfFile("defaultPort"))
+							request = "=cmd newFileNetwork name " + filename + " ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
 							request = request.encode()
 							connNoeud.send(request)
 							rcvCmd = connNoeud.recv(1024)

@@ -19,6 +19,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 import threading
 from loader import loader
+import config
 
 
 class ClientThread(threading.Thread):
@@ -131,7 +132,7 @@ class ClientThread(threading.Thread):
 			# On envoie le port par défaut du noeud
 			if rcvCmd != '':
 				logs.addLogs("ERROR : Unknown error (serveurDNS.py) : " + str(rcvCmd))
-				sendCmd = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("defaultPort"))
+				sendCmd = "=cmd ERROR DefaultPort "+str(config.readConfFile("defaultPort"))
 				sendCmd = sendCmd.encode()
 				self.clientsocket.send(sendCmd)
 		status.stop()
@@ -146,13 +147,10 @@ class ServDNS(threading.Thread):
 	def run(self):
 		status = loader("The DNS service start")
 		status.start()
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ALLUMER")
-		fExtW.close()
 		host = '127.0.0.1'
-		port = int(autresFonctions.readConfFile("DNSPort"))
+		port = int(config.readConfFile("DNSPort"))
 		logs.addLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		try:
 			try:
 				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -161,15 +159,8 @@ class ServDNS(threading.Thread):
 				tcpsock.settimeout(5)
 			except OSError as e:
 				logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
-				logs.addLogs("Stop everything and restart after...")
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ETEINDRE")
-				fExtW.close()
-				time.sleep(15)
-				logs.addLogs("Try to restart...")
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ETEINDRE")
-				fExtW.close()
+				logs.addLogs("INFO : Stop everything and restart after...")
+				os.popen("python3 reload.py", 'r')
 			else:
 				status.stop()
 				status.join()
@@ -178,16 +169,7 @@ class ServDNS(threading.Thread):
 						tcpsock.listen(10)
 						(clientsocket, (ip, port)) = tcpsock.accept()
 					except socket.timeout:
-						fExt = open(".extinctionWTP", "r")
-						contenu = fExt.read()
-						fExt.close()
-						if contenu == "ETEINDRE":
-							# On doit éteindre WTP.
-							self.serveur_lance = False
-						elif contenu != "ALLUMER":
-							fExtW = open(".extinctionWTP", "w")
-							fExtW.write("ALLUMER")
-							fExtW.close()
+						pass
 					except OSError:
 						# Le port est déjà pris, impossible de se connecter
 						logs.addLogs("ERROR : The dns service failed to start because the port is already taken. The dns service will stop. If problems persist, restart your machine")
@@ -195,23 +177,9 @@ class ServDNS(threading.Thread):
 					else:
 						newthread = ClientThread(ip, port, clientsocket)
 						newthread.start()
-						# Vérifier si WTP a recu une demande d'extinction
-						fExt = open(".extinctionWTP", "r")
-						contenu = fExt.read()
-						fExt.close()
-						if contenu == "ETEINDRE":
-							# On doit éteindre WTP.
-							self.serveur_lance = False
-						elif contenu != "ALLUMER":
-							fExtW = open(".extinctionWTP", "w")
-							fExtW.write("ALLUMER")
-							fExtW.close()
 		except KeyboardInterrupt:
 			print(" pressed: Shutting down ...")
 			print("")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
 		logs.addLogs("INFO : The DNS service has been stoped successfully.")
 
 	def stop(self):

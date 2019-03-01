@@ -7,6 +7,8 @@ import autresFonctions
 import logs
 from Crypto import Random
 from Crypto.Cipher import AES
+import sqlite3
+import config
 
 # Les fonctions ici servent à chercher des files sur le réseau
 
@@ -14,7 +16,32 @@ def searchFile(fileName):
 	# Fonction qui a pour but de chercher sur le réseau un file
 	# Il faut d'abord chercher dans la BDD, et si il n'y est pas on cherche plus spécifiquement
 	# IPpeerPort est la variable qui contient l'IP Port du noeud qui possède le file
-	IPpeerPort = BDD.searchFileBDD(fileName)
+	verifExistBDD()
+	IPpeerPort = ""
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	# On va chercher dans les files hébergés
+	try:
+		cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (fileName,))
+	except Exception as e:
+		logs.addLogs("ERROR : Problem with database (searchFile()):" + str(e))
+	rows = cursor.fetchall()
+	for row in rows:
+		boucle += 1
+		# Le file est hébergé par le noeud qui le cherche
+		ipPortIci = "127.0.0.1:"+str(config.readConfFile("defaultPort"))
+		IPpeerPort = ipPortIci
+	# Si le file n'a pas été trouvé
+	# Il faut chercher dans les files connus externes
+	try:
+		cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (fileName,))
+	except Exception as e:
+		logs.addLogs("ERROR : Problem with database (searchFile()):" + str(e))
+	else:
+		rows = cursor.fetchall()
+		for row in rows:
+			# Le file est hébergé par un noeud connu
+			IPpeerPort = str(row)
 	if IPpeerPort == "":
 		# Il faut demander aux noeuds que l'on connait
 		tblNoeuds = BDD.aleatoire("Noeuds", "IP", 10)
@@ -43,7 +70,7 @@ def searchFile(fileName):
 			# Maintenant on se connecte au noeud
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(peerIPActuel, peerPortActuel)
-			cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -66,7 +93,7 @@ def chercherFichier(fileName):
 	if retour != 0 and str(retour) != "None":
 		# Le noeud héberge le file demandé
 		# Donc on retourne son IP
-		return autresFonctions.connaitreIP()+":"+str(autresFonctions.readConfFile("defaultPort"))
+		return autresFonctions.connaitreIP()+":"+str(config.readConfFile("defaultPort"))
 	retour = BDD.chercherInfo("FichiersExt", fileName)
 	# ATTENTION ! Si le file n'est pas connu, 0 est retourné
 	return retour
@@ -85,7 +112,7 @@ def searchNDD(url):
 			port = int(noeud[noeud.find(":")+1:])
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-			cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:

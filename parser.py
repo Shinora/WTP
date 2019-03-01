@@ -17,9 +17,6 @@ class Parser(threading.Thread):
 		self.allume = True
 
 	def run(self):
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ALLUMER")
-		fExtW.close()
 		while self.allume:
 			BDD.verifExistBDD()
 			conn = sqlite3.connect('WTP.db')
@@ -44,17 +41,6 @@ class Parser(threading.Thread):
 					# tous les noeuds qu'il connait (=cmd DemandeListeNoeuds)
 					fctsClient.CmdDemandeListeNoeuds(host, port)
 			conn.close()
-			# Vérifier si WTP a recu une demande d'extinction
-			fExt = open(".extinctionWTP", "r")
-			contenu = fExt.read()
-			fExt.close()
-			if contenu == "ETEINDRE":
-				# On doit éteindre WTP.
-				self.allume = False
-			elif contenu != "ALLUMER":
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ALLUMER")
-				fExtW.close()
 
 	def stop(self):
 		self.allume = False

@@ -12,6 +12,7 @@ import sqlite3
 import autresFonctions
 from Crypto import Random
 from Crypto.Cipher import AES
+import config
 
 def addNDD(ipport, sha, ndd, password):
 	error = 0
@@ -20,7 +21,7 @@ def addNDD(ipport, sha, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -50,7 +51,7 @@ def addNoeudDNS(ipport, ipportNoeud):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -80,7 +81,7 @@ def modifNDD(ipport, ndd, adress, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -111,7 +112,7 @@ def supprNDD(ipport, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:

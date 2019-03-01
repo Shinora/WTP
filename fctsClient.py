@@ -10,11 +10,12 @@ import search
 import logs
 from Crypto import Random
 from Crypto.Cipher import AES
+import config
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
@@ -34,14 +35,14 @@ def CmdDemandeFichier(ip, port, file, special = "files"):
 	# L'IP et le port du noeud qui va envoyer le file (sous forme IP:PORT)
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
 		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
 		# Il faut trouver un port libre pour que le noeud donneur
 		# puisse se connecter à ce noeud sur le bon port
-		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(autresFonctions.portLibre(int(autresFonctions.readConfFile("miniPort"))))
+		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(autresFonctions.portLibre(int(config.readConfFile("miniPort"))))
 		sendCmd = "=cmd DemandeFichier  nom " + file
 		sendCmd += " ipPort " + newIPPort
 		sendCmd = sendCmd.encode()
@@ -74,7 +75,7 @@ def CmdDemandeListeNoeuds(ip, port):
 	sendCmd = "=cmd DemandeListeNoeuds"
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
@@ -93,7 +94,7 @@ def CmdDemandeListeFichiers(ip, port, ext = 0):
 		sendCmd = "=cmd DemandeListeFichiers"
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
@@ -109,7 +110,7 @@ def CmdDemandeStatut(ip, port):
 	error = 0
 	# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
@@ -133,7 +134,7 @@ def VPN(demande, ipPortVPN, ipPortExt):
 		ip = ipPortVPN[:ipPortVPN.find(":")]
 		port = ipPortVPN[ipPortVPN.find(":")+1:]
 		connNoeud = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connNoeud) == "=cmd ERROR":
 			error += 1
 		else:
@@ -174,7 +175,7 @@ def sayHello():
 	ip = ipport[:ipport.find(":")]
 	port = ipport[ipport.find(":")+1:]
 	connNoeud = autresFonctions.connectionClient(ip, port)
-	cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+	cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:

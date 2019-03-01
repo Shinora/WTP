@@ -129,31 +129,6 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 				logs.addLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
 	conn.close()
 
-def envNoeuds(nbreNoeuds):
-	# Fonction qui permet de lire un nombre de noeuds et de 
-	# ... renvoyer une chaine de type 88.189.108.233:12345
-	# Paramètre : Le nomnbre de noeuds à renvoyer
-	listeNoeuds = ""
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	datetimeAct24H = str(time.time()-86400)
-	datetime24H = datetimeAct24H[:datetimeAct24H.find(".")]
-	try:
-		cursor.execute("""SELECT IP FROM Noeuds WHERE DerSync > ? LIMIT ?""", (datetimeAct24H, nbreNoeuds))
-	except Exception as e:
-		logs.addLogs("ERROR : Problem with database (envNoeuds()):" + str(e))
-	rows = cursor.fetchall()
-	nbRes = 0
-	for row in rows:
-		if nbRes == 0:
-			listeNoeuds += row[0]
-		else:
-			listeNoeuds += "," + row[0]
-			nbRes += 1
-	conn.close()
-	return listeNoeuds
-
 def supprEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet de supprimer une entrée dans une table
 	verifExistBDD()
@@ -289,53 +264,6 @@ def compterStats(colonne):
 		conn.rollback()
 		logs.addLogs("ERROR : Problem with database (compterStats()):" + str(e))
 	conn.close()
-
-def searchFileBDD(fileName):
-	# Fonction qui a pour but de chercher dans la Base de données le noeud qui possède le file recherché
-	# Elle retourne l'IP du noeud qui a le file, sinon elle retourne une chaine vide
-	IPpeerPort = "" # L'adresse du noeud sera ici
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	# On va chercher dans les files hébergés
-	try:
-		cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (fileName,))
-	except Exception as e:
-		logs.addLogs("ERROR : Problem with database (searchFile()):" + str(e))
-	rows = cursor.fetchall()
-	for row in rows:
-		boucle += 1
-		# Le file est hébergé par le noeud qui le cherche
-		ipPortIci = "127.0.0.1:"+str(autresFonctions.readConfFile("defaultPort"))
-		return ipPortIci
-	# Si le file n'a pas été trouvé
-	# Il faut chercher dans les files connus externes
-	try:
-		cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (fileName,))
-	except Exception as e:
-		logs.addLogs("ERROR : Problem with database (searchFile()):" + str(e))
-	else:
-		rows = cursor.fetchall()
-		for row in rows:
-			# Le file est hébergé par un noeud connu
-			IPpeerPort = str(row)
-		return IPpeerPort
-
-def nbEntrees(nomTable):
-	# Fonction qui a pour seul but de compter toutes les entrées de la table
-	# Dont le nom a été passé en paramètres
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT COUNT(*) FROM ?""", (nomTable,))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("ERROR : Problem with database (nbEntrees()):" + str(e))
-	for row in cursor.fetchall():
-		conn.close()
-		return row
 
 def aleatoire(nomTable, entree, nbEntrees, fonction = ""):
 	# Fonction qui a pour but de renvoyer sour forme d'un tableau nbEntrees lignes

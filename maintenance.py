@@ -56,9 +56,6 @@ class Maintenance(threading.Thread):
 		tmpsActuel = str(time.time())
 		point = tmpsActuel.find('.')
 		tmpsAct = int(tmpsActuel[0:point])
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ALLUMER")
-		fExtW.close()
 		# En cas de file vide, on attribue la valeur 0 pour ne pas avoir de problèmes
 		if derMtnc == "":
 			derMtnc = 0
@@ -95,24 +92,13 @@ class Maintenance(threading.Thread):
 				derMtnc5M = tmpsAct
 				fctsMntc.creerFichier()
 				logs.addLogs("INFO : Verification of new files completed successfully.")
-			for loop in range(50):
+			for loop in range(60):
 				if self.serveur_lance == True:
-					time.sleep(6) # Se reveille toutes les 5 minutes.
+					time.sleep(5) # Se reveille toutes les 5 minutes.
 				else:
 					break
 			tmpsActuel = str(time.time())
 			point = tmpsActuel.find('.')
 			tmpsAct = int(tmpsActuel[0:point])
-			# Vérifier si WTP a recu une demande d'extinction
-			fExt = open(".extinctionWTP", "r")
-			contenu = fExt.read()
-			fExt.close()
-			if contenu == "ETEINDRE":
-				# On doit éteindre WTP.
-				self.serveur_lance = False
-			elif contenu != "ALLUMER":
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ALLUMER")
-				fExtW.close()
 	def stop(self):
 		self.serveur_lance = False

@@ -10,6 +10,7 @@ import platform
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ETEINDRE")
 fExtW.close()
+time.sleep(10)
 # Et voilà, c'est tout éteint !
 
 # On l'allume en fonction de l'OS
@@ -33,5 +34,5 @@ while lance:
 	fExtW = open(".extinctionWTP", "r")
 	contenu = fExtW.read()
 	fExtW.close()
-	if contenu == "ETEINDRE":
+	if contenu != "ETEINDRE":
 		lance = False

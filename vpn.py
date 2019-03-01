@@ -19,6 +19,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from loader import loader
 import threading
+import config
 
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
@@ -90,7 +91,7 @@ class ClientThread(threading.Thread):
 			# On envoie le port par défaut du noeud
 			if rcvCmd != '':
 				logs.addLogs("ERROR : Unknown request (vpn.py) : " + str(rcvCmd))
-				sendCmd = "=cmd ERROR DefaultPort "+str(autresFonctions.readConfFile("defaultPort"))
+				sendCmd = "=cmd ERROR DefaultPort "+str(config.readConfFile("defaultPort"))
 				sendCmd = sendCmd.encode()
 				self.clientsocket.send(sendCmd)
 		status.stop()
@@ -106,12 +107,9 @@ class ServVPN(threading.Thread):
 		status = loader("The DNS service start")
 		status.start()
 		host = '127.0.0.1'
-		port = int(autresFonctions.readConfFile("VPNPort"))
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ALLUMER")
-		fExtW.close()
+		port = int(config.readConfFile("VPNPort"))
 		logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		try:
 			try:
 				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -120,15 +118,8 @@ class ServVPN(threading.Thread):
 				tcpsock.settimeout(5)
 			except OSError as e:
 				logs.addLogs("ERROR : In vpn.py : "+str(e))
-				logs.addLogs("Stop everything and restart after...")
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ETEINDRE")
-				fExtW.close()
-				time.sleep(15)
-				logs.addLogs("Try to restart...")
-				fExtW = open(".extinctionWTP", "w")
-				fExtW.write("ETEINDRE")
-				fExtW.close()
+				logs.addLogs("INFO : Stop everything and restart after...")
+				os.popen("python3 reload.py", 'r')
 			else:
 				logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
 				status.stop()
@@ -138,36 +129,13 @@ class ServVPN(threading.Thread):
 						tcpsock.listen(10)
 						(clientsocket, (ip, port)) = tcpsock.accept()
 					except socket.timeout:
-						fExt = open(".extinctionWTP", "r")
-						contenu = fExt.read()
-						fExt.close()
-						if contenu == "ETEINDRE":
-							# On doit éteindre WTP.
-							self.serveur_lance = False
-						elif contenu != "ALLUMER":
-							fExtW = open(".extinctionWTP", "w")
-							fExtW.write("ALLUMER")
-							fExtW.close()
+						pass
 					else:
 						newthread = ClientThread(ip, port, clientsocket)
 						newthread.start()
-						# Vérifier si WTP a recu une demande d'extinction
-						fExt = open(".extinctionWTP", "r")
-						contenu = fExt.read()
-						fExt.close()
-						if contenu == "ETEINDRE":
-							# On doit éteindre WTP.
-							self.serveur_lance = False
-						elif contenu != "ALLUMER":
-							fExtW = open(".extinctionWTP", "w")
-							fExtW.write("ALLUMER")
-							fExtW.close()
 		except KeyboardInterrupt:
 			print(" pressed: Shutting down ...")
 			print("")
-		fExtW = open(".extinctionWTP", "w")
-		fExtW.write("ETEINDRE")
-		fExtW.close()
 		logs.addLogs("INFO : WTP service has been stoped successfully.")
 
 	def stop(self):

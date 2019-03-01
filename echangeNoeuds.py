@@ -8,6 +8,8 @@ import BDD
 import re
 from Crypto import Random
 from Crypto.Cipher import AES
+import sqlite3
+import config
 
  ####################################################
 #                                                    #
@@ -40,7 +42,7 @@ def DemandeNoeuds(IppeerPort):
 		ip = IppeerPort[:IppeerPort.find(":")]
 		port = IppeerPort[IppeerPort.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -79,7 +81,6 @@ def DemandeNoeuds(IppeerPort):
 #########################
 
 def EnvoiNoeuds(IppeerPort):
-	#Départager l'IP et le port
 	error = 0
 	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
 	if reg.match(ipport): # Si ipport est un ip:port
@@ -93,24 +94,14 @@ def EnvoiNoeuds(IppeerPort):
 		mainConn.bind((host, int(port)))
 		mainConn.listen(5)
 		logs.addLogs("INFO : Listen on port " + str(port) + ". (EnvoiNoeuds())")
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		serveur_lance = True
 		clients_connectes = []
 		while serveur_lance:
-			# On va vérifier que de nouveaux clients ne demandent pas à se connecter
-			# Pour cela, on écoute la mainConn en lecture
-			# On attend maximum 50ms
 			connexions_demandees, wlist, xlist = select.select([mainConn], [], [], 0.05)
 			for connexion in connexions_demandees:
 				connexion_avec_client, infos_connexion = connexion.accept()
-				# On ajoute le socket connecté à la liste des clients
 				clients_connectes.append(connexion_avec_client)
-			# Maintenant, on écoute la liste des clients connectés
-			# Les clients renvoyés par select sont ceux devant être lus (recv)
-			# On attend là encore 50ms maximum
-			# On enferme l'appel à select.select dans un bloc try
-			# En effet, si la liste de clients connectés est vide, une exception
-			# Peut être levée
 			clients_a_lire = []
 			try:
 				clients_a_lire, wlist, xlist = select.select(clients_connectes,
@@ -118,17 +109,31 @@ def EnvoiNoeuds(IppeerPort):
 			except select.error:
 				pass
 			else:
-				# On parcourt la liste des clients à lire
 				for client in clients_a_lire:
-					# Client est de type socket
 					rcvCmd = client.recv(1024)
-					# Peut planter si le message contient des caractères spéciaux
 					rcvCmd = rcvCmd.decode()
 					if rcvCmd == "=cmd DonListeNoeuds 48":
 						#Oh, un noeud demande une liste de 48 noeuds sous la forme 000.000.000.000:00000 et séparés par une virgule
 						# On va chercher dans la BDD une liste de noeuds
 						sendCmd = b""
-						sendCmd = BDD.envNoeuds(48)
+						verifExistBDD()
+						conn = sqlite3.connect('WTP.db')
+						cursor = conn.cursor()
+						datetimeAct24H = str(time.time()-86400)
+						datetime24H = datetimeAct24H[:datetimeAct24H.find(".")]
+						try:
+							cursor.execute("""SELECT IP FROM Noeuds WHERE DerSync > ? LIMIT ?""", (datetimeAct24H, 48))
+						except Exception as e:
+							logs.addLogs("ERROR : Problem with database (envNoeuds()):" + str(e))
+						rows = cursor.fetchall()
+						nbRes = 0
+						for row in rows:
+							if nbRes == 0:
+								sendCmd += row[0]
+							else:
+								sendCmd += "," + row[0]
+								nbRes += 1
+						conn.close()
 						sendCmd = sendCmd.encode()
 						client.send(sendCmd)
 		logs.addLogs("INFO : Connections closed. (EnvoiNoeuds())")

@@ -10,9 +10,10 @@ import search
 import fctsClient
 from Crypto import Random
 from Crypto.Cipher import AES
+import config
 
 host = "127.0.0.1"
-port = int(autresFonctions.readConfFile("defaultPort"))
+port = int(config.readConfFile("defaultPort"))
 
 autresFonctions.afficherLogo()
 sendCmd = b""
@@ -44,7 +45,7 @@ while sendCmd != b"fin":
 	else:
 		error = 0
 		connexion_avec_serveur = autresFonctions.connectionClient(host, port)
-		cipher = autresFonctions.createCipherAES(autresFonctions.readConfFile("AESKey"))
+		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
