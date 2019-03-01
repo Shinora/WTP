@@ -3,17 +3,10 @@
 
 import socket
 import select
-import sys
 import os
 import os.path
 import logs
-import BDD
 import autresFonctions
-import echangeNoeuds
-import echangeFichiers
-import time
-import maj
-import search
 import dns
 from Crypto import Random
 from Crypto.Cipher import AES

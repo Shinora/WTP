@@ -24,9 +24,9 @@ import config
 
 ########################
 #
-# Ce code va permettre au noeud de demander de nouveaux 
+# Ce code va permettre au noeud de demander de nouveaux
 # noeuds à un autre Noeud (Super-Noeud (SN) ou Noeud "simple")
-# Il va envoyer une requete qui demande 48 noeuds. 
+# Il va envoyer une requete qui demande 48 noeuds.
 # (Le minimum d'IP+Ports qui peuvent tenir dans 1024 octets)
 # Puis il va analiser la réponse du SN
 # Et pour terminer, il va mettre le tout dans sa BDD
@@ -56,7 +56,7 @@ def DemandeNoeuds(IppeerPort):
 			ListeNoeuds = ListeNoeudsEnc.decode()
 			ConnectionDemande.close()
 			#Les 48 IP+port sont sous la forme 000.000.000.000:00000 et sont séparés par une virgule
-			#Départager les IP et les ports et envoi à la BDD par l'intermédiaire 
+			#Départager les IP et les ports et envoi à la BDD par l'intermédiaire
 			# de la fonction spécifique
 			for loop in range(ListeNoeuds.count(',')+1):
 				lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
@@ -122,7 +122,7 @@ def EnvoiNoeuds(IppeerPort):
 						datetimeAct24H = str(time.time()-86400)
 						datetime24H = datetimeAct24H[:datetimeAct24H.find(".")]
 						try:
-							cursor.execute("""SELECT IP FROM Noeuds WHERE DerSync > ? LIMIT ?""", (datetimeAct24H, 48))
+							cursor.execute("""SELECT IP FROM Noeuds WHERE DerSync > ? LIMIT ?""", (datetime24H, 48))
 						except Exception as e:
 							logs.addLogs("ERROR : Problem with database (envNoeuds()):" + str(e))
 						rows = cursor.fetchall()

@@ -2,9 +2,6 @@
 # -*- coding:utf-8 -*-
 
 import logs
-import sys
-import os
-import math
 import time
 import re
 import hashlib
@@ -45,7 +42,7 @@ def addNDD(ipport, sha, ndd, password):
 	return error
 
 def addNoeudDNS(ipport, ipportNoeud):
-	errror = 0
+	error = 0
 	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
 	if reg.match(ipport): # Si ipport est un ip:port
 		ip = ipport[:ipport.find(":")]
@@ -264,7 +261,6 @@ def supprEntree(nomTable, entree, entree1 = ""):
 				# et si c'est le cas on peut suprimer la ligne
 				cursor.execute("""SELECT PASSWORD FROM DNS WHERE NDD = ?""", (entree1,))
 				rows = cursor.fetchall()
-				nbRes = 0
 				passwordHash = hashlib.sha256(str(entree1).encode()).hexdigest()
 				for row in rows:
 					if row[0] == passwordHash:

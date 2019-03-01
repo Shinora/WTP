@@ -1,10 +1,7 @@
 #!/usr/bin/python
 # -*-coding:Utf-8 -*
 
-import socket
-import select
 import logs
-import BDD
 import re
 from Crypto import Random
 from Crypto.Cipher import AES

@@ -2,8 +2,6 @@
 # -*- coding:utf-8 -*-
 
 import socket
-import select
-import sys
 import sqlite3
 import logs
 import os
@@ -15,7 +13,6 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from urllib.request import *
 from os import get_terminal_size
-import config
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -85,7 +82,7 @@ def lsteNoeuds():
 	# IP+PORT des noeuds connus par ce noeud
 	# et qui sont dans la BDD, un par ligne
 	BDD.verifExistBDD()
-	try: 
+	try:
 		os.makedirs("HOSTEDFILES")
 	except OSError:
 		if not os.path.isdir("HOSTEDFILES"):

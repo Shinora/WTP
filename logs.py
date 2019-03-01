@@ -1,7 +1,6 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import os
 from datetime import datetime
 import requests
 
@@ -57,4 +56,4 @@ def rapportErreur(selection = " "):
 				megaStr += line
 	f.close()
 	data = {"text":megaStr}
-	r = requests.post("https://myrasp.fr/WTPStatic/rapport.php", data = data)
+	requests.post("https://myrasp.fr/WTPStatic/rapport.php", data = data)

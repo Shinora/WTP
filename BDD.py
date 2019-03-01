@@ -1,9 +1,7 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import sys
 import os
-import math
 import time
 import logs
 import sqlite3

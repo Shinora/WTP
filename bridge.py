@@ -1,8 +1,6 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import time
-import autresFonctions
 import re
 import search
 import fctsClient
@@ -48,7 +46,7 @@ class Bridge(threading.Thread):
 			elif requete[:15] == "=cmd VPN noeud " and requete.find(" request =cmd DemandeFichier") != -1:
 				# =cmd VPN noeud 127.0.0.1:5555 request =cmd DemandeFichier
 				ipport = requete[requete.find("=cmd VPN noeud ")+15:requete.find(" request ")]
-				request = requete[requete.find(" request ")+10:]
+				resultat = requete[requete.find(" request ")+10:]
 			else:
 				resultat = "=cmd CommandeInconnue :"+requete+":"
 			print(resultat)
