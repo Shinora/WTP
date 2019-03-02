@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import os
+import autresFonctions
 
 def fillConfFile():
 	# On vide le file avant de le remplir de nouveau
@@ -63,7 +64,8 @@ def fillConfFile():
 	conf_file.write("miniPort : "+str(min_port)+"\n")
 	conf_file.write("MaxPort : "+str(max_port)+"\n")
 	conf_file.write("AESKey : aeosiekrjeklkrjb\n")
-	conf_file.write("MyIP : "+str(connaitreIP())+"\n")
+	conf_file.write("MyIP : "+str(autresFonctions.connaitreIP())+"\n")
+	conf_file.write("Version : 0.0.9-4 Beta\n")
 	conf_file.write("Path : "+str(os.getcwd())+"\n")
 	if autostart == "0":
 		conf_file.write("Autostart : Oui\n")
@@ -94,10 +96,12 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 			pass
 	except IOError:
 		# Le file n'existe pas
+		print("LA")
 		fillConfFile()
 	if os.path.getsize("wtp.conf") < 80:
 		# Le file est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer
+		print("ICI")
 		fillConfFile()
 	f = open("wtp.conf",'r')
 	lignes  = f.readlines()
@@ -146,7 +150,7 @@ def modifConfig():
 	f.close()
 	print("Enter exit to exit this wizard")
 	while 1:
-		param = input("What would you want to change ?\n")
+		param = input("What would you want to change ? (exit for quit)\n")
 		if param == "exit":
 			break
 		current = str(readConfFile(param))

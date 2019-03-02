@@ -10,6 +10,9 @@ import autresFonctions
 from Crypto import Random
 from Crypto.Cipher import AES
 import config
+import BDD
+import echangeListes
+import fctsClient
 
 def addNDD(ipport, sha, ndd, password):
 	error = 0
@@ -126,177 +129,12 @@ def supprNDD(ipport, ndd, password):
 		error += 1
 	return error
 
-
-######################################################################
-##########################  BASE DE DONNÉES ##########################
-######################################################################
-
-def creerBase():
-	# Fonction qui a pour seul but de créer la base de données
-	# si le file la contenant n'existe pas.
-	conn = sqlite3.connect('WTPDNS.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""
-			CREATE TABLE IF NOT EXISTS DNS(
-				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-				SHA256 TEXT,
-				NDD TEXT,
-				PASSWORD TEXT,
-				DateAjout INTEGER
-			)
-		""")
-		conn.commit()
-		cursor.execute("""
-			CREATE TABLE IF NOT EXISTS DNSExt(
-				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-				IPPORT TEXT,
-				DateAjout TEXT
-			)
-		""")
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("DNS : ERROR : Problem with the database (creerBase()) :" + str(e))
-	conn.close()
-
-def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
-	# Fonction qui permet d'ajouter une entrée à une table de la base
-	verifExistBDD()
-	# Vérifier si l'entrée existe déjà dans la BDD.
-	# Si il existe on ne fait rien
-	# Si il n'existe pas, on l'ajoute
-	conn = sqlite3.connect('WTPDNS.db')
-	cursor = conn.cursor()
-	problem = 0
-	try:
-		if nomTable == "DNS":
-			cursor.execute("""SELECT id FROM DNS WHERE NDD = ?""", (entree,))
-		elif nomTable == "DNSExt":
-			cursor.execute("""SELECT id FROM DNSExt WHERE IPPORT = ?""", (entree,))
-		else:
-			logs.addLogs("DNS : ERROR: The table name was not recognized (ajouterEntree()) : " + str(nomTable))
-			problem += 1
-	except Exception as e:
-		logs.addLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
-		problem += 1
-	else:
-		nbRes = 0
-		rows = cursor.fetchall()
-		for row in rows:
-			nbRes += 1
-		if nbRes != 0:
-			# L'entrée existe déjà
-			problem = 5
-			if nbRes > 1:
-				logs.addLogs("DNS : ERROR: Entry is multiple times in the database. (ajouterEntree())")
-				problem = 7
-		else:
-			datetimeAct = str(time.time())
-			datetimeAct = datetimeAct[:datetimeAct.find(".")]
-			# En fonction de la table, il n'y a pas les mêmes champs à remplir
-			try:
-				if nomTable == "DNS":
-					if entree1 != "" and entree2 != "":
-						passwordHash = hashlib.sha256(str(entree2).encode()).hexdigest()
-						try:
-							cursor.execute("""INSERT INTO DNS (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (entree1, entree, passwordHash, datetimeAct))
-							conn.commit()
-						except Exception as e:
-							logs.addLogs("DNS : ERREUR :" + str(e))
-					else:
-						logs.addLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
-						problem += 1
-				elif nomTable == "DNSExt":
-					cursor.execute("""INSERT INTO DNSExt (IPPORT, DateAjout) VALUES (?, ?)""", (entree, datetimeAct))
-					conn.commit()
-			except Exception as e:
-				conn.rollback()
-				logs.addLogs("DNS : ERROR : Problem with the database (ajouterEntree()):" + str(e))
-				problem += 1
-	conn.close()
-	return problem
-
-def envLste(nomTable, nbreEntrees = 150):
-	# Fonction qui permet de lire un nombre d'entrées et de les renvoyer
-	# Paramètre : Le nomnbre de noeuds à renvoyer (par défaut 150)
-	listeEntrees = ""
-	verifExistBDD()
-	conn = sqlite3.connect('WTPDNS.db')
-	cursor = conn.cursor()
-	try:
-		if nomTable == "DNS":
-			cursor.execute("""SELECT SHA256, NDD FROM DNS LIMIT ? ORDER BY id DESC""", (nbreEntrees,))
-		elif nomTable == "DNSExt":
-			cursor.execute("""SELECT IPPORT FROM DNSExt LIMIT ? ORDER BY id DESC""", (nbreEntrees,))
-		else:
-			logs.addLogs("DNS : ERROR: The table name was not recognized (envLste()) : " + str(nomTable))
-	except Exception as e:
-		logs.addLogs("DNS : ERROR : Problem with the database (envLste()):" + str(e))
-	rows = cursor.fetchall()
-	nbRes = 0
-	for row in rows:
-		if nbRes == 0:
-			nbRes = 1
-			listeEntrees += row[0]
-			if nomTable == "DNS": # Sous la forme SHA256:NDD,SHA256:NDD sinon IPPORT,IPPORT
-				listeEntrees += ":" + row[1]
-		else:
-			listeEntrees += "," + row[0]
-			if nomTable == "DNS": # Sous la forme SHA256:NDD,SHA256:NDD sinon IPPORT,IPPORT
-				listeEntrees += ":" + row[1]
-	conn.close()
-	return listeEntrees
-
-def supprEntree(nomTable, entree, entree1 = ""):
-	# Fonction qui permet de supprimer une entrée dans une table
-	problem = 0
-	verifExistBDD()
-	conn = sqlite3.connect('WTPDNS.db')
-	cursor = conn.cursor()
-	try:
-		if nomTable == "DNS":
-			if entree1 != "":
-				# On vérifie que le mot de passe hashé est égal à celui de la base de données,
-				# et si c'est le cas on peut suprimer la ligne
-				cursor.execute("""SELECT PASSWORD FROM DNS WHERE NDD = ?""", (entree1,))
-				rows = cursor.fetchall()
-				passwordHash = hashlib.sha256(str(entree1).encode()).hexdigest()
-				for row in rows:
-					if row[0] == passwordHash:
-						cursor.execute("""DELETE FROM DNS WHERE NDD = ? AND PASSWORD = ?""", (entree, passwordHash))
-						conn.commit()
-					else:
-						# Le mot de passe n'est pas valide
-						problem = 5
-			else:
-				logs.addLogs("DNS : ERROR: There is a missing parameter to perform this action (supprEntree())")
-				problem += 1
-		elif nomTable == "DNSExt":
-			cursor.execute("""DELETE FROM DNSExt WHERE IPPORT = ?""", (entree,))
-			conn.commit()
-		else:
-			logs.addLogs("DNS : ERROR: The table name was not recognized (supprEntree()) : " + str(nomTable))
-			problem += 1
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("DNS : ERROR : Problem with the database (supprEntree()):" + str(e))
-		problem += 1
-	else:
-		if problem == 0:
-			logs.addLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
-		else:
-			logs.addLogs("DNS : ERROR : The " + entree + " entry of the " + nomTable + " table could not be deleted")
-	conn.close()
-	return problem
-
 def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 	# Fonction qui permet de supprimer une entrée dans une table
 	# Paramètres : Le nom de la table; le nouveau SHA256; le nom de domaine; le mot de passe non hashé
 	problem = 0
-	verifExistBDD()
-	conn = sqlite3.connect('WTPDNS.db')
+	BDD.verifExistBDD()
+	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
 		if nomTable == "DNS":
@@ -334,67 +172,58 @@ def modifEntree(nomTable, entree, entree1 = "", entree2 = ""):
 	conn.close()
 	return problem
 
-def verifExistBDD():
-	# Fonction qui permet d'alèger le code en évitant les duplications
-	try:
-		with open('WTPDNS.db'):
-			pass
-	except IOError:
-		logs.addLogs("DNS : ERROR: Base not found ... Creating a new database.")
-		creerBase()
-
-def searchSHA(ndd):
-	# Fonction qui a pour but de chercher le sha256 correspondant
-	# au nom de domaine passé en paramètres s'il existe
-	verifExistBDD()
-	problem = 0
-	sha256 = "0"
-	conn = sqlite3.connect('WTPDNS.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT SHA256 FROM DNS WHERE NDD = ?""", (ndd,))
-		rows = cursor.fetchall()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("DNS : ERROR : Problem with the database (searchSHA()):" + str(e))
-		problem += 1
-	else:
-		nbRes = 0
-		for row in rows:
-			nbRes += 1
-			if nbRes > 1:
-				# On trouve plusieurs fois le même nom de domaine dans la base
-				problem = 5
-				logs.addLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
-			sha256 = row[0]
-	conn.close()
-	if problem > 1:
-		return problem
-	if sha256 == "0":
-		return "INCONNU"
-	return sha256
-
-def majDNS():
+def majDNS(ipportNoeud = ""):
 	# Fonction pour noeud DNS qui permet de mettre à jour toute sa base avec un autre noeud
-	verifExistBDD()
+	BDD.verifExistBDD()
 	problem = 0
-	conn = sqlite3.connect('WTPDNS.db')
+	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT IPPORT FROM DNSExt ORDER BY RANDOM() LIMIT 1""")
-		rows = cursor.fetchall()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("DNS : ERROR : Problem with the database (majDNS()):" + str(e))
-		problem += 1
+	ipport = ""
+	if ipportNoeud == "":
+		try:
+			cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = DNS ORDER BY RANDOM() LIMIT 1""")
+			rows = cursor.fetchall()
+			conn.close()
+		except Exception as e:
+			conn.rollback()
+			logs.addLogs("DNS : ERROR : Problem with the database (majDNS()):" + str(e))
+			problem += 1
+		else:
+			for row in rows:
+				ipport = row[0]
 	else:
-		for row in rows:
-			ipport = row[0]
-		# Maintenant on va demander au noeud DNS distant d'envoyer toutes ses entrées DNS pour
-		# Que l'on puisse ensuite analyser, et ajouter/mettre à jour notre base
-	conn.close()
-	if problem > 1:
-		return problem
-	if sha256 == "0":
-		return "INCONNU"
-	return sha256
+		ipport = ipportNoeud
+		if ipport != "":
+			# Maintenant on va demander au noeud DNS distant d'envoyer toutes ses entrées DNS pour
+			# Que l'on puisse ensuite analyser, et ajouter/mettre à jour notre base
+			ip = ipport[:ipport.find(":")]
+			port = ipport[ipport.find(":")+1:]
+			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
+			if str(connexion_avec_serveur) != "=cmd ERROR":
+				sendCmd = b""
+				sendCmd = "=cmd DNS syncBase"
+				connexion_avec_serveur.send(sendCmd.encode())
+				rcvCmd = connexion_avec_serveur.recv(1024)
+				rcvCmd = rcvCmd.decode()
+				connexion_avec_serveur.close()
+				# Le noeud renvoie le nom du fichier à télécharger
+				# Et son IP:PortPrincipal, sinon =cmd ERROR
+				if rcvCmd != "=cmd ERROR":
+					# =cmd Filename ****** ipport ******
+					filename = rcvCmd[14:rcvCmd.find(" ipport ")]
+					ipport = rcvCmd[rcvCmd.find(" ipport ")+8:]
+					ip = ipport[:ipport.find(":")]
+					port = ipport[ipport.find(":")+1:]
+					error = fctsClient.CmdDemandeFichier(ip, port, filename)
+					if error == 0:
+						echangeListes.filetoTable(filename, "DNS")
+					else:
+						problem += 1
+				else:
+					problem += 1
+			else:
+				problem += 1
+		else:
+			problem += 1
+	return problem

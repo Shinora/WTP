@@ -65,6 +65,16 @@ def creerBase():
 			)
 		""")
 		conn.commit()
+		cursor.execute("""
+			CREATE TABLE IF NOT EXISTS DNS(
+				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+				SHA256 TEXT,
+				NDD TEXT,
+				PASSWORD TEXT,
+				DateAjout INTEGER
+			)
+		""")
+		conn.commit()
 		# On initialise les Statistiques
 		cursor.execute("""INSERT INTO Statistiques (NbNoeuds, NbSN, NbFichiersExt, NbFichiers, PoidsFichiers, NbEnvsLstNoeuds, NbEnvsLstFichiers, NbEnvsLstFichiersExt, NbEnvsFichiers, NbPresence, NbReceptFichiers) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)""")
 		conn.commit()
@@ -73,9 +83,10 @@ def creerBase():
 		logs.addLogs("ERROR : Problem with database (creerBase()) :" + str(e))
 	conn.close()
 
-def ajouterEntree(nomTable, entree, entree1 = ""):
+def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 	# Fonction qui permet d'ajouter une entrée à une table de la base
 	verifExistBDD()
+	error = 0
 	# Vérifier si l'entrée existe déjà dans la BDD.
 	# Si il existe on ne fait rien
 	# Si il n'existe pas, on l'ajoute
@@ -90,8 +101,11 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 			cursor.execute("""SELECT id FROM FichiersExt WHERE Nom = ? AND IP = ?""", (entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
 			cursor.execute("""SELECT id FROM NoeudsHorsCo WHERE IP = ?""", (entree,))
+		elif nomTable == "DNS":
+			cursor.execute("""SELECT id FROM DNS WHERE NDD = ?""", (entree,))
 	except Exception as e:
 		logs.addLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
+		error += 1
 	else:
 		nbRes = 0
 		rows = cursor.fetchall()
@@ -99,8 +113,10 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 			nbRes += 1
 		if nbRes != 0:
 			# L'entrée existe déjà
+			error = 5
 			if nbRes > 1:
 				logs.addLogs("ERROR : Entry presents several times in the database. (ajouterEntree())")
+				error = 7
 		else:
 			datetimeAct = str(time.time())
 			datetimeAct = datetimeAct[:datetimeAct.find(".")]
@@ -121,14 +137,27 @@ def ajouterEntree(nomTable, entree, entree1 = ""):
 					cursor.execute("""INSERT INTO FichiersExt (Nom, IP) VALUES (?, ?)""", (entree, entree1))
 				elif nomTable == "NoeudsHorsCo":
 					cursor.execute("""INSERT INTO NoeudsHorsCo (IP, NbVerifs) VALUES (?, 0)""", (entree,))
+				elif nomTable == "DNS":
+					if entree1 != "" and entree2 != "":
+						passwordHash = hashlib.sha256(str(entree2).encode()).hexdigest()
+						try:
+							cursor.execute("""INSERT INTO DNS (SHA256, NDD, PASSWORD, DateAjout) VALUES (?, ?, ?, ?)""", (entree1, entree, passwordHash, datetimeAct))
+							conn.commit()
+						except Exception as e:
+							logs.addLogs("DNS : ERREUR :" + str(e))
+					else:
+						logs.addLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
+						error += 1
 				conn.commit()
 			except Exception as e:
 				conn.rollback()
 				logs.addLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
 	conn.close()
+	return error
 
 def supprEntree(nomTable, entree, entree1 = ""):
 	# Fonction qui permet de supprimer une entrée dans une table
+	error = 0
 	verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
@@ -141,6 +170,23 @@ def supprEntree(nomTable, entree, entree1 = ""):
 			cursor.execute("""DELETE FROM FichiersExt WHERE Nom = ? AND IP = ?""", (entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
 			cursor.execute("""DELETE FROM NoeudsHorsCo WHERE IP =  ?""", (entree,))
+		elif nomTable == "DNS":
+			if entree1 != "":
+				# On vérifie que le mot de passe hashé est égal à celui de la base de données,
+				# et si c'est le cas on peut suprimer la ligne
+				cursor.execute("""SELECT PASSWORD FROM DNS WHERE NDD = ?""", (entree1,))
+				rows = cursor.fetchall()
+				passwordHash = hashlib.sha256(str(entree1).encode()).hexdigest()
+				for row in rows:
+					if row[0] == passwordHash:
+						cursor.execute("""DELETE FROM DNS WHERE NDD = ? AND PASSWORD = ?""", (entree, passwordHash))
+						conn.commit()
+					else:
+						# Le mot de passe n'est pas valide
+						error = 5
+			else:
+				logs.addLogs("DNS : ERROR: There is a missing parameter to perform this action (supprEntree())")
+				error += 1
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
@@ -160,7 +206,12 @@ def supprEntree(nomTable, entree, entree1 = ""):
 			logs.addLogs("INFO : The External file " + entree + " has been removed.")
 		elif nomTable == "NoeudsHorsCo":
 			logs.addLogs("INFO : The peer off " + entree + " has been permanently deleted from the database.")
+		elif problem == 0:
+			logs.addLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
+		else:
+			logs.addLogs("DNS : ERROR : The " + entree + " entry of the " + nomTable + " table could not be deleted")
 	conn.close()
+	return error
 
 def incrNbVerifsHS(ipPort):
 	# Vérifie que le noeud existe
@@ -292,26 +343,6 @@ def aleatoire(nomTable, entree, nbEntrees, fonction = ""):
 		# Ligne à activer seulement lorsque le réseau fonctionne
 	return tableau
 
-def chercherInfo(nomTable, info):
-	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		if nomTable == "Noeuds":
-			cursor.execute("""SELECT Fonction FROM Noeuds WHERE IP = ?""", (info,))
-		elif nomTable == "Fichiers":
-			cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (info,))
-		elif nomTable == "FichiersExt":
-			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (info,))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("ERROR : Problem with database (chercherInfo()):" + str(e))
-	for row in cursor.fetchall():
-		conn.close()
-		return row[0]
-
 def verifExistBDD():
 	# Fonction qui permet d'alèger le code en évitant les duplications
 	try:
@@ -320,22 +351,3 @@ def verifExistBDD():
 	except Exception:
 		logs.addLogs("ERROR : Base not found ... Creating a new base.")
 		creerBase()
-
-def searchNoeud(role, nbre = 10):
-	# Fonction qui  pour but de chercher 'nbre' noeuds ayant pour role 'role'
-	verifExistBDD()
-	conn = sqlite3.connect('WTP.db')
-	cursor = conn.cursor()
-	try:
-		cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = ? ORDER BY RANDOM() LIMIT ?""", (role, nbre))
-		conn.commit()
-	except Exception as e:
-		conn.rollback()
-		logs.addLogs("ERROR : Problem with database (aleatoire()):" + str(e))
-	rows = cursor.fetchall()
-	tableau = []
-	for row in rows:
-		tableau.append(row)
-		# On remplit le tableau avant de le retourner
-	conn.close()
-	return tableau

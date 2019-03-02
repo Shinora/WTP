@@ -110,36 +110,6 @@ def lsteNoeuds():
 	os.rename(fileDir, pathFichier)
 	return fileName
 
-def lireListeNoeuds(fileName):
-	# Fonction qui lit la liste de noeuds ligne par ligne et qui ajoute les noeuds dans la base de données
-	pathFichier = "HOSTEDFILES/"+fileName
-	f = open(pathFichier,'r')
-	lignes  = f.readlines()
-	f.close()
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	for ligne in lignes:
-		if reg.match(ligne):
-			# Si la ligne est une IP
-			BDD.ajouterEntree("Noeuds", ligne)
-	# Puis on supprime le file car on en n'a plus besoin
-	os.remove(pathFichier)
-	logs.addLogs("INFO : A file containing a peer list was parsed and deleted.")
-
-def lireListeFichiers(fileName):
-	# Fonction qui lit la liste de files ligne par ligne et qui ajoute les noeuds dans la base de données
-	# Chaque ligne est de type SHA256file.ext @ IP:Port
-	pathFichier = "HOSTEDFILES/"+fileName
-	f = open(pathFichier,'r')
-	lignes  = f.readlines()
-	f.close()
-	for ligne in lignes:
-		fileName = ligne[:ligne.find(" @ ")]
-		ipPort = ligne[ligne.find(" @ ")+3:]
-		BDD.ajouterEntree("FichiersExt", fileName, ipPort)
-	# Puis on supprime le file car on en n'a plus besoin
-	os.remove(pathFichier)
-	logs.addLogs("INFO : A file containing a list of files was parsed and deleted.")
-
 def connaitreIP():
 	# Fonction qui retourne l'IP externe du noeud qui lance cette fonction
 	class AppURLopener(FancyURLopener):
@@ -178,7 +148,7 @@ def connectionClient(ip, port, verify = 1):
 	if verify == 1:
 		# On ajoute le noeud dans la liste des noeuds Hors Connection s'il n'y est pas déjà
 		# (Mais on ne l'incrémente pas s'il l'est déjà)
-		IppeerPort = ip+":"+port
+		IppeerPort = ip+":"+str(port)
 		BDD.ajouterEntree("NoeudsHorsCo", IppeerPort)
 		BDD.supprEntree("Noeuds", IppeerPort)
 	return "=cmd ERROR"

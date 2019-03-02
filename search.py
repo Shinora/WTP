@@ -51,7 +51,7 @@ def searchFile(fileName):
 		tableauSuperNoeuds = []
 		for noeud in tblNoeuds:
 			# On verifie chaque noeud
-			fonctionNoeud = BDD.chercherInfo("Noeuds", noeud)
+			fonctionNoeud = chercherInfo("Noeuds", noeud)
 			if fonctionNoeud == "simple":
 				tableauNoeudsSimple.append(noeud)
 			if fonctionNoeud == "supernoeud" or fonctionNoeud == "DNS":
@@ -88,12 +88,12 @@ def searchFile(fileName):
 def chercherFichier(fileName):
 	# Fonction qui regarde dans sa BDD si il y a le file en question
 	retour = 0
-	retour = BDD.chercherInfo("Fichiers", fileName)
+	retour = chercherInfo("Fichiers", fileName)
 	if retour != 0 and str(retour) != "None":
 		# Le noeud héberge le file demandé
 		# Donc on retourne son IP
 		return autresFonctions.connaitreIP()+":"+str(config.readConfFile("defaultPort"))
-	retour = BDD.chercherInfo("FichiersExt", fileName)
+	retour = chercherInfo("FichiersExt", fileName)
 	# ATTENTION ! Si le file n'est pas connu, 0 est retourné
 	return retour
 
@@ -104,7 +104,7 @@ def searchNDD(url):
 	sha = ""
 	if len(url) <= 64:
 		# Ce n'est pas un nom de file, car il est plus petit qu'un SHA256
-		tableau = BDD.searchNoeud("DNS", 25)
+		tableau = searchNoeud("DNS", 25)
 		for noeud in tableau:
 			noeud = str(noeud[0])
 			ip = noeud[:noeud.find(":")]
@@ -154,3 +154,73 @@ def rechercheFichierEntiere(donnee):
 	if retour3 != "":
 		return str(retour3 + ";" + retour)
 	return "=cmd NOHOST"
+
+def searchNoeud(role, nbre = 10):
+	# Fonction qui  pour but de chercher 'nbre' noeuds ayant pour role 'role'
+	verifExistBDD()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = ? ORDER BY RANDOM() LIMIT ?""", (role, nbre))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.addLogs("ERROR : Problem with database (aleatoire()):" + str(e))
+	rows = cursor.fetchall()
+	tableau = []
+	for row in rows:
+		tableau.append(row)
+		# On remplit le tableau avant de le retourner
+	conn.close()
+	return tableau
+
+def chercherInfo(nomTable, info):
+	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
+	verifExistBDD()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		if nomTable == "Noeuds":
+			cursor.execute("""SELECT Fonction FROM Noeuds WHERE IP = ?""", (info,))
+		elif nomTable == "Fichiers":
+			cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (info,))
+		elif nomTable == "FichiersExt":
+			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (info,))
+		conn.commit()
+	except Exception as e:
+		conn.rollback()
+		logs.addLogs("ERROR : Problem with database (chercherInfo()):" + str(e))
+	for row in cursor.fetchall():
+		conn.close()
+		return row[0]
+
+def searchSHA(ndd):
+	# Fonction qui a pour but de chercher le sha256 correspondant
+	# au nom de domaine passé en paramètres s'il existe
+	verifExistBDD()
+	problem = 0
+	sha256 = "0"
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		cursor.execute("""SELECT SHA256 FROM DNS WHERE NDD = ?""", (ndd,))
+		rows = cursor.fetchall()
+	except Exception as e:
+		conn.rollback()
+		logs.addLogs("DNS : ERROR : Problem with the database (searchSHA()):" + str(e))
+		problem += 1
+	else:
+		nbRes = 0
+		for row in rows:
+			nbRes += 1
+			if nbRes > 1:
+				# On trouve plusieurs fois le même nom de domaine dans la base
+				problem = 5
+				logs.addLogs("DNS : ERROR: The domain name "+ ndd +" is present several times in the database")
+			sha256 = row[0]
+	conn.close()
+	if problem > 1:
+		return problem
+	if sha256 == "0":
+		return "INCONNU"
+	return sha256

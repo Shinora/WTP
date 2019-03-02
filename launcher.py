@@ -25,19 +25,15 @@ from bridge import Bridge
 import config
 from clientDNS import DNSConfig
 from thrdLnch import ThreadLauncher
+import cmdLauncher
 
 
 logs.addLogs("\n\n\n")
-status = loader("Start Up")
-status.start()
-
 fExtW = open(".extinctionWTP", "w")
 fExtW.write("ALLUMER")
 fExtW.close()
-
 # On vérifie que les sources sont correctes et pas modifiées
 #maj.verifSources()
-
 # On vérifie que le file de config existe
 try:
 	with open('wtp.conf'):
@@ -45,12 +41,14 @@ try:
 except IOError:
 	# Le file n'existe pas, on lance le créateur
 	config.fillConfFile()
+host = '127.0.0.1'
+port = int(config.readConfFile("defaultPort"))
+status = loader("Start Up") # Ici et pas avant car si le fichier n'existe pas
+status.start() # L'assistant est invisible.
+
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5555", "Parser")
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5556")
 BDD.ajouterEntree("Noeuds", "88.189.108.233:5557")
-
-host = '127.0.0.1'
-port = int(config.readConfFile("defaultPort"))
 
 class ServeurThread(threading.Thread):
 	def __init__(self):
@@ -137,79 +135,46 @@ try:
 		newServ = ServeurThread()
 		newServ.start()
 		serveur_lance = True
+		delAll = False
 		while serveur_lance:
 			# Gérer les commandes utilisateur
 			# La première fois, le wtp@PC:$ ne s'affiche pas...
 			userCmd = str(input("wtp@"+str(platform.uname()[1])+":$ "))
-			if userCmd == "help":
-				# Afficher toutes les options
-				print("Here are the main functions:")
-				print("update		Check for updates")
-				print("stats 		Shows your peer statistics")
-				print("config 		Edit the configuration")
-				print("exit 		Stop WTP")
-				print("reload 		Restart WTP")
-				print("dns 			Edit the VPN configuration")
-			elif userCmd == "update":
-				# Vérifier les MAJ
-				#maj.verifMAJ()
-				#maj.verifSources()
-				print("Done.")
-			elif userCmd == "stats":
-				# Affiche les statistiques
-				print("Number of peers in the database : " + str(BDD.compterStats("NbNoeuds")))
-				print("Number of special peers in the database : " + str(BDD.compterStats("NbSN")))
-				print("Number of external files in the database : " + str(BDD.compterStats("NbFichiersExt")))
-				print("Number of files on this hard drive : " + str(BDD.compterStats("NbFichiers")))
-				print("Size of all files : " + str(BDD.compterStats("PoidsFichiers")))
-				print("Number of peers lists sent : " + str(BDD.compterStats("NbEnvsLstNoeuds")))
-				print("Number of file lists sent : " + str(BDD.compterStats("NbEnvsLstFichiers")))
-				print("Number of external file lists sent : " + str(BDD.compterStats("NbEnvsLstFichiersExt")))
-				print("Number of files sent : " + str(BDD.compterStats("NbEnvsFichiers")))
-				print("Number of presence requests received : " + str(BDD.compterStats("NbPresence")))
-				print("Number of files received : " + str(BDD.compterStats("NbReceptFichiers")))
-			elif userCmd == "config":
-				# Modifier le fichier de configuration
-				config.modifConfig()
-			elif userCmd == "dns":
-				# Entrer dans le programme de configuration du DNS
-				thrdDNS = DNSConfig()
-				thrdDNS.start()
-				thrdDNS.join()
-			elif userCmd == "exit":
-				# On arrète WTP
-				print("Pro tip : You can also stop WTP at any time by pressing Ctrl + C.")
-				break
-			elif userCmd == "reload": # Ne fonctionne pas. Trouver une alternative à .extinctionWTP
-				os.popen("python3 reload.py", 'r')
+			retour = cmdLauncher.cmdLauncher(userCmd)
+			if retour == -1:
 				serveur_lance = False
-			else:
-				print("Unknow request.")
+			elif retour == -2:
+				serveur_lance = False
+				delAll = True
 			print("") # Un saut de ligne entre chaque commande
 except KeyboardInterrupt:
 	pass
 status = loader("Shutting down ...")
 status.start()
 newServ.stop()
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ETEINDRE")
-fExtW.close()
-if(str(config.readConfFile("Parser")) == "True"):
-	# Le noeud est un parseur, on arrète le thread.
+try:
 	ThrdParser.stop()
 	ThrdParser.join()
-if(str(config.readConfFile("DNS")) == "True"):
-	# Le noeud est un DNS, on arrète le thread.
+except NameError:
+	pass
+try:
 	ThrdDNS.stop()
 	ThrdDNS.join()
-if(str(config.readConfFile("VPN")) == "True"):
-	# Le noeud est un VPN, on arrète le thread.
+except NameError:
+	pass
+try:
 	ThrdVPN.stop()
 	ThrdVPN.join()
+except NameError:
+	pass
 ThrdMntc.stop()
 # ThrdBrd.stop()
 newServ.join()
 ThrdMntc.join()
 # ThrdBrd.join()
-logs.addLogs("INFO : WTP has correctly stopped.")
 status.stop()
+if delAll != True:
+	fExtW = open(".extinctionWTP", "w")
+	fExtW.write("ETEINDRE")
+	fExtW.close()
+	logs.addLogs("INFO : WTP has correctly stopped.")
