@@ -13,6 +13,8 @@ from Crypto.Cipher import AES
 import threading
 from loader import loader
 import config
+import search
+import echangeListes
 
 
 class ClientThread(threading.Thread):
@@ -98,7 +100,7 @@ class ClientThread(threading.Thread):
 				print(erreur)
 			elif request[:9] == "searchSHA":
 				# =cmd DNS searchSHA ndd ******
-				sortie = str(dns.searchSHA(request[14:]))
+				sortie = str(search.searchSHA(request[14:]))
 				if len(sortie) >= 64:
 					sendCmd = sortie
 				else:
@@ -112,6 +114,20 @@ class ClientThread(threading.Thread):
 				# On demande le statut du noeud (Simple, Parser, DNS, VPN, Main)
 				sendCmd = "=cmd DNS"
 				self.clientsocket.send(sendCmd.encode())
+			elif request == "syncBase":
+				# Le noeud demande à recevoir la BDD DNS de ce noeud
+				filename = echangeListes.tableToFile("DNS")
+				try:
+					filename = int(filename)
+				except ValueError:
+					sendCmd = "=cmd Filename " + str(filename) + "ipport " + config.readConfFile("MyIP") + ":" + config.readConfFile("defaultPort")
+				else:
+					sendCmd = "=cmd ERROR"
+				self.clientsocket.send(sendCmd.encode())
+			elif request == "DNS?":
+				sendCmd = "=cmd DNS"
+				sendCmd = sendCmd.encode()
+				self.clientsocket.send(sendCmd)
 			else:
 				sendCmd = "=cmd Inconnu"
 				sendCmd = sendCmd.encode()

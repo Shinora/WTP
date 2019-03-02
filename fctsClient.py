@@ -10,6 +10,7 @@ import logs
 from Crypto import Random
 from Crypto.Cipher import AES
 import config
+import echangeListes
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
@@ -27,7 +28,7 @@ def CmdDemandeNoeud(ip, port):
 		echangeNoeuds.DemandeNoeuds(str(rcvCmd))
 	return error
 
-def CmdDemandeFichier(ip, port, file, special = "files"):
+def CmdDemandeFichier(ip, port, file):
 	# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
 	# Dirriger vers la fonction DownloadFichier()
 	# On va chercher l'info qu'il nous faut :
@@ -50,18 +51,7 @@ def CmdDemandeFichier(ip, port, file, special = "files"):
 		connNoeud.close()
 		if rcvCmd.decode() == "=cmd OK":
 			# Le noeud distant a le file que l'on veut
-			if echangeFichiers.DownloadFichier(newIPPort) == 0:
-				if special == "noeuds":
-					# C'est un file qui contient une liste de noeuds
-					# Récuperer le nom du file
-					fileName = sendCmd[sendCmd.find(" nom ")+5:sendCmd.find(" ipPort ")]
-					autresFonctions.lireListeNoeuds(fileName)
-				if special == "files":
-					# C'est un file qui contient une liste de files
-					# Récuperer le nom du file
-					fileName = sendCmd[sendCmd.find(" nom ")+5:sendCmd.find(" ipPort ")]
-					autresFonctions.lireListeFichiers(fileName)
-			else:
+			if echangeFichiers.DownloadFichier(newIPPort) != 0:
 				error += 1
 				logs.addLogs("ERROR : Download failed")
 		else:
@@ -83,7 +73,8 @@ def CmdDemandeListeNoeuds(ip, port):
 		connNoeud.send(sendCmd)
 		fileName = connNoeud.recv(1024)
 		connNoeud.close()
-		CmdDemandeFichier(ip, port, fileName.decode(), "noeuds")
+		CmdDemandeFichier(ip, port, fileName.decode())
+		echangeListes.filetoTable(fileName.decode(), "Noeuds")
 	return error
 
 def CmdDemandeListeFichiers(ip, port, ext = 0):
@@ -102,7 +93,8 @@ def CmdDemandeListeFichiers(ip, port, ext = 0):
 		connNoeud.send(sendCmd)
 		fileName = connNoeud.recv(1024)
 		connNoeud.close()
-		CmdDemandeFichier(ip, port, fileName.decode(), "files")
+		CmdDemandeFichier(ip, port, fileName.decode())
+		echangeListes.filetoTable(filename.decode(), "Fichiers")
 	return error
 
 def CmdDemandeStatut(ip, port):
@@ -150,13 +142,13 @@ def VPN(demande, ipPortVPN, ipPortExt):
 				# =cmd DemandeFichier nom sha256.ext
 				CmdDemandeFichier(ip, port, request[24:])
 			elif request[:17] == "=cmd DemandeNoeud":
-				CmdDemandeNoeud(host, port)
+				CmdDemandeNoeud(ip, port)
 			elif request[:28] == "=cmd DemandeListeFichiersExt":
 				CmdDemandeListeFichiers(ip, port, 1)
 			elif request[:25] == "=cmd DemandeListeFichiers":
 				CmdDemandeListeFichiers(ip, port)
 			elif request[:23] == "=cmd DemandeListeNoeuds":
-				CmdDemandeListeNoeuds(host, port)
+				CmdDemandeListeNoeuds(ip, port)
 			elif request[:22] == "=cmd rechercher":
 				# =cmd rechercher nom SHA256.ext
 				search.rechercheFichierEntiere(sendCmd[20:])

@@ -2,33 +2,69 @@
 # -*-coding:Utf-8 -*
 
 import logs
-import re
-from Crypto import Random
-from Crypto.Cipher import AES
-import config
+import time
+import os
+import sqlite3
 
-def demandeListeFichiers(IppeerPort):
-	# Fonction qui demande l'intégralité de la liste de files que contient le noeud.
-	# Le noeud va chercher dans sa BDD, et faire un file temporel qui contiendra le nom des files.
-	# Il va l'envoyer, puis cette fonction va le rencevoir, l'avaniser puis l'envoyer dans la BDD
+def tableToFile(nomTable):
+	# cette fonction a pour but de lire une table et de l'écrire dans un fichier
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(IppeerPort): # Si ipport est un ip:port
-		ip = IppeerPort[:IppeerPort.find(":")]
-		port = IppeerPort[IppeerPort.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
-		if str(connexion_avec_serveur) == "=cmd ERROR":
-			error += 1
+	BDD.verifExistBDD()
+	conn = sqlite3.connect('WTP.db')
+	cursor = conn.cursor()
+	try:
+		if nomTable == "Noeuds":
+			cursor.execute("SELECT IP FROM Noeuds WHERE 1")
+			conn.commit()
+		elif nomTable == "Fichiers":
+			cursor.execute("SELECT Nom FROM Fichiers WHERE 1")
+			conn.commit()
+		elif nomTable == "FichiersExt":
+			cursor.execute("SELECT Nom FROM FichiersExt WHERE 1")
+			conn.commit()
+		elif nomTable == "DNS":
+			cursor.execute("SELECT SHA256, NDD, PASSWORD FROM DNS WHERE 1")
+			conn.commit()
 		else:
-			logs.addLogs("Connection with the peer established. (demandeListeFichiers())")
-			sendCmd = b""
-			sendCmd = "=cmd ListeIntegraleFichiers"
-			sendCmd = sendCmd.encode()
-			# On envoie le message
-			ConnectionDemande.send(sendCmd)
-			ListeNoeudsEnc = ConnectionDemande.recv(1024)
-			ListeNoeuds = ListeNoeudsEnc.decode()
-	else:
+			logs.addLogs("ERROR: The table name was not recognized (tableToFile()) : " + str(nomTable))
+			problem += 1
+	except Exception as e:
+		conn.rollback()
+		logs.addLogs("ERROR : Problem with database (aleatoire()):" + str(e))
 		error += 1
-	return error
+	rows = cursor.fetchall()
+	conn.close()
+	fileName = "TEMP"+str(time.time())
+	if error != 0:
+		return error
+	else:
+		f = open("HOSTEDFILES/"+fileName, "a")
+		for row in rows:
+			if nomTable != "DNS":
+				f.write(str(row[0])+"\n")
+			else:
+				f.write(str(row[0]) + "," + str(row[1]) + ", " + str(row[2]) + "\n")
+				# La virgule sans espace en premier est normal
+		f.close()
+		return fileName
+
+def filetoTable(fileName, nomTable):
+	# cette fonction a pour but de lire un fichier et de l'écrire dans une table
+	f = open("HOSTEDFILES/"+fileName, "r")
+	lines = f.readlines()
+	f.close()
+	for line in lines:
+		if nomTable == "Noeuds":
+			BDD.ajouterEntree("Noeud", line)
+		elif nomTable[:8] == "Fichiers":
+			BDD.ajouterEntree("FichierExt", line)
+		elif nomTable == "DNS":
+			# La virgule sans espace en premier est normal
+			SHA256 = line[:line.find(",")]
+			NDD = line[line.find(",")+1:line.find(", ")]
+			PASS = line[line.find(", ")+2:-1]
+			BDD.ajouterEntree("DNS", NDD, SHA256, PASS)
+		else:
+			logs.addLogs("ERROR: The table name was not recognized (filetoTable()) : " + str(nomTable))
+			problem += 1
+	print("UH")

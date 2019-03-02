@@ -13,7 +13,6 @@ import time
 import search
 from Crypto import Random
 from Crypto.Cipher import AES
-from loader import loader
 import threading
 import config
 
@@ -26,14 +25,12 @@ class ThreadLauncher(threading.Thread):
 		self.port = port
 		self.clientsocket = clientsocket
 	
-	def run(self): 
+	def run(self):
 		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		rcvCmd = self.clientsocket.recv(1024)
 		rcvCmd = rcvCmd.decode()
 		# Maintenant, vérifions la demande du client.
 		if rcvCmd != '':
-			status = loader("Connection with a peer")
-			status.start()
 			if rcvCmd[:19] == "=cmd DemandeFichier": # Fonction Client OPPÉRATIONNEL
 				# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
 				# Dirriger vers la fonction UploadFichier()
@@ -147,5 +144,3 @@ class ThreadLauncher(threading.Thread):
 				# Oups... Demande non-reconnue...
 				logs.addLogs("ERROR : Unknown request : " + str(rcvCmd))
 				self.clientsocket.send("=cmd UNKNOW".encode())
-			status.stop()
-			status.join()
