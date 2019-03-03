@@ -41,7 +41,7 @@ def lsteFichiers(filesExternes = 0):
 	# et qui sont dans la BDD, un par ligne
 	# Si filesExternes = 1, on doit faire la liste des focihers externes connus et non des files hébergés
 	BDD.verifExistBDD()
-	try: 
+	try:
 		os.makedirs("HOSTEDFILES")
 	except OSError:
 		if not os.path.isdir("HOSTEDFILES"):

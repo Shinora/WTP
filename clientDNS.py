@@ -3,8 +3,6 @@
 
 import dns
 import autresFonctions
-from Crypto import Random
-from Crypto.Cipher import AES
 import config
 import threading
 
@@ -13,7 +11,6 @@ class DNSConfig(threading.Thread):
 		threading.Thread.__init__(self)
 
 	def run(self):
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		print("Welcome in the DNS center !\nWhat do you want to do ?")
 		action = self.ask("1 : Add a domain name\n2 : Modify a domain name\n3 : Delete a domain name")
 		if action == 1:
@@ -60,4 +57,3 @@ class DNSConfig(threading.Thread):
 			else:
 				break
 		return result
-

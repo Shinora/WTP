@@ -1,9 +1,6 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-import socket
-import os
-import os.path
 import logs
 import BDD
 import autresFonctions
@@ -11,8 +8,6 @@ import echangeNoeuds
 import echangeFichiers
 import time
 import search
-from Crypto import Random
-from Crypto.Cipher import AES
 import threading
 import config
 
@@ -26,7 +21,6 @@ class ThreadLauncher(threading.Thread):
 		self.clientsocket = clientsocket
 	
 	def run(self):
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		rcvCmd = self.clientsocket.recv(1024)
 		rcvCmd = rcvCmd.decode()
 		# Maintenant, vérifions la demande du client.
@@ -119,7 +113,7 @@ class ThreadLauncher(threading.Thread):
 					port = ipport[ipport.find(":")+1:]
 					fctsClient.CmdDemandeFichier(ip, port, fileName)
 				else:
-					# On ne prend pas en charge l'import de files, 
+					# On ne prend pas en charge l'import de files,
 					# Mais on l'ajoute quand même à la base de données
 					BDD.ajouterEntree("FichiersExt", fileName, ipport)
 					sendCmd = "=cmd noParser"

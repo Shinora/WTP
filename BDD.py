@@ -280,7 +280,7 @@ def verifFichier(fileName):
 		conn.rollback()
 		logs.addLogs("ERROR : Problem with database (verifFichier()) : " + str(e))
 	FichierExiste = False
-	for row in rows:
+	if str(rows) != "[]":
 		FichierExiste = True
 	conn.close()
 	return FichierExiste

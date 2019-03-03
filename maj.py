@@ -28,7 +28,7 @@ def verifMAJ(force = 0):
 		# Le file zip a un nom de forme WTPversion.zip Ex : WTP0.0.1.zip
 		fileName = "WTP"+latest+".zip"
 		url = 'https://static.myrasp.fr/WTP/'+fileName
-		try: 
+		try:
 			os.makedirs(".MAJ")
 		except OSError:
 			if not os.path.isdir(".MAJ"):

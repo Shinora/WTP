@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 
 import socket
-import select
 import os
 import os.path
 import logs
@@ -159,7 +158,6 @@ class ServDNS(threading.Thread):
 		host = '127.0.0.1'
 		port = int(config.readConfFile("DNSPort"))
 		logs.addLogs("INFO : The DNS service has started, he is now listening to the port " + str(port))
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		try:
 			try:
 				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

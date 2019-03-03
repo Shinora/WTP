@@ -15,7 +15,7 @@ def searchFile(fileName):
 	# Fonction qui a pour but de chercher sur le réseau un file
 	# Il faut d'abord chercher dans la BDD, et si il n'y est pas on cherche plus spécifiquement
 	# IPpeerPort est la variable qui contient l'IP Port du noeud qui possède le file
-	verifExistBDD()
+	BDD.verifExistBDD()
 	IPpeerPort = ""
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
@@ -69,7 +69,6 @@ def searchFile(fileName):
 			# Maintenant on se connecte au noeud
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(peerIPActuel, peerPortActuel)
-			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -111,7 +110,6 @@ def searchNDD(url):
 			port = int(noeud[noeud.find(":")+1:])
 			error = 0
 			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -157,7 +155,7 @@ def rechercheFichierEntiere(donnee):
 
 def searchNoeud(role, nbre = 10):
 	# Fonction qui  pour but de chercher 'nbre' noeuds ayant pour role 'role'
-	verifExistBDD()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -176,7 +174,7 @@ def searchNoeud(role, nbre = 10):
 
 def chercherInfo(nomTable, info):
 	# Fonction qui retourne une information demandée dans la table demandée dans une entrée demandé
-	verifExistBDD()
+	BDD.verifExistBDD()
 	conn = sqlite3.connect('WTP.db')
 	cursor = conn.cursor()
 	try:
@@ -197,7 +195,7 @@ def chercherInfo(nomTable, info):
 def searchSHA(ndd):
 	# Fonction qui a pour but de chercher le sha256 correspondant
 	# au nom de domaine passé en paramètres s'il existe
-	verifExistBDD()
+	BDD.verifExistBDD()
 	problem = 0
 	sha256 = "0"
 	conn = sqlite3.connect('WTP.db')

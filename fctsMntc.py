@@ -7,9 +7,6 @@ import socket
 import hashlib
 import sqlite3
 import os
-from Crypto import Random
-from Crypto.Cipher import AES
-import base64
 import config
 
 def verifNoeud():
@@ -167,7 +164,7 @@ def creerFichier():
 				with open(file, "r", encoding="utf-8") as fluxLecture:
 					contenu = fluxLecture.read()
 					fluxLecture.close()
-			except:
+			except UnicodeDecodeError:
 				logs.addLogs("ERROR : The file is not supported : "+str(file))
 				os.remove(file)
 			else:
@@ -190,7 +187,6 @@ def creerFichier():
 						ip = peerIP[:peerIP.find(":")]
 						port = peerIP[peerIP.find(":")+1:]
 						connNoeud = autresFonctions.connectionClient(ip, port)
-						cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 						if str(connNoeud) != "=cmd ERROR":
 							logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
 							request = "=cmd newFileNetwork name " + filename + " ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
