@@ -7,8 +7,6 @@ import math
 import hashlib
 import logs
 import BDD
-from Crypto import Random
-from Crypto.Cipher import AES
 import re
 
  ####################################################
@@ -64,7 +62,7 @@ def UploadFichier(fileName, IppeerPort):
 					deplacementFichier = 0
 					while num < nbPaquets:
 						fich.seek(deplacementFichier, 0) # on se deplace par rapport au numero de caractere (de 1024 a 1024 octets)
-						donnees = fich.read(1024) # Lecture du file en 1024 octets 
+						donnees = fich.read(1024) # Lecture du file en 1024 octets
 						c.send(donnees) # Envoi du file par paquet de 1024 octets
 						num = num + 1
 						deplacementFichier = deplacementFichier + 1024

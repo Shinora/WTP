@@ -6,8 +6,6 @@ import select
 import logs
 import BDD
 import re
-from Crypto import Random
-from Crypto.Cipher import AES
 import sqlite3
 import config
 
@@ -42,7 +40,6 @@ def DemandeNoeuds(IppeerPort):
 		ip = IppeerPort[:IppeerPort.find(":")]
 		port = IppeerPort[IppeerPort.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -94,7 +91,6 @@ def EnvoiNoeuds(IppeerPort):
 		mainConn.bind((host, int(port)))
 		mainConn.listen(5)
 		logs.addLogs("INFO : Listen on port " + str(port) + ". (EnvoiNoeuds())")
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		serveur_lance = True
 		clients_connectes = []
 		while serveur_lance:

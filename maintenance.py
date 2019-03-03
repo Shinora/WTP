@@ -93,7 +93,7 @@ class Maintenance(threading.Thread):
 				fctsMntc.creerFichier()
 				logs.addLogs("INFO : Verification of new files completed successfully.")
 			for loop in range(60):
-				if self.serveur_lance == True:
+				if self.serveur_lance is True:
 					time.sleep(5) # Se reveille toutes les 5 minutes.
 				else:
 					break

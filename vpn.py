@@ -102,7 +102,6 @@ class ServVPN(threading.Thread):
 		host = '127.0.0.1'
 		port = int(config.readConfFile("VPNPort"))
 		logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		try:
 			try:
 				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -2,13 +2,10 @@
 # -*- coding:utf-8 -*-
 
 import logs
-import time
 import re
 import hashlib
 import sqlite3
 import autresFonctions
-from Crypto import Random
-from Crypto.Cipher import AES
 import config
 import BDD
 import echangeListes
@@ -21,7 +18,6 @@ def addNDD(ipport, sha, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -51,7 +47,6 @@ def addNoeudDNS(ipport, ipportNoeud):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -81,7 +76,6 @@ def modifNDD(ipport, ndd, adress, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -112,7 +106,6 @@ def supprNDD(ipport, ndd, password):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-		cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
@@ -181,7 +174,7 @@ def majDNS(ipportNoeud = ""):
 	ipport = ""
 	if ipportNoeud == "":
 		try:
-			cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = DNS ORDER BY RANDOM() LIMIT 1""")
+			cursor.execute("""SELECT IP FROM Noeuds WHERE Fonction = 'DNS' ORDER BY RANDOM() LIMIT 1""")
 			rows = cursor.fetchall()
 			conn.close()
 		except Exception as e:
@@ -199,7 +192,6 @@ def majDNS(ipportNoeud = ""):
 			ip = ipport[:ipport.find(":")]
 			port = ipport[ipport.find(":")+1:]
 			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
-			cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 			if str(connexion_avec_serveur) != "=cmd ERROR":
 				sendCmd = b""
 				sendCmd = "=cmd DNS syncBase"

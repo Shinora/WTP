@@ -8,13 +8,7 @@ import platform
 import logs
 import BDD
 import autresFonctions
-import echangeNoeuds
-import echangeFichiers
-import time
 import maj
-import search
-from Crypto import Random
-from Crypto.Cipher import AES
 from loader import loader
 import threading
 from maintenance import Maintenance
@@ -106,7 +100,6 @@ try:
 				ip = peerIP[:peerIP.find(":")]
 				port = peerIP[peerIP.find(":")+1:]
 				connNoeud = autresFonctions.connectionClient(ip, port)
-				cipher = autresFonctions.createCipherAES(config.readConfFile("AESKey"))
 				if str(connNoeud) != "=cmd ERROR":
 					logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
 					request = "=cmd newPeerNetwork ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
@@ -173,7 +166,7 @@ newServ.join()
 ThrdMntc.join()
 # ThrdBrd.join()
 status.stop()
-if delAll != True:
+if delAll is True:
 	fExtW = open(".extinctionWTP", "w")
 	fExtW.write("ETEINDRE")
 	fExtW.close()

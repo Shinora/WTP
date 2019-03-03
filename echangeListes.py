@@ -3,7 +3,6 @@
 
 import logs
 import time
-import os
 import sqlite3
 
 def tableToFile(nomTable):
@@ -37,16 +36,15 @@ def tableToFile(nomTable):
 	fileName = "TEMP"+str(time.time())
 	if error != 0:
 		return error
-	else:
-		f = open("HOSTEDFILES/"+fileName, "a")
-		for row in rows:
-			if nomTable != "DNS":
-				f.write(str(row[0])+"\n")
-			else:
-				f.write(str(row[0]) + "," + str(row[1]) + ", " + str(row[2]) + "\n")
-				# La virgule sans espace en premier est normal
-		f.close()
-		return fileName
+	f = open("HOSTEDFILES/"+fileName, "a")
+	for row in rows:
+		if nomTable != "DNS":
+			f.write(str(row[0])+"\n")
+		else:
+			f.write(str(row[0]) + "," + str(row[1]) + ", " + str(row[2]) + "\n")
+			# La virgule sans espace en premier est normal
+	f.close()
+	return fileName
 
 def filetoTable(fileName, nomTable):
 	# cette fonction a pour but de lire un fichier et de l'écrire dans une table
@@ -67,4 +65,3 @@ def filetoTable(fileName, nomTable):
 		else:
 			logs.addLogs("ERROR: The table name was not recognized (filetoTable()) : " + str(nomTable))
 			problem += 1
-	print("UH")

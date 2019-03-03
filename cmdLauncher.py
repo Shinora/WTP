@@ -13,8 +13,9 @@ from fctsMntc import creerFichier
 import shutil
 import logs
 import dns
-import re
 import autresFonctions
+import re
+import fctsClient
 
 
 def cmdLauncher(userCmd):
@@ -26,12 +27,12 @@ def cmdLauncher(userCmd):
 		print("stats 		Shows your peer statistics")
 		print("config 		Edit the configuration")
 		print("exit 		Stop WTP")
-		print("reload 		Restart WTP")
 		print("dns 		Edit the VPN configuration")
 		print("doc 		How to use wtp")
 		print("checkFiles 	Check the ADDFILES folder")
 		print("delAll 		Delete all : Config, DB, Files.")
 		print("majDNS		Update the DNS database")
+		print("client 		Use WTP in console")
 	elif userCmd == "update":
 		# Vérifier les MAJ
 		status = loader("Work in progress")
@@ -66,9 +67,6 @@ def cmdLauncher(userCmd):
 		# On arrète WTP
 		print("Pro tip : You can also stop WTP at any time by pressing Ctrl + C.")
 		return -1
-	elif userCmd == "reload": # Ne fonctionne pas. Trouver une alternative à .extinctionWTP
-		os.popen("python3 reload.py", 'r')
-		serveur_lance = False
 	elif userCmd == "doc":
 		# On affiche la documentation
 		print("Welcome to the WTP documentation.")
@@ -109,8 +107,7 @@ def cmdLauncher(userCmd):
 			status.stop()
 			status.join()
 			return -1
-		else:
-			print("You scared us!\nFortunately, you have not passed the dark side of the force!")
+		print("You scared us!\nFortunately, you have not passed the dark side of the force!")
 	elif userCmd == "majDNS":
 		print("You want to update the DNS database.\nIf you are crazy, you can enter crazy to update with a random peer.")
 		ipport = str(input("With which DNS do you want to update ?\n>> "))
@@ -146,6 +143,59 @@ def cmdLauncher(userCmd):
 				print("You scared us!\nFortunately, you have not passed the dark side of the force!")
 		else:
 			print("It's not an ip:port")
+	elif userCmd == "client":
+		# Possibilité de faire des demandes en console
+		error = 0
+		sendCmd = ""
+		print("You can now write requests and send them to the peers you want.")
+		print("Exit this wizard and enter doc for more information.")
+		while sendCmd != "exit":
+			sendCmd = str(input("What is your request ? (exit for quit this wizard)\n>> "))
+			if sendCmd != "exit":
+				host = str(input("What is the IP of the peer that you want to contact ? > "))
+				try:
+					port = int(input("What is the Port of the peer that you want to contact ? > "))
+				except ValueError:
+					print("It isn't a port (between 1024 and 65535)")
+				else:
+					if sendCmd == "=cmd DemandeNoeud":
+						error += fctsClient.CmdDemandeNoeud(host, port)
+					elif sendCmd[:19] == "=cmd DemandeFichier":
+						# =cmd DemandeFichier nom sha256.ext
+						error += fctsClient.CmdDemandeFichier(host, port, sendCmd[24:])
+					elif sendCmd == "=cmd DemandeListeNoeuds":
+						error += fctsClient.CmdDemandeListeNoeuds(host, port)
+					elif sendCmd == "=cmd DemandeListeFichiers":
+						error += fctsClient.CmdDemandeListeFichiers(host, port)
+					elif sendCmd[:19] == "=cmd rechercher nom":
+						# =cmd rechercher nom SHA256.ext
+						sortie = search.rechercheFichierEntiere(sendCmd[20:])
+						ipport = sortie[:sortie.find(";")]
+						sha = sortie[sortie.find(";")+1:]
+						if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
+							# C'est un IPPort
+							# On envoi vers la fonction qui télécharge le file
+							ip = ipport[:ipport.find(":")]
+							port = int(ipport[ipport.find(":")+1:])
+							error += fctsClient.CmdDemandeFichier(host, port, sha)
+						else:
+							# C'est une erreur
+							print(sortie)
+							error += 1
+					else:
+						error = 0
+						connexion_avec_serveur = autresFonctions.connectionClient(host, port)
+						if str(connexion_avec_serveur) == "=cmd ERROR":
+							error += 1
+						else:
+							connexion_avec_serveur.send(sendCmd.encode())
+							rcvCmd = connexion_avec_serveur.recv(1024).decode()
+							connexion_avec_serveur.close()
+							print(rcvCmd)
+					if int(error) == 0:
+						print("Done.")
+					else:
+						print("An error occured. ("+str(error)+")")
 	else:
 		print("Unknow request.")
 	return 0
