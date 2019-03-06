@@ -9,7 +9,7 @@ import search
 from loader import loader
 import config
 from clientDNS import DNSConfig
-from fctsMntc import creerFichier
+import fctsMntc
 import shutil
 import logs
 import dns
@@ -29,7 +29,7 @@ def cmdLauncher(userCmd):
 		print("exit 		Stop WTP")
 		print("dns 		Edit the VPN configuration")
 		print("doc 		How to use wtp")
-		print("checkFiles 	Check the ADDFILES folder")
+		print("checkFiles 	Check the ADDFILES and HOSTEDFILES")
 		print("delAll 		Delete all : Config, DB, Files.")
 		print("majDNS		Update the DNS database")
 		print("client 		Use WTP in console")
@@ -85,7 +85,8 @@ def cmdLauncher(userCmd):
 		# On vérifie immédiatement dans ADDFILES
 		status = loader("Work in progress")
 		status.start()
-		creerFichier()
+		fctsMntc.creerFichier()
+		fctsMntc.checkIntruders()
 		status.stop()
 		status.join()
 		print("Done.")

@@ -8,6 +8,8 @@ import hashlib
 import sqlite3
 import os
 import config
+import shutil
+import time
 
 def verifNoeud():
 	BDD.verifExistBDD()
@@ -206,3 +208,45 @@ def creerFichier():
 				else:
 					# Une erreur s'est produite
 					logs.addLogs("ERROR : There is not enough IP in creerFichier() : "+str(tableau))
+
+def checkIntruders():
+	# Cette fonction a pour but de vérifier qu'il n'y a pas de fichiers
+	# Qui ne devrait pas l'être dans HOSTEDFILES, sinon ils sont supprimés
+	for file in os.listdir("HOSTEDFILES/"):
+		file = "HOSTEDFILES/"+file
+		if os.path.isdir(str(file)) == False:
+			# C'est un fichier, on vérifie qu'il existe dans la BDD
+			BDD.verifExistBDD()
+			conn = sqlite3.connect('WTP.db')
+			cursor = conn.cursor()
+			try:
+				cursor.execute("""SELECT ID FROM Fichiers WHERE Chemin = ?""", (file,))
+				conn.commit()
+			except Exception as e:
+				conn.rollback()
+				logs.addLogs("ERROR : Problem with database (checkIntruders()):" + str(e))
+				error += 1
+			rows = cursor.fetchall()
+			if str(rows) == "[]":
+				# Il n'existe pas, on le déplace vers ADDFILES
+				dest = "../ADDFILES/"+str(file[12:])
+				if file != dest:
+					if os.path.exists(dest) == False:
+						# Exception pour les fichiers temporels :
+						# On les supprime si ils ont plus de 24h
+						if str(file[12:16]) == "TEMP":
+							actTime = str(time.time())
+							if int(file[16:file.find(".")]) < int(actTime[:actTime.find(".")])-86400:
+								os.remove(file)
+								logs.addLogs("INFO : A temporary file has been deleted : "+str(file[12:]))
+						else:
+							try:
+								shutil.copyfile(file,dest)
+							except Exception as e:
+								logs.addLogs("ERROR : The file " + file + " could not be copied in checkIntruders : "+str(e))
+							else:
+								os.remove(file)
+								logs.addLogs("INFO : The file has been moved from HOSTEDFILES to ADDFILES because it was not in the database")
+		else:
+			# C'est un dossier, on supprime
+			shutil.rmtree(file)

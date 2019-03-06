@@ -91,6 +91,7 @@ class Maintenance(threading.Thread):
 				f.close()
 				derMtnc5M = tmpsAct
 				fctsMntc.creerFichier()
+				fctsMntc.checkIntruders()
 				logs.addLogs("INFO : Verification of new files completed successfully.")
 			for loop in range(60):
 				if self.serveur_lance is True:
