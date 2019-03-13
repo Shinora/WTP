@@ -40,26 +40,26 @@ port = int(config.readConfFile("defaultPort"))
 status = loader("Start Up") # Ici et pas avant car si le fichier n'existe pas
 status.start() # L'assistant est invisible.
 
-BDD.ajouterEntree("Noeuds", "88.189.108.233:5555", "Parser")
-BDD.ajouterEntree("Noeuds", "88.189.108.233:5556")
-BDD.ajouterEntree("Noeuds", "88.189.108.233:5557")
-
 class ServeurThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		self.serveur_lance = True
+		self.ip = ""
+		self.port = 0
+		self.clientsocket = ""
 	
 	def run(self): 
 		while self.serveur_lance:
 			tcpsock.listen(10)
 			tcpsock.settimeout(5)
 			try:
-				(clientsocket, (ip, port)) = tcpsock.accept()
+				(self.clientsocket, (self.ip, self.port)) = tcpsock.accept()
 			except socket.timeout:
-				break
-			newthread = ThreadLauncher(ip, port, clientsocket)
-			newthread.start()
-
+				pass
+			else:
+				newthread = ThreadLauncher(self.ip, self.port, self.clientsocket)
+				newthread.start()
+	
 	def stop(self):
 		self.serveur_lance = False
 
@@ -119,8 +119,6 @@ try:
 		else:
 			# Une erreur s'est produite
 			logs.addLogs("ERROR : There is not enough IP in launcher.py : "+str(tableau))
-			print(len(tableau))
-			print(str(tableau))
 		status.stop()
 		status.join()
 		autresFonctions.afficherLogo()

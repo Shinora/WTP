@@ -27,7 +27,7 @@ def verifMAJ(force = 0):
 		logs.addLogs("INFO : Démmarage de la mise à jour de V" + str(versionActuelle) + " à V" + latest)
 		# Le file zip a un nom de forme WTPversion.zip Ex : WTP0.0.1.zip
 		fileName = "WTP"+latest+".zip"
-		url = 'https://static.myrasp.fr/WTP/'+fileName
+		url = 'https://myrasp.fr/WTP/Maj/'+fileName
 		try:
 			os.makedirs(".MAJ")
 		except OSError:
@@ -53,11 +53,11 @@ def verifMAJ(force = 0):
 			newFichier = ".MAJ/"+latest+"/"+liste[x]
 			oldFichier = liste[x]
 			# On copie le contenu du nouveau file
-			file = open(newFichier, "r")
+			file = open(newFichier, "rb")
 			contenuNewFichier = file.read()
 			file.close()
 			# On remplace l'ancien par la copie
-			file = open(oldFichier, "w")
+			file = open(oldFichier, "wb")
 			file.write(contenuNewFichier)
 			file.close()
 			logs.addLogs("INFO : The file " + oldFichier + " has been updated")
@@ -74,12 +74,12 @@ def verifSources():
 			version = "Mozilla/5.0"
 		if en_cours[0] != "." and en_cours != "logs.txt" and en_cours != "wtp.conf" and en_cours != "WTP.db":
 			opener = AppURLopener()
-			page = opener.open("https://myrasp.fr/WTPStatic/"+en_cours)
+			page = opener.open("https://myrasp.fr/WTP/Maj/"+en_cours)
 			online_sha = page.read().decode("utf-8")
 			acces_file = open(en_cours, "r")
 			contenu = acces_file.read()
 			acces_file.close()
-			sha_file = hashlib.sha256(contenu.encode()).hexdigest()
+			sha_file = hashlib.sha256(str(contenu).encode()).hexdigest()
 			if online_sha != sha_file:
 				# On lance la MAJ en mode forcé
 				logs.addLogs("ERROR : When checking sources, the file " + en_cours + " was found to be incorrect. New sources will be downloaded.")

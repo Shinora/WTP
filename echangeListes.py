@@ -48,7 +48,7 @@ def tableToFile(nomTable):
 
 def filetoTable(fileName, nomTable):
 	# cette fonction a pour but de lire un fichier et de l'écrire dans une table
-	f = open("HOSTEDFILES/"+fileName, "r")
+	f = open("HOSTEDFILES/"+fileName, "rb")
 	lines = f.readlines()
 	f.close()
 	for line in lines:

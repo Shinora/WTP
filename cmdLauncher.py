@@ -19,6 +19,7 @@ import fctsClient
 
 
 def cmdLauncher(userCmd):
+	error = 0
 	if userCmd == "help":
 		# Afficher toutes les options
 		print("Web Transfer Protocol	V"+str(config.readConfFile("Version")))
@@ -75,12 +76,12 @@ def cmdLauncher(userCmd):
 		print("To add files to the network, you must go to the file named ADDFILES and copy / paste them. Path : "+str(os.getcwd())+"/ADDFILES  WTP will automatically add them. \nPro tip : WTP checks this folder every 5 minutes. If you are in a hurry, you can enter this request : checkFiles. \nDISCLAMER : A file can not be deleted from the network. Be careful when you add some.")
 		print("For more information on the possible commands here, enter help.\n")
 		print("2. Advenced")
-		print("You found a bug or improvement ? Contact us on our website :\nhttps://myrasp.fr/WTP%20Landed")
+		print("You found a bug or improvement ? Contact us on our website :\nhttps://myrasp.fr/WTP")
 		print("Developer ressources are in the Wiki part of our GitHub.\nhttps://github.com/Torzivalds/WTP/wiki")
 		print("3. Contribute")
 		print("You can contribute by improving the code with us, by talking about Web Transfer Protocol to your friends, your family, your colleagues, and if you can not contribute in these ways, you can donate via PayPal.\nYour contributions make us happy and help us to move forward, thank you!\n")
 		print("4. External ressources")
-		print("GitHub : https://github.com/Torzivalds/WTP\nPayPal : https://paypal.me/torzivalds\nWebsite : https://myrasp.fr/WTP%20Landed/\nFirefox Extension : https://github.com/Torzivalds/WTP/tree/master/Extention%20Firefox")
+		print("GitHub : https://github.com/Torzivalds/WTP\nPayPal : https://paypal.me/torzivalds\nWebsite : https://myrasp.fr/WTP\nFirefox Extension : https://github.com/Torzivalds/WTP/tree/master/Extention%20Firefox")
 	elif userCmd == "checkFiles":
 		# On vérifie immédiatement dans ADDFILES
 		status = loader("Work in progress")
@@ -94,7 +95,7 @@ def cmdLauncher(userCmd):
 		print("Are you sure you want to delete everything ?\nAll configuration, database, hosted files will be lost.")
 		print("You will not be able to go back.")
 		if str(input("If you are sure, enter DeleteAll\n>> ")) == "DeleteAll":
-			print("We are sorry to see you go.\nWe hope to see you very soon !\nIf you have comments to send to you, please contact us via our website :\nhttps://myrasp.fr/WTP%20Landed/")
+			print("We are sorry to see you go.\nWe hope to see you very soon !\nIf you have comments to send to you, please contact us via our website :\nhttps://myrasp.fr/WTP")
 			status = loader("Work in progress")
 			status.start()
 			shutil.rmtree(str(os.getcwd())+"/HOSTEDFILES")
@@ -178,7 +179,7 @@ def cmdLauncher(userCmd):
 							# On envoi vers la fonction qui télécharge le file
 							ip = ipport[:ipport.find(":")]
 							port = int(ipport[ipport.find(":")+1:])
-							error += fctsClient.CmdDemandeFichier(host, port, sha)
+							error += fctsClient.CmdDemandeFichier(ip, int(port), sha)
 						else:
 							# C'est une erreur
 							print(sortie)
@@ -197,6 +198,19 @@ def cmdLauncher(userCmd):
 						print("Done.")
 					else:
 						print("An error occured. ("+str(error)+")")
+	elif userCmd == "add":
+		# L'utilisateur veut ajouter quelque chose
+		categorie = str(input("What do you want to add ?\n>>> "))
+		if categorie == "peer":
+			ipport = str(input("What is the IP:Port of the peer ?\n>>> "))
+			error = BDD.ajouterEntree("Noeud", ipport)
+			if error == 0:
+				print("Done.")
+			else:
+				print("An error occured ("+str(error)+").")
+		else:
+			print("Your input is unknown.")
+			print("You can enter help for more information.")
 	else:
-		print("Unknow request.")
+		print("Unknown request.")
 	return 0
