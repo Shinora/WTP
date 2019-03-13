@@ -27,12 +27,10 @@ class Bridge(threading.Thread):
 				sha = sortie[sortie.find(";")+1:]
 				if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
 					# C'est un IPPort
-					# On envoi vers la fonction qui télécharge le file
-					ip = ipport[:ipport.find(":")]
-					port = int(ipport[ipport.find(":")+1:])
-					error = fctsClient.CmdDemandeFichier(ip, port, sha)
+					# On envoi vers le thread qui télécharge le file
+					error += fctsClient.CmdDemandeFichier(ipport[:ipport.find(":")], int(ipport[ipport.find(":")+1:]), sha)
 					if error == 0:
-						resultat = "=cmd SUCCESS : " + str(config.readConfFile("Path"))[:-1] + "/HOSTEDFILES/" + sha
+						resultat = "=cmd SUCCESS : " + str(config.readConfFile("Path")) + "/HOSTEDFILES/" + sha
 					elif error == 5:
 						resultat = "=cmd ERROR NO FILE"
 					else:

@@ -117,7 +117,7 @@ def verifFichier():
 		# Et voilà, on a juste le nom du file, sans extention,
 		# ce qui correspond normalement au SHA256 du contenu de celui-ci
 		try:
-			file = open(path, "r")
+			file = open(path, "rb")
 			contenu = file.read()
 			file.close()
 		except FileNotFoundError:
@@ -126,7 +126,7 @@ def verifFichier():
 			logs.addLogs("ERROR : The file " + fileName + " has been deleted from the database.")
 		else:
 			# On vérifie si le SHA256 correspond au contenu du file.
-			SHAContenuFichier = hashlib.sha256(contenu.encode('utf-8')).hexdigest()
+			SHAContenuFichier = hashlib.sha256(str(contenu).encode('utf-8')).hexdigest()
 			if fileSHA == SHAContenuFichier:
 				# Le file a le même hash que son nom, c'est bon.
 				# Si le programme est arrivé jusqu'à là, c'est que le file existe egalement.
@@ -163,18 +163,18 @@ def creerFichier():
 		if os.path.isfile(file):
 			# L'élément est un file, c'est bon (et pas un dossier)
 			try:
-				with open(file, "r", encoding="utf-8") as fluxLecture:
+				with open(file, "rb") as fluxLecture:
 					contenu = fluxLecture.read()
 					fluxLecture.close()
 			except UnicodeDecodeError:
 				logs.addLogs("ERROR : The file is not supported : "+str(file))
 				os.remove(file)
 			else:
-				shaFichier = hashlib.sha256(contenu.encode()).hexdigest()
+				shaFichier = hashlib.sha256(str(contenu).encode()).hexdigest()
 				osef, extention = os.path.splitext(file)
 				filename = shaFichier + extention
 				fileDir = "HOSTEDFILES/" + filename
-				fluxEcriture = open(fileDir, "w")
+				fluxEcriture = open(fileDir, "wb")
 				fluxEcriture.write(contenu)
 				fluxEcriture.close()
 				os.remove(file)
@@ -214,7 +214,7 @@ def checkIntruders():
 	# Qui ne devrait pas l'être dans HOSTEDFILES, sinon ils sont supprimés
 	for file in os.listdir("HOSTEDFILES/"):
 		file = "HOSTEDFILES/"+file
-		if os.path.isdir(str(file)) == False:
+		if os.path.isdir(str(file)) is False:
 			# C'est un fichier, on vérifie qu'il existe dans la BDD
 			BDD.verifExistBDD()
 			conn = sqlite3.connect('WTP.db')
@@ -229,9 +229,9 @@ def checkIntruders():
 			rows = cursor.fetchall()
 			if str(rows) == "[]":
 				# Il n'existe pas, on le déplace vers ADDFILES
-				dest = "../ADDFILES/"+str(file[12:])
+				dest = "ADDFILES/"+str(file[12:])
 				if file != dest:
-					if os.path.exists(dest) == False:
+					if os.path.exists(dest) is False:
 						# Exception pour les fichiers temporels :
 						# On les supprime si ils ont plus de 24h
 						if str(file[12:16]) == "TEMP":

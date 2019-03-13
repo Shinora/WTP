@@ -207,7 +207,7 @@ def majDNS(ipportNoeud = ""):
 					ipport = rcvCmd[rcvCmd.find(" ipport ")+8:]
 					ip = ipport[:ipport.find(":")]
 					port = ipport[ipport.find(":")+1:]
-					error = fctsClient.CmdDemandeFichier(ip, port, filename)
+					error += fctsClient.CmdDemandeFichier(ip, port, filename)
 					if error == 0:
 						echangeListes.filetoTable(filename, "DNS")
 					else:

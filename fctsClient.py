@@ -9,6 +9,9 @@ import search
 import logs
 import config
 import echangeListes
+import threading
+import echangeFichiers
+import time
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
@@ -26,10 +29,6 @@ def CmdDemandeNoeud(ip, port):
 	return error
 
 def CmdDemandeFichier(ip, port, file):
-	# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
-	# Dirriger vers la fonction DownloadFichier()
-	# On va chercher l'info qu'il nous faut :
-	# L'IP et le port du noeud qui va envoyer le file (sous forme IP:PORT)
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
 	if str(connNoeud) == "=cmd ERROR":
@@ -38,22 +37,23 @@ def CmdDemandeFichier(ip, port, file):
 		logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
 		# Il faut trouver un port libre pour que le noeud donneur
 		# puisse se connecter à ce noeud sur le bon port
-		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(autresFonctions.portLibre(int(config.readConfFile("miniPort"))))
-		sendCmd = "=cmd DemandeFichier  nom " + file
-		sendCmd += " ipPort " + newIPPort
-		sendCmd = sendCmd.encode()
-		connNoeud.send(sendCmd)
-		rcvCmd = connNoeud.recv(1024)
+		freePort = autresFonctions.portLibre(int(config.readConfFile("miniPort")))
+		temp = str(time.time())
+		thrdDown = echangeFichiers.downFile(file, int(freePort), temp)
+		thrdDown.start()
+		newIPPort = str(autresFonctions.connaitreIP()) + ":" + str(freePort)
+		sendCmd = "=cmd DemandeFichier  nom " + str(file) + " ipport " + str(newIPPort)
+		connNoeud.send(sendCmd.encode())
 		connNoeud.close()
-		if rcvCmd.decode() == "=cmd OK":
-			# Le noeud distant a le file que l'on veut
-			if echangeFichiers.DownloadFichier(newIPPort) != 0:
-				error += 1
-				logs.addLogs("ERROR : Download failed")
-		else:
-			# Le noeud distant n'a pas le file que l'on veut
-			logs.addLogs("ERROR : The peer doesn't have the file")
-			error = 5
+		thrdDown.join()
+		# Lire le fichier temporaire pour savoir si il y a eut des erreurs
+		try:
+			f = open(".TEMP/"+temp, "r")
+			error += int(f.read())
+			f.close()
+		except Exception as e:
+			error += 1
+			logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
 	return error
 
 def CmdDemandeListeNoeuds(ip, port):
@@ -68,7 +68,7 @@ def CmdDemandeListeNoeuds(ip, port):
 		connNoeud.send(sendCmd)
 		fileName = connNoeud.recv(1024)
 		connNoeud.close()
-		CmdDemandeFichier(ip, port, fileName.decode())
+		error += CmdDemandeFichier(ip, port, fileName.decode())
 		echangeListes.filetoTable(fileName.decode(), "Noeuds")
 	return error
 
@@ -132,7 +132,7 @@ def VPN(demande, ipPortVPN, ipPortExt):
 			# Pour cela, il faut analyser la request initiale
 			if request[:19] == "=cmd DemandeFichier":
 				# =cmd DemandeFichier nom sha256.ext
-				CmdDemandeFichier(ip, port, request[24:])
+				error += CmdDemandeFichier(ip, port, request[24:])
 			elif request[:17] == "=cmd DemandeNoeud":
 				CmdDemandeNoeud(ip, port)
 			elif request[:28] == "=cmd DemandeListeFichiersExt":

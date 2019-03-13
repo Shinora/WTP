@@ -57,9 +57,9 @@ def rapportErreur(selection = " "):
 	f.close()
 	data = {"text":megaStr}
 	try:
-		requests.post("https://myrasp.fr/WTPStatic/rapport.php", data = data)
+		requests.post("https://myrasp.fr/WTP/Logs/index.php", data = data)
 	except Exception as e:
-		addLogs("ERROR : We could not send the logs to the developers in rapportErreur() : " + srt(e))
+		addLogs("ERROR : We could not send the logs to the developers in rapportErreur() : " + str(e))
 		print("We could not send the logs to the developers... \nCheck your Internet connection.")
 	else:
 		supprLogs()

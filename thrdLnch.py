@@ -10,6 +10,7 @@ import time
 import search
 import threading
 import config
+import os
 
 # Le thread principal du launcher est ici
 
@@ -26,30 +27,36 @@ class ThreadLauncher(threading.Thread):
 		# Maintenant, vérifions la demande du client.
 		if rcvCmd != '':
 			if rcvCmd[:19] == "=cmd DemandeFichier": # Fonction Client OPPÉRATIONNEL
-				# =cmd DemandeFichier  nom sha256.ext  ipPort IP:PORT
+				# =cmd DemandeFichier  nom sha256.ext  ipport IP:PORT
 				# Dirriger vers la fonction UploadFichier()
 				# Le noeud distant demande le file, donc on lui envoi, Up !
 				# On va chercher les deux informations qu'il nous faut :
 				# Le nom du file (sous forme sha256.ext)
 				# L'IP et le port du noeud qui a fait la demande (sous forme IP:PORT)
-				pos1 = rcvCmd.find(" nom ")
-				pos1 = pos1+5
-				pos2 = rcvCmd.find(" ipPort ")
-				fileName = rcvCmd[pos1:pos2]
-				pos2 = pos2+8
-				pos3 = len(rcvCmd)
-				IppeerPort = rcvCmd[pos2:pos3]
+				fileName = rcvCmd[rcvCmd.find(" nom ")+5:rcvCmd.find(" ipport ")]
+				IppeerPort = rcvCmd[rcvCmd.find(" ipport ")+8:]
 				if BDD.verifFichier(fileName):
+					error = 0
 					# Le file est présent dans la BDD, on peut l'envoyer
-					self.clientsocket.send("=cmd OK".encode())
-					time.sleep(0.5) # Le temps que le noeud distant mette en place son serveur
-					if echangeFichiers.UploadFichier(fileName, IppeerPort) != 0:
-						self.clientsocket.send("=cmd ERROR".encode())
-					else:
-						self.clientsocket.send(")cmd SUCCESS".encode())
+					temp = str(time.time())
+					thrdUp = echangeFichiers.upFile(IppeerPort, fileName, temp)
+					thrdUp.start()
+					thrdUp.join()
+					# Lire le fichier temporaire pour savoir si il y a eut des erreurs
+					try:
+						f = open(".TEMP/"+temp, "r")
+						error += int(f.read())
+						f.close()
+					except Exception as e:
+						error += 1
+						logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
+					os.remove(".TEMP/"+temp)
+					if error != 0:
 						BDD.modifStats("NbEnvsFichiers")
+					else:
+						logs.addLogs("ERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")")
 				else:
-					self.clientsocket.send("=cmd ERROR".encode())
+					print("This file isn't on this computer : '"+str(fileName)+"'")
 			elif rcvCmd[:17] == "=cmd DemandeNoeud": # Fonction Serveur
 				# Dirriger vers la fonction EnvoiNoeuds()
 				# Le noeud distant a demandé les noeuds, on lui envoi !
@@ -77,7 +84,7 @@ class ThreadLauncher(threading.Thread):
 				file = autresFonctions.lsteNoeuds()
 				self.clientsocket.send(file.encode())
 				BDD.modifStats("NbEnvsLstNoeuds")
-			elif rcvCmd[:20] == "=cmd DemandePresence": # OPPÉRATIONNEL
+			elif rcvCmd[:20] == "=cmd DemandePresence":
 				# C'est tout bête, pas besoin de fonction
 				# Il suffit de renvoyer la request informant que l'on est connecté au réseau.
 				sendCmd = "=cmd Present"
