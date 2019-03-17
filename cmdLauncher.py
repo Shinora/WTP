@@ -14,8 +14,8 @@ import shutil
 import logs
 import dns
 import autresFonctions
-import re
 import fctsClient
+import blacklist
 
 
 def cmdLauncher(userCmd):
@@ -34,6 +34,7 @@ def cmdLauncher(userCmd):
 		print("delAll 		Delete all : Config, DB, Files.")
 		print("majDNS		Update the DNS database")
 		print("client 		Use WTP in console")
+		print("majBlkLst	Update the blacklist database")
 	elif userCmd == "update":
 		# Vérifier les MAJ
 		status = loader("Work in progress")
@@ -83,11 +84,12 @@ def cmdLauncher(userCmd):
 		print("4. External ressources")
 		print("GitHub : https://github.com/Torzivalds/WTP\nPayPal : https://paypal.me/torzivalds\nWebsite : https://myrasp.fr/WTP\nFirefox Extension : https://github.com/Torzivalds/WTP/tree/master/Extention%20Firefox")
 	elif userCmd == "checkFiles":
-		# On vérifie immédiatement dans ADDFILES
+		# On vérifie immédiatement dans ADDFILES, HOSTEDFILES et .TEMP
 		status = loader("Work in progress")
 		status.start()
 		fctsMntc.creerFichier()
 		fctsMntc.checkIntruders()
+		fctsMntc.supprTemp()
 		status.stop()
 		status.join()
 		print("Done.")
@@ -211,6 +213,24 @@ def cmdLauncher(userCmd):
 		else:
 			print("Your input is unknown.")
 			print("You can enter help for more information.")
+	elif userCmd == "majBlkLst":
+		# L'utilisateur veut mettre à jour sa BlackList
+		ipport = str(input("With which peer do you want to update? (Press ENTER to update with the default peer : "+str(config.readConfFile("BlackList"))+")\n>> "))
+		if ipport == "enter" or ipport == "ENTER" or ipport == "":
+			status = loader("Work in progress")
+			status.start()
+			blacklist.maj()
+			status.stop()
+			status.join()
+		else:
+			if autresFonctions.verifIPPORT(IppeerPort): # Si ipport est un ip:port
+				status = loader("Work in progress")
+				status.start()
+				blacklist.maj(ipport)
+				status.stop()
+				status.join()
+			else:
+				print("This is not a IP:PORT")
 	else:
 		print("Unknown request.")
 	return 0

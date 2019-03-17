@@ -4,9 +4,9 @@
 import logs
 import fctsClient
 import BDD
-import re
 import threading
 import sqlite3
+import autresFonctions
 
 # Fonctionnalité qui permet de connaitre l'intégralité du réseau
 
@@ -28,9 +28,7 @@ class Parser(threading.Thread):
 				conn.rollback()
 				logs.addLogs("ERREUR : Problem with database (parseAll()) : " + str(e))
 			for row in rows:
-				reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-				row = str(row)
-				if reg.match(row): # Si row est un ip:port
+				if autresFonctions.verifIPPORT(row): # Si row est un ip:port
 					host = row[:row.find(":")]
 					port = row[row.find(":")+1:]
 					# Pour chaque noeud on demande la liste de :
