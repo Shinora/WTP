@@ -1,6 +1,3 @@
-#! /usr/bin/python
-# -*- coding:utf-8 -*-
-
 import os
 import logs
 import config
@@ -71,7 +68,6 @@ def searchBlackList(name, Isrank = False):
 			return 0
 	if Isrank:
 		return rank
-	else:
-		if rank == 0:
-			return 0
-		return 1
+	if rank == 0:
+		return 0
+	return 1

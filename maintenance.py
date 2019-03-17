@@ -1,6 +1,3 @@
-#! /usr/bin/python
-# -*- coding:utf-8 -*-
-
 import time
 import logs
 import fctsMntc
