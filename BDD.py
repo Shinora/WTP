@@ -75,6 +75,14 @@ def creerBase():
 			)
 		""")
 		conn.commit()
+		cursor.execute("""
+			CREATE TABLE IF NOT EXISTS BlackList(
+				id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+				Name TEXT,
+				Rank INTEGER
+			)
+		""")
+		conn.commit()
 		# On initialise les Statistiques
 		cursor.execute("""INSERT INTO Statistiques (NbNoeuds, NbSN, NbFichiersExt, NbFichiers, PoidsFichiers, NbEnvsLstNoeuds, NbEnvsLstFichiers, NbEnvsLstFichiersExt, NbEnvsFichiers, NbPresence, NbReceptFichiers) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)""")
 		conn.commit()
@@ -103,6 +111,8 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 			cursor.execute("""SELECT id FROM NoeudsHorsCo WHERE IP = ?""", (entree,))
 		elif nomTable == "DNS":
 			cursor.execute("""SELECT id FROM DNS WHERE NDD = ?""", (entree,))
+		elif nomTable == "BlackList":
+			cursor.execute("""SELECT id FROM BlackList WHERE Name = ?""", (entree,))
 	except Exception as e:
 		logs.addLogs("ERROR : Problem with database (ajouterEntree()):" + str(e))
 		error += 1
@@ -148,6 +158,10 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 					else:
 						logs.addLogs("DNS : ERROR: Parameters missing when calling the function (ajouterEntree())")
 						error += 1
+				elif nomTable == "BlackList":
+					if entree1 == "":
+						entree1 = "1"
+					cursor.execute("""INSERT INTO BlackList (Name, Rank) VALUES (?, ?)""", (entree, entree1))
 				conn.commit()
 			except Exception as e:
 				conn.rollback()
@@ -170,6 +184,8 @@ def supprEntree(nomTable, entree, entree1 = ""):
 			cursor.execute("""DELETE FROM FichiersExt WHERE Nom = ? AND IP = ?""", (entree, entree1))
 		elif nomTable == "NoeudsHorsCo":
 			cursor.execute("""DELETE FROM NoeudsHorsCo WHERE IP =  ?""", (entree,))
+		elif nomTable == "BlackList":
+			cursor.execute("""DELETE FROM BlackList WHERE Name = ?""", (entree,))
 		elif nomTable == "DNS":
 			if entree1 != "":
 				# On vérifie que le mot de passe hashé est égal à celui de la base de données,
@@ -206,6 +222,8 @@ def supprEntree(nomTable, entree, entree1 = ""):
 			logs.addLogs("INFO : The External file " + entree + " has been removed.")
 		elif nomTable == "NoeudsHorsCo":
 			logs.addLogs("INFO : The peer off " + entree + " has been permanently deleted from the database.")
+		elif nomTable == "BlackList":
+			logs.addLogs("INFO : The " + entree + " entry has been permanently deleted from the BlackList.")
 		elif problem == 0:
 			logs.addLogs("DNS : INFO : The " + entree + " entry of the " + nomTable + " table has been removed.")
 		else:

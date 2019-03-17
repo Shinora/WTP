@@ -43,16 +43,9 @@ def fillConfFile():
 			max_port = 5600
 		else:
 			max_port = int(max_port)
-	blacklist = []
-	loop_blacklist = 1
-	while loop_blacklist == 1:
-		black_ip = str(input("Enter an IP that you want to blacklist : "))
-		blacklist.append(black_ip)
-		loop_request = input("Do you want to blacklist another IP ? (1 = Yes / O = No) ")
-		if loop_request == "1":
-			loop_blacklist = 1
-		else:
-			loop_blacklist = 0
+	blacklist = str(input("Enter your trust node for the blacklist (IP:PORT) : "))
+	if blacklist == "":
+		blacklist = "88.189.108.233:5555"
 	autostart = input("Do you want to enable autostart ? ( 0 = Yes / 1 = No ) : ")
 	parser = input("Do you want to enable parser mode ? ( 0 = Yes / 1 = No ) : ") # Parser = SuperNoeud
 	vpn = input("Do you want to enable VPN ? ( 0 = Yes / 1 = No ) : ")
@@ -83,10 +76,7 @@ def fillConfFile():
 		conf_file.write("DNS : True\n")
 	else:
 		conf_file.write("DNS : False\n")
-	conf_file.write("Blacklist [\n")
-	for ip in blacklist:
-		conf_file.write(ip + " ; \n")
-	conf_file.write("]")
+	conf_file.write("Blacklist : "+str(blacklist)+"\n")
 	conf_file.close()
 
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
@@ -96,12 +86,10 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 			pass
 	except IOError:
 		# Le file n'existe pas
-		print("LA")
 		fillConfFile()
 	if os.path.getsize("wtp.conf") < 80:
 		# Le file est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer
-		print("ICI")
 		fillConfFile()
 	f = open("wtp.conf",'r')
 	lignes  = f.readlines()

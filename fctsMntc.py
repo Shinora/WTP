@@ -250,3 +250,19 @@ def checkIntruders():
 		else:
 			# C'est un dossier, on supprime
 			shutil.rmtree(file)
+
+def supprTemp():
+	# Fonction qui a pour but de supprimer les fichiers dans TEMP
+	# S'ils ont plus que 5 minutes
+	dateAct = str(time.time())
+	for file in os.listdir(".TEMP/"):
+		file = str(".TEMP/"+file)
+		if os.path.isdir(file) is False:
+			try:
+				if float(dateAct) > float(file)+300:
+					os.remove(file)
+			except Exception:
+				os.remove(file)
+		else:
+			# C'est un dossier, on supprime
+			shutil.rmtree(file)

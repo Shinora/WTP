@@ -26,7 +26,7 @@ class ThreadLauncher(threading.Thread):
 		rcvCmd = rcvCmd.decode()
 		# Maintenant, vérifions la demande du client.
 		if rcvCmd != '':
-			if rcvCmd[:19] == "=cmd DemandeFichier": # Fonction Client OPPÉRATIONNEL
+			if rcvCmd[:19] == "=cmd DemandeFichier":
 				# =cmd DemandeFichier  nom sha256.ext  ipport IP:PORT
 				# Dirriger vers la fonction UploadFichier()
 				# Le noeud distant demande le file, donc on lui envoi, Up !
@@ -47,6 +47,7 @@ class ThreadLauncher(threading.Thread):
 						f = open(".TEMP/"+temp, "r")
 						error += int(f.read())
 						f.close()
+						os.remove(".TEMP/"+temp)
 					except Exception as e:
 						error += 1
 						logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
@@ -140,6 +141,26 @@ class ThreadLauncher(threading.Thread):
 					# Mais on l'ajoute quand même à la base de données
 					BDD.ajouterEntree("FichiersExt", fileName, ipport)
 					sendCmd = "=cmd noParser"
+					self.clientsocket.send(sendCmd.encode())
+			elif rcvCmd[10:] == "BlackList ":
+				# Les fonctionnalitées de la BlackList
+				rcvCmd = rcvCmd[10:]
+				if rcvCmd[:4] == "name":
+					# Le peer veut savoir si cet élément fait partie de la BlackList,
+					# et si oui quel est son rang (de 0 à 5)
+					rank = search.chercherInfo("BlackList", rcvCmd[4:])
+					self.clientsocket.send(rank.encode())
+				if rcvCmd[4:] == "sync":
+					# Le peer veut recevoir l'intégralité de cette base
+					# On va donc la mettre dans un fichier
+					filename = echangeListes.tableToFile("BlackList")
+					try:
+						filename = int(filename)
+					except ValueError:
+						# Si c'est un chiffre, c'est un code d'erreur
+						sendCmd = "=cmd Filename " + str(filename) + "ipport " + config.readConfFile("MyIP") + ":" + config.readConfFile("defaultPort")
+					else:
+						sendCmd = "=cmd ERROR"
 					self.clientsocket.send(sendCmd.encode())
 			else:
 				# Oups... Demande non-reconnue...

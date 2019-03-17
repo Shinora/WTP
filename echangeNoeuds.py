@@ -5,7 +5,6 @@ import socket
 import select
 import logs
 import BDD
-import re
 import sqlite3
 import config
 
@@ -35,8 +34,7 @@ def DemandeNoeuds(IppeerPort):
 	#Le paramètre à donner est l'ip suivie du port du Noeud à contacter sous la forme 000.000.000.000:00000
 	#Départager l'IP et le port
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(IppeerPort): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(IppeerPort):
 		ip = IppeerPort[:IppeerPort.find(":")]
 		port = IppeerPort[IppeerPort.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
@@ -58,9 +56,11 @@ def DemandeNoeuds(IppeerPort):
 			for loop in range(ListeNoeuds.count(',')+1):
 				lsteTemp = ListeNoeuds[:ListeNoeuds.find(',')]
 				ListeNoeuds = ListeNoeuds[ListeNoeuds.find(',')+1:]
-				reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})$")
-				if reg.match(lsteTemp): # Si lsteTemp est un ip:port
-					BDD.ajouterEntree("Noeuds", lsteTemp)
+				if autresFonctions.verifIPPORT(lsteTemp):
+					if blacklist.searchBlackList(lsteTemp) == 0:
+						BDD.ajouterEntree("Noeuds", lsteTemp)
+					else:
+						logs.addLogs("ERROR : This peer is part of the Blacklist : "+str(lsteTemp))
 				else:
 					logs.addLogs("ERROR : The variable isn't a IP:PORT in DemandeNoeuds() : "+str(lsteTemp))
 			logs.addLogs("INFO : Connection closed. (DemandeNoeuds())")
@@ -79,8 +79,7 @@ def DemandeNoeuds(IppeerPort):
 
 def EnvoiNoeuds(IppeerPort):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipport): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipport):
 		pos1 = IppeerPort.find(":")
 		pos1 = pos1+1
 		pos2 = len(IppeerPort)

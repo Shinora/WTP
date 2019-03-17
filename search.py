@@ -184,6 +184,11 @@ def chercherInfo(nomTable, info):
 			cursor.execute("""SELECT id FROM Fichiers WHERE Nom = ?""", (info,))
 		elif nomTable == "FichiersExt":
 			cursor.execute("""SELECT IP FROM FichiersExt WHERE Nom = ?""", (info,))
+		elif nomTable == "BlackList":
+			cursor.execute("""SELECT Rank FROM BlackList WHERE Name = ?""", (info,))
+		else:
+			logs.addLogs("ERROR : The table is unknown in chercherInfo : "+str(nomTable))
+			return 0
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
@@ -191,6 +196,7 @@ def chercherInfo(nomTable, info):
 	for row in cursor.fetchall():
 		conn.close()
 		return row[0]
+	return 0
 
 def searchSHA(ndd):
 	# Fonction qui a pour but de chercher le sha256 correspondant

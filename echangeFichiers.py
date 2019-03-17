@@ -7,7 +7,6 @@ import math
 import hashlib
 import logs
 import BDD
-import re
 import threading
 import autresFonctions
 import time

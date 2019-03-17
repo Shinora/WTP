@@ -24,26 +24,32 @@ def tableToFile(nomTable):
 		elif nomTable == "DNS":
 			cursor.execute("SELECT SHA256, NDD, PASSWORD FROM DNS WHERE 1")
 			conn.commit()
+		elif nomTable == "BlackList":
+			cursor.execute("SELECT Name, Rank FROM BlackList WHERE 1")
+			conn.commit()
 		else:
 			logs.addLogs("ERROR: The table name was not recognized (tableToFile()) : " + str(nomTable))
-			problem += 1
+			error += 1
 	except Exception as e:
 		conn.rollback()
 		logs.addLogs("ERROR : Problem with database (aleatoire()):" + str(e))
 		error += 1
-	rows = cursor.fetchall()
-	conn.close()
-	fileName = "TEMP"+str(time.time())
-	if error != 0:
-		return error
-	f = open("HOSTEDFILES/"+fileName, "a")
-	for row in rows:
-		if nomTable != "DNS":
-			f.write(str(row[0])+"\n")
-		else:
-			f.write(str(row[0]) + "," + str(row[1]) + ", " + str(row[2]) + "\n")
-			# La virgule sans espace en premier est normal
-	f.close()
+	if error == 0:
+		rows = cursor.fetchall()
+		conn.close()
+		fileName = "TEMP"+str(time.time())
+		if error != 0:
+			return error
+		f = open("HOSTEDFILES/"+fileName, "a")
+		for row in rows:
+			if nomTable == "DNS":
+				# La virgule sans espace en premier est normal
+				f.write(str(row[0]) + "," + str(row[1]) + ", " + str(row[2]) + "\n")
+			elif nomTable == "BlackList":
+				f.write(str(row[0])+";"+str(row[1])+"\n")
+			else:
+				f.write(str(row[0])+"\n")
+		f.close()
 	return fileName
 
 def filetoTable(fileName, nomTable):
@@ -55,13 +61,18 @@ def filetoTable(fileName, nomTable):
 		if nomTable == "Noeuds":
 			BDD.ajouterEntree("Noeud", line)
 		elif nomTable[:8] == "Fichiers":
-			BDD.ajouterEntree("FichierExt", line)
+			BDD.ajouterEntree(nomTable, line)
 		elif nomTable == "DNS":
 			# La virgule sans espace en premier est normal
 			SHA256 = line[:line.find(",")]
 			NDD = line[line.find(",")+1:line.find(", ")]
 			PASS = line[line.find(", ")+2:-1]
 			BDD.ajouterEntree("DNS", NDD, SHA256, PASS)
+		elif nomTable == "BlackList":
+			name = line[:line.find(";")]
+			rank = line[line.find(";")+1:]
+			BDD.ajouterEntree("BlackList", name, rank)
 		else:
 			logs.addLogs("ERROR: The table name was not recognized (filetoTable()) : " + str(nomTable))
-			problem += 1
+			return 1
+	return 0

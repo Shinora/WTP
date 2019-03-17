@@ -4,14 +4,13 @@
 import autresFonctions
 import echangeNoeuds
 import echangeFichiers
-import re
 import search
 import logs
 import config
 import echangeListes
 import threading
-import echangeFichiers
 import time
+import os
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
@@ -29,6 +28,9 @@ def CmdDemandeNoeud(ip, port):
 	return error
 
 def CmdDemandeFichier(ip, port, file):
+	if blacklist.searchBlackList(file) != 0:
+		logs.addLogs("ERROR : This file is part of the Blacklist : "+str(file))
+		return 1
 	error = 0
 	connNoeud = autresFonctions.connectionClient(ip, port)
 	if str(connNoeud) == "=cmd ERROR":
@@ -51,6 +53,7 @@ def CmdDemandeFichier(ip, port, file):
 			f = open(".TEMP/"+temp, "r")
 			error += int(f.read())
 			f.close()
+			os.remove(".TEMP/"+temp)
 		except Exception as e:
 			error += 1
 			logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
@@ -113,8 +116,7 @@ def CmdDemandeStatut(ip, port):
 
 def VPN(demande, ipPortVPN, ipPortExt):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipPortExt) and reg.match(ipPortVPN): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipPortExt) and reg.match(ipPortVPN):
 		ip = ipPortVPN[:ipPortVPN.find(":")]
 		port = ipPortVPN[ipPortVPN.find(":")+1:]
 		connNoeud = autresFonctions.connectionClient(ip, port)

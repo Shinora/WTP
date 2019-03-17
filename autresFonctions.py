@@ -33,8 +33,7 @@ def portLibre(premierPort):
 			premierPort += 1
 			if premierPort < int(config.readConfFile("MaxPort")):
 				return premierPort
-			else:
-				logs.addLogs("ERROR: All ports already in use")
+			logs.addLogs("ERROR: All ports already in use")
 
 def lsteFichiers(filesExternes = 0): 
 	# ATTENTION !! IL FAUT CONNAITRE SON IP EXTERNE POUR POUVOIR L'AJOUTER EN FIN DE LIGNE
@@ -125,9 +124,7 @@ def afficherLogo():
 	print("")
 
 def connectionClient(ip, port, verify = 1):
-	ipPort = str(ip) + ":" + str(port)
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipPort):
+	if verifIPPORT(str(ip) + ":" + str(port)):
 		try:
 			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			connexion_avec_serveur.connect((ip, int(port)))
@@ -159,3 +156,9 @@ def verifFiles():
 	except OSError:
 		if not os.path.isdir(".TEMP"):
 			raise
+
+def verifIPPORT(ipport):
+	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
+	if reg.match(str(ipport)): # Si ipport est un ip:port
+		return 1
+	return 0

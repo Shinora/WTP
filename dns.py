@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 
 import logs
-import re
 import hashlib
 import sqlite3
 import autresFonctions
@@ -13,8 +12,7 @@ import fctsClient
 
 def addNDD(ipport, sha, ndd, password):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipport): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipport): # Si ipport est un ip:port
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
@@ -42,8 +40,7 @@ def addNDD(ipport, sha, ndd, password):
 
 def addNoeudDNS(ipport, ipportNoeud):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipport): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipport):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
@@ -71,8 +68,7 @@ def addNoeudDNS(ipport, ipportNoeud):
 
 def modifNDD(ipport, ndd, adress, password):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipport): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipport):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
@@ -101,8 +97,7 @@ def modifNDD(ipport, ndd, adress, password):
 
 def supprNDD(ipport, ndd, password):
 	error = 0
-	reg = re.compile("^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]{1,5})?$")
-	if reg.match(ipport): # Si ipport est un ip:port
+	if autresFonctions.verifIPPORT(ipport):
 		ip = ipport[:ipport.find(":")]
 		port = ipport[ipport.find(":")+1:]
 		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
