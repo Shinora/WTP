@@ -1,4 +1,3 @@
-import socket
 import os
 import os.path
 import logs

@@ -8,6 +8,7 @@ import echangeListes
 import threading
 import time
 import os
+import blacklist
 
 def CmdDemandeNoeud(ip, port):
 	error = 0
