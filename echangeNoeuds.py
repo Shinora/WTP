@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*-coding:Utf-8 -*
-
 import socket
 import select
 import logs
