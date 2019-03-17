@@ -1,4 +1,3 @@
-import socket
 import sqlite3
 import logs
 import os

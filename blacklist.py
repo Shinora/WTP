@@ -1,7 +1,9 @@
-import os
 import logs
 import config
 import BDD
+import search
+import autresFonctions
+import echangeListes
 
 # Sont ici toutes les fonctions qui se réferrent à la Blacklist
 
@@ -48,7 +50,7 @@ def maj(ipport = ""):
 def searchBlackList(name, Isrank = False):
 	error = 0
 	rank = 0
-	rank = BDD.chercherInfo(name)
+	rank = search.chercherInfo("Blacklist", name)
 	if rank == 0:
 		ipport = str(config.readConfFile("Blacklist"))
 		ip = ipport[:ipport.find(":")]

@@ -1,6 +1,5 @@
 import logs
 import BDD
-import socket
 import hashlib
 import sqlite3
 import os
