@@ -68,7 +68,7 @@ def verifNoeudHS():
 		# Connection au receveur
 		try:
 			c.connect((peerIP, peerPort))
-		except:
+		except Exception:
 			logs.addLogs("ERROR : Connection to the peer out of service impossible. (verifNoeudHS())")
 			# Le noeud n'est pas connecté au réseau
 			# On incrémente son nombre de vérifs et on le supprime si besoin
@@ -182,11 +182,9 @@ def creerFichier():
 				if isinstance(tableau, list) and len(tableau) == 15:
 					# On envoi la request à chaque noeud sélectionné
 					for peerIP in tableau:
-						ip = peerIP[:peerIP.find(":")]
-						port = peerIP[peerIP.find(":")+1:]
-						connNoeud = autresFonctions.connectionClient(ip, port)
+						connNoeud = autresFonctions.connectionClient(peerIP)
 						if str(connNoeud) != "=cmd ERROR":
-							logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+							logs.addLogs("INFO : Connection with peer etablished")
 							request = "=cmd newFileNetwork name " + filename + " ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
 							request = request.encode()
 							connNoeud.send(request)

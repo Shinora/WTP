@@ -61,11 +61,9 @@ def searchFile(fileName):
 		tblNoeuds = tableauNoeudsSimple + tableauSuperNoeuds
 		for noeudActuel in tblNoeuds:
 			# À chaque noeud on demande si il a le file ou s'il connait un noeud qui l'a
-			peerIPActuel = noeudActuel[:noeudActuel.find(":")]
-			peerPortActuel = noeudActuel[noeudActuel.find(":")+1:]
 			# Maintenant on se connecte au noeud
 			error = 0
-			connexion_avec_serveur = autresFonctions.connectionClient(peerIPActuel, peerPortActuel)
+			connexion_avec_serveur = autresFonctions.connectionClient(noeudActuel)
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:
@@ -103,10 +101,8 @@ def searchNDD(url):
 		tableau = searchNoeud("DNS", 25)
 		for noeud in tableau:
 			noeud = str(noeud[0])
-			ip = noeud[:noeud.find(":")]
-			port = int(noeud[noeud.find(":")+1:])
 			error = 0
-			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			connexion_avec_serveur = autresFonctions.connectionClient(noeud)
 			if str(connexion_avec_serveur) == "=cmd ERROR":
 				error += 1
 			else:

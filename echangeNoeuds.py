@@ -32,9 +32,7 @@ def DemandeNoeuds(IppeerPort):
 	#Départager l'IP et le port
 	error = 0
 	if autresFonctions.verifIPPORT(IppeerPort):
-		ip = IppeerPort[:IppeerPort.find(":")]
-		port = IppeerPort[IppeerPort.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:

@@ -97,11 +97,9 @@ try:
 			# On envoi la request à chaque noeud sélectionné
 			for peerIP in tableau:
 				peerIP = peerIP[0]
-				ip = peerIP[:peerIP.find(":")]
-				port = peerIP[peerIP.find(":")+1:]
-				connNoeud = autresFonctions.connectionClient(ip, port)
+				connNoeud = autresFonctions.connectionClient(peerIP)
 				if str(connNoeud) != "=cmd ERROR":
-					logs.addLogs("INFO : Connection with peer etablished on port {}".format(port))
+					logs.addLogs("INFO : Connection with peer etablished")
 					request = "=cmd newPeerNetwork ip " + str(config.readConfFile("MyIP")) + str(config.readConfFile("defaultPort"))
 					request = request.encode()
 					connNoeud.send(request)

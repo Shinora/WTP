@@ -10,13 +10,11 @@ import fctsClient
 def addNDD(ipport, sha, ndd, password):
 	error = 0
 	if autresFonctions.verifIPPORT(ipport): # Si ipport est un ip:port
-		ip = ipport[:ipport.find(":")]
-		port = ipport[ipport.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.addLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS")
 			# =cmd DNS AddDNS sha ******* ndd ******* pass *******
 			request = "=cmd DNS AddDNS sha " + str(sha) + " ndd " + str(ndd) + " pass " + str(password)
 			request = request.encode()
@@ -38,13 +36,11 @@ def addNDD(ipport, sha, ndd, password):
 def addNoeudDNS(ipport, ipportNoeud):
 	error = 0
 	if autresFonctions.verifIPPORT(ipport):
-		ip = ipport[:ipport.find(":")]
-		port = ipport[ipport.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.addLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS")
 			# =cmd DNS AddDNSExt ipport ******
 			request = "=cmd DNS AddDNSExt ipport " + ipportNoeud
 			request = request.encode()
@@ -66,13 +62,11 @@ def addNoeudDNS(ipport, ipportNoeud):
 def modifNDD(ipport, ndd, adress, password):
 	error = 0
 	if autresFonctions.verifIPPORT(ipport):
-		ip = ipport[:ipport.find(":")]
-		port = ipport[ipport.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.addLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS")
 			# =cmd DNS modifNDD ndd ****** adress ****** pass ******
 			request = "=cmd DNS modifNDD ndd " + str(ndd) + " adress " + str(adress) + " pass " + str(password)
 			request = request.encode()
@@ -95,13 +89,11 @@ def modifNDD(ipport, ndd, adress, password):
 def supprNDD(ipport, ndd, password):
 	error = 0
 	if autresFonctions.verifIPPORT(ipport):
-		ip = ipport[:ipport.find(":")]
-		port = ipport[ipport.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) == "=cmd ERROR":
 			error += 1
 		else:
-			logs.addLogs("Connection established with the DNS on the port {}".format(port))
+			logs.addLogs("Connection established with the DNS")
 			# =cmd DNS supprNDD ndd ****** pass ******
 			request = "=cmd DNS supprNDD ndd " + str(ndd) + " pass " + str(password)
 			request = request.encode()
@@ -181,9 +173,7 @@ def majDNS(ipportNoeud = ""):
 		if ipport != "":
 			# Maintenant on va demander au noeud DNS distant d'envoyer toutes ses entrées DNS pour
 			# Que l'on puisse ensuite analyser, et ajouter/mettre à jour notre base
-			ip = ipport[:ipport.find(":")]
-			port = ipport[ipport.find(":")+1:]
-			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 			if str(connexion_avec_serveur) != "=cmd ERROR":
 				sendCmd = b""
 				sendCmd = "=cmd DNS syncBase"

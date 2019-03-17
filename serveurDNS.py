@@ -119,10 +119,6 @@ class ClientThread(threading.Thread):
 				else:
 					sendCmd = "=cmd ERROR"
 				self.clientsocket.send(sendCmd.encode())
-			elif request == "DNS?":
-				sendCmd = "=cmd DNS"
-				sendCmd = sendCmd.encode()
-				self.clientsocket.send(sendCmd)
 			else:
 				sendCmd = "=cmd Inconnu"
 				sendCmd = sendCmd.encode()
