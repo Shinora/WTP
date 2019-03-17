@@ -41,5 +41,4 @@ while(continuer == 'True'):
   message_recu = c.recv(1024) # Réception des données crypter
   message_recu = cipher.decrypt(message_recu) # Décryptage des données recues.
   print(message_recu) # Affichage des données recues.
-
 c.close()
