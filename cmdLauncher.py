@@ -113,17 +113,16 @@ def cmdLauncher(userCmd):
 		print("You want to update the DNS database.\nIf you are crazy, you can enter crazy to update with a random peer.")
 		ipport = str(input("With which DNS do you want to update ?\n>> "))
 		# Vérifier le noeud
-		if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
+		if verifIPPORT(ipport):
 			# C'est un IPPort
-			ip = ipport[:ipport.find(":")]
-			port = int(ipport[ipport.find(":")+1:])
-			co = autresFonctions.connectionClient(ip, port)
+			co = autresFonctions.connectionClient(ipport)
 			if co != "=cmd ERROR":
-				connexion_avec_serveur.send(sendCmd.encode())
-				rcvCmd = connexion_avec_serveur.recv(1024).decode()
-				connexion_avec_serveur.close()
+				sendCmd = "=cmd status"
+				co.send(sendCmd.encode())
+				rcvCmd = co.recv(1024).decode()
+				co.close()
 				if rcvCmd == "=cmd DNS":
-					e = dns.majDNS()
+					e = dns.majDNS(ipport)
 					if int(e) > 0:
 						print("An error occured.")
 					else:

@@ -15,9 +15,7 @@ def maj(ipport = ""):
 		ipport = str(config.readConfFile("Blacklist"))
 	else:
 		if ipport != "":
-			ip = ipport[:ipport.find(":")]
-			port = ipport[ipport.find(":")+1:]
-			connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+			connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 			if str(connexion_avec_serveur) != "=cmd ERROR":
 				sendCmd = b""
 				sendCmd = "=cmd BlackList sync"
@@ -53,9 +51,7 @@ def searchBlackList(name, Isrank = False):
 	rank = search.chercherInfo("Blacklist", name)
 	if rank == 0:
 		ipport = str(config.readConfFile("Blacklist"))
-		ip = ipport[:ipport.find(":")]
-		port = ipport[ipport.find(":")+1:]
-		connexion_avec_serveur = autresFonctions.connectionClient(ip, port)
+		connexion_avec_serveur = autresFonctions.connectionClient(ipport)
 		if str(connexion_avec_serveur) != "=cmd ERROR":
 			sendCmd = "=cmd BlackList name "+str(name)
 			connexion_avec_serveur.send(sendCmd.encode())

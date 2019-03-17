@@ -119,7 +119,10 @@ def afficherLogo():
 	print("")
 	print("")
 
-def connectionClient(ip, port, verify = 1):
+def connectionClient(ip, port = "", verify = 1):
+	if port == "":
+		port = ip[ip.find(":")+1:]
+		ip = ip[:ip.find(":")]
 	if verifIPPORT(str(ip) + ":" + str(port)):
 		try:
 			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

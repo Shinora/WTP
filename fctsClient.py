@@ -155,13 +155,11 @@ def sayHello():
 	# Fonction dont le but est d'avertir des noeuds importants de sa présence
 	error = 0
 	ipPortMe = autresFonctions.connaitreIP()
-	ip = ipport[:ipport.find(":")]
-	port = ipport[ipport.find(":")+1:]
-	connNoeud = autresFonctions.connectionClient(ip, port)
+	connNoeud = autresFonctions.connectionClient(ipport)
 	if str(connNoeud) == "=cmd ERROR":
 		error += 1
 	else:
-		logs.addLogs("INFO : Connection with VPN peer etablished on port {}".format(port))
+		logs.addLogs("INFO : Connection with VPN peer etablished")
 		request = "=cmd HELLO " + ipPortMe
 		request = request.encode()
 		connNoeud.send(request)
