@@ -307,9 +307,11 @@ def modifStats(colonne, valeur=-1):
 	cursor = conn.cursor()
 	try:
 		if valeur == -1:
-			cursor.execute("UPDATE Statistiques SET "+colonne+" = 1 WHERE 1")
+			sql = "UPDATE Statistiques SET "+colonne+" = 1 WHERE 1"
+			cursor.execute(sql)
 		else:
-			cursor.execute("UPDATE Statistiques SET "+colonne+" = "+str(valeur)+" WHERE 1")
+			sql = "UPDATE Statistiques SET "+colonne+" = "+str(valeur)+" WHERE 1"
+			cursor.execute(sql)
 		conn.commit()
 	except Exception as e:
 		conn.rollback()

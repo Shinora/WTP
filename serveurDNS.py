@@ -158,8 +158,8 @@ class ServDNS(threading.Thread):
 				tcpsock.settimeout(5)
 			except OSError as e:
 				logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
-				logs.addLogs("INFO : Stop everything and restart after...")
-				os.popen("python3 reload.py", 'r')
+				logs.addLogs("FATAL : Shutting down...")
+				print("An error occured. Please restart WTP.")
 			else:
 				status.stop()
 				status.join()

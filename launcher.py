@@ -23,9 +23,6 @@ import cmdLauncher
 
 
 logs.addLogs("\n\n\n")
-fExtW = open(".extinctionWTP", "w")
-fExtW.write("ALLUMER")
-fExtW.close()
 # On vérifie que les sources sont correctes et pas modifiées
 #maj.verifSources()
 config.verifConfig()
@@ -65,8 +62,8 @@ try:
 		serveur_lance = True
 	except OSError as e:
 		logs.addLogs("ERROR : In launcher.py : "+str(e))
-		logs.addLogs("INFO : Stop everything and restart after...")
-		os.popen("python3 reload.py", 'r')
+		logs.addLogs("FATAL : Shutting down...")
+		print("An error occured. Please restart WTP.")
 	else:
 		# On lance les programmes externes
 		ThrdMntc = Maintenance()
@@ -156,8 +153,4 @@ newServ.join()
 ThrdMntc.join()
 # ThrdBrd.join()
 status.stop()
-if delAll is True:
-	fExtW = open(".extinctionWTP", "w")
-	fExtW.write("ETEINDRE")
-	fExtW.close()
-	logs.addLogs("INFO : WTP has correctly stopped.")
+logs.addLogs("INFO : WTP has correctly stopped.")
