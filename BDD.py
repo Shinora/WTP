@@ -307,11 +307,55 @@ def modifStats(colonne, valeur=-1):
 	cursor = conn.cursor()
 	try:
 		if valeur == -1:
-			sql = "UPDATE Statistiques SET "+colonne+" = 1 WHERE 1"
-			cursor.execute(sql)
+			if colonne == "NbNoeuds":
+				cursor.execute("""UPDATE Statistiques SET NbNoeuds = 1 WHERE 1""")
+			elif colonne == "NbFichiersExt":
+				cursor.execute("""UPDATE Statistiques SET NbFichiersExt = 1 WHERE 1""")
+			elif colonne == "NbSN":
+				cursor.execute("""UPDATE Statistiques SET NbSN = 1 WHERE 1""")
+			elif colonne == "NbFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbFichiers = 1 WHERE 1""")
+			elif colonne == "PoidsFichiers":
+				cursor.execute("""UPDATE Statistiques SET PoidsFichiers = 1 WHERE 1""")
+			elif colonne == "NbEnvsLstNoeuds":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstNoeuds = 1 WHERE 1""")
+			elif colonne == "NbEnvsLstFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstFichiers = 1 WHERE 1""")
+			elif colonne == "NbEnvsLstFichiersExt":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstFichiersExt = 1 WHERE 1""")
+			elif colonne == "NbEnvsFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsFichiers = 1 WHERE 1""")
+			elif colonne == "NbPresence":
+				cursor.execute("""UPDATE Statistiques SET NbPresence = 1 WHERE 1""")
+			elif colonne == "NbReceptFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbReceptFichiers = 1 WHERE 1""")
+			else:
+				logs.addLogs("ERROR : This statistic is unknown : "+str(colonne))
 		else:
-			sql = "UPDATE Statistiques SET "+colonne+" = "+str(valeur)+" WHERE 1"
-			cursor.execute(sql)
+			if colonne == "NbNoeuds":
+				cursor.execute("""UPDATE Statistiques SET NbNoeuds = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbFichiersExt":
+				cursor.execute("""UPDATE Statistiques SET NbFichiersExt = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbSN":
+				cursor.execute("""UPDATE Statistiques SET NbSN = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbFichiers = ? WHERE 1""", (str(valeur),))
+			elif colonne == "PoidsFichiers":
+				cursor.execute("""UPDATE Statistiques SET PoidsFichiers = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbEnvsLstNoeuds":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstNoeuds = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbEnvsLstFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstFichiers = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbEnvsLstFichiersExt":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsLstFichiersExt = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbEnvsFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbEnvsFichiers = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbPresence":
+				cursor.execute("""UPDATE Statistiques SET NbPresence = ? WHERE 1""", (str(valeur),))
+			elif colonne == "NbReceptFichiers":
+				cursor.execute("""UPDATE Statistiques SET NbReceptFichiers = ? WHERE 1""", (str(valeur),))
+			else:
+				logs.addLogs("ERROR : This statistic is unknown : "+str(colonne))
 		conn.commit()
 	except Exception as e:
 		conn.rollback()
