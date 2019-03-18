@@ -162,3 +162,13 @@ def verifIPPORT(ipport):
 	if reg.match(str(ipport)): # Si ipport est un ip:port
 		return 1
 	return 0
+
+def ask(question):
+	while 1:
+		try:
+			result = str(input(str(question) + "\n>>> "))
+		except ValueError as e:
+			print("Your input isn't correct. Error : " + str(e))
+		else:
+			break
+	return result
