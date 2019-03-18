@@ -78,12 +78,7 @@ def fillConfFile():
 
 def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 	# Fonction qui lit le file de configuration et qui retourne l'information demandée en paramètres
-	try:
-		with open('wtp.conf'):
-			pass
-	except IOError:
-		# Le file n'existe pas
-		fillConfFile()
+	verifConfig()
 	if os.path.getsize("wtp.conf") < 80:
 		# Le file est très léger, il ne peut contenir les informations
 		# Il faut donc le recréer
@@ -102,16 +97,7 @@ def readConfFile(parametre): # Fonctionne pour tout sauf Blacklist
 def modifConfigFile(parametre, value):
 	# Fonction qui a pour but de remplacer la valeur actuelle du fichier de config
 	# Par la valeur passée en paramètres
-	try:
-		with open('wtp.conf'):
-			pass
-	except IOError:
-		# Le file n'existe pas
-		fillConfFile()
-	if os.path.getsize("wtp.conf") < 80:
-		# Le file est très léger, il ne peut contenir les informations
-		# Il faut donc le recréer
-		fillConfFile()
+	verifConfig()
 	f = open("wtp.conf",'r')
 	lignes  = f.readlines()
 	f.close()
@@ -128,6 +114,7 @@ def modifConfigFile(parametre, value):
 
 def modifConfig():
 	# Fonction qui a pour but de modifier le fichier de configuration.
+	verifConfig()
 	print("Configuration file path : " + str(os.getcwd()) + "/wtp.conf")
 	print("This is the actual configuration file :\n")
 	f = open("wtp.conf", "r")
@@ -148,3 +135,15 @@ def modifConfig():
 			print("Done !")
 		print("\n")
 	print("For the changes to take effect, please restart WTP")
+
+def verifConfig():
+	try:
+		with open('wtp.conf'):
+			pass
+	except IOError:
+		# Le file n'existe pas
+		fillConfFile()
+	if os.path.getsize("wtp.conf") < 80:
+		# Le file est très léger, il ne peut contenir les informations
+		# Il faut donc le recréer
+		fillConfFile()
