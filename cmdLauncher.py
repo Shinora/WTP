@@ -12,7 +12,7 @@ import logs
 import dns
 import autresFonctions
 import fctsClient
-import blacklist
+import clientBlacklist
 
 
 def cmdLauncher(userCmd):
@@ -31,7 +31,7 @@ def cmdLauncher(userCmd):
 		print("delAll 		Delete all : Config, DB, Files.")
 		print("majDNS		Update the DNS database")
 		print("client 		Use WTP in console")
-		print("majBlkLst	Update the blacklist database")
+		print("blacklist 	Edit the BlackList configuration")
 	elif userCmd == "update":
 		# Vérifier les MAJ
 		status = loader("Work in progress")
@@ -172,7 +172,7 @@ def cmdLauncher(userCmd):
 						sortie = search.rechercheFichierEntiere(sendCmd[20:])
 						ipport = sortie[:sortie.find(";")]
 						sha = sortie[sortie.find(";")+1:]
-						if re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', ipport):
+						if autresFonctions.verifIPPORT(ipport):
 							# C'est un IPPort
 							# On envoi vers la fonction qui télécharge le file
 							ip = ipport[:ipport.find(":")]
@@ -209,24 +209,10 @@ def cmdLauncher(userCmd):
 		else:
 			print("Your input is unknown.")
 			print("You can enter help for more information.")
-	elif userCmd == "majBlkLst":
-		# L'utilisateur veut mettre à jour sa BlackList
-		ipport = str(input("With which peer do you want to update? (Press ENTER to update with the default peer : "+str(config.readConfFile("BlackList"))+")\n>> "))
-		if ipport == "enter" or ipport == "ENTER" or ipport == "":
-			status = loader("Work in progress")
-			status.start()
-			blacklist.maj()
-			status.stop()
-			status.join()
-		else:
-			if autresFonctions.verifIPPORT(IppeerPort): # Si ipport est un ip:port
-				status = loader("Work in progress")
-				status.start()
-				blacklist.maj(ipport)
-				status.stop()
-				status.join()
-			else:
-				print("This is not a IP:PORT")
+	elif userCmd == "blacklist":
+		blckLst = clientBlacklist.configBlckLst()
+		blckLst.start()
+		blckLst.join()
 	else:
 		print("Unknown request.")
 	return 0

@@ -28,13 +28,7 @@ fExtW.write("ALLUMER")
 fExtW.close()
 # On vérifie que les sources sont correctes et pas modifiées
 #maj.verifSources()
-# On vérifie que le file de config existe
-try:
-	with open('wtp.conf'):
-		pass
-except IOError:
-	# Le file n'existe pas, on lance le créateur
-	config.fillConfFile()
+config.verifConfig()
 host = '127.0.0.1'
 port = int(config.readConfFile("defaultPort"))
 status = loader("Start Up") # Ici et pas avant car si le fichier n'existe pas

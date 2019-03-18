@@ -6,6 +6,7 @@ import os
 import config
 import shutil
 import time
+import autresFonctions
 
 def verifNoeud():
 	BDD.verifExistBDD()
@@ -248,6 +249,7 @@ def checkIntruders():
 def supprTemp():
 	# Fonction qui a pour but de supprimer les fichiers dans TEMP
 	# S'ils ont plus que 5 minutes
+	autresFonctions.verifFiles()
 	dateAct = str(time.time())
 	for file in os.listdir(".TEMP/"):
 		file = str(".TEMP/"+file)
