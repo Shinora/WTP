@@ -20,7 +20,7 @@ import config
 from clientDNS import DNSConfig
 from thrdLnch import ThreadLauncher
 import cmdLauncher
-
+#import ssl
 
 logs.addLogs("\n\n\n")
 # On vérifie que les sources sont correctes et pas modifiées
@@ -58,6 +58,7 @@ try:
 	try:
 		tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		#tcpsock = ssl.wrap_socket(tcpsock, ssl_version=ssl.PROTOCOL_TLSv1, ciphers="ADH-AES256-SHA")
 		tcpsock.bind((host, port))
 		serveur_lance = True
 	except OSError as e:
@@ -111,6 +112,7 @@ try:
 		status.stop()
 		status.join()
 		autresFonctions.afficherLogo()
+		autresFonctions.protip()
 		logs.addLogs("INFO : WTP has started, he is now listening to the port " + str(port))
 		newServ = ServeurThread()
 		newServ.start()

@@ -9,6 +9,7 @@ import threading
 from loader import loader
 import config
 import search
+#import ssl
 import echangeListes
 
 
@@ -154,6 +155,7 @@ class ServDNS(threading.Thread):
 			try:
 				tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+				#tcpsock = ssl.wrap_socket(tcpsock, ssl_version=ssl.PROTOCOL_TLSv1, ciphers="ADH-AES256-SHA")
 				tcpsock.bind((host,port))
 				tcpsock.settimeout(5)
 			except OSError as e:
