@@ -11,6 +11,8 @@ from Crypto.Cipher import AES
 from urllib.request import *
 from os import get_terminal_size
 import config
+#import ssl
+from random import randint
 
 def portLibre(premierPort):
 	# Fonction qui cherche les ports de la machine qui sont libres
@@ -126,12 +128,14 @@ def connectionClient(ip, port = "", verify = 1):
 		ip = ip[:ip.find(":")]
 	if verifIPPORT(str(ip) + ":" + str(port)):
 		try:
-			connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connexion_avec_serveur.connect((ip, int(port)))
+			conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			conn.settimeout(15)
+			#conn = ssl.wrap_socket(conn, ssl_version=ssl.PROTOCOL_TLSv1, ciphers="ADH-AES256-SHA")
+			conn.connect((ip, int(port)))
 		except Exception as e:
 			logs.addLogs("INFO : Unable to connect to " + str(ip) + ":" + str(port) + " Reason : " + str(e))
 		else:
-			return connexion_avec_serveur
+			return conn
 	if verify == 1:
 		# On ajoute le noeud dans la liste des noeuds Hors Connection s'il n'y est pas déjà
 		# (Mais on ne l'incrémente pas s'il l'est déjà)
@@ -170,5 +174,21 @@ def ask(question):
 		except ValueError as e:
 			print("Your input isn't correct. Error : " + str(e))
 		else:
-			break
-	return result
+			return result
+
+def protip():
+	# Fonction qui affiche une ligne au hazard du fichier protip.txt
+	try:
+		f = open("protip.txt", 'r')
+		lines = f.readlines()
+		f.close()
+	except Exception as e:
+		logs.addLogs("ERROR : Unable de read the file protip.txt : "+str(e))
+	else:
+		hazard = randint(0,len(lines))
+		nbre = 0
+		for line in lines:
+			if hazard == nbre:
+				print(line)
+				break
+			nbre += 1

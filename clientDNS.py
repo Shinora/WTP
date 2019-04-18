@@ -8,7 +8,7 @@ class DNSConfig(threading.Thread):
 		threading.Thread.__init__(self)
 
 	def run(self):
-		print("Welcome in the DNS center !\nWhat do you want to do ?")
+		print("Welcome in the DNS center !\nWhat do you want to do ? (exit for quit this wizard)")
 		action = autresFonctions.ask("1 : Add a domain name\n2 : Modify a domain name\n3 : Delete a domain name")
 		if action == 1:
 			ipport = autresFonctions.ask("Enter the IP and the Port of the DNS (format : IP:Port)")

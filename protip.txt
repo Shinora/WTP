@@ -1,0 +1,13 @@
+You can turn off WTP by entering quit in this program, or by pressing Ctrl + C
+For more information about possible queries on this program, enter help.
+If you have found any bugs or have technical problems, please contact us from our website or on GitHub.
+Our GitHub : https://github.com/Torzivalds/WTP
+Our website : https://myrasp.fr/WTP
+Add files to the network by placing them in the ADDFILES folder.
+Thank you for using WTP !
+Feel free to contribute to WTP, by talking to your friends or by participating in coding WTP.
+WTP is licensed under GPL v3, which means you can use, share, modify, redistribute as much as you want.
+Long live the free software !
+Nobody should be restricted by the software they use.
+What a beautiful time today! Why not enjoy it ?
+To see the complete documentation, enter doc

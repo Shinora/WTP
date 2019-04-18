@@ -8,6 +8,7 @@ import search
 import threading
 import config
 import os
+import stats
 
 # Le thread principal du launcher est ici
 
@@ -50,7 +51,7 @@ class ThreadLauncher(threading.Thread):
 						logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
 					os.remove(".TEMP/"+temp)
 					if error != 0:
-						BDD.modifStats("NbEnvsFichiers")
+						stats.modifStats("NbEnvsFichiers")
 					else:
 						logs.addLogs("ERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")")
 				else:
@@ -63,17 +64,17 @@ class ThreadLauncher(threading.Thread):
 				sendCmd = IppeerPort # On envoie au demandeur l'adresse à contacter
 				self.clientsocket.send(sendCmd.encode())
 				echangeNoeuds.EnvoiNoeuds(IppeerPort)
-				BDD.modifStats("NbEnvsLstNoeuds")
+				stats.modifStats("NbEnvsLstNoeuds")
 			elif rcvCmd[:25] == "=cmd DemandeListeFichiers":
 				# On va récuperer le nom du file qui contient la liste
 				# Ensuite, on la transmet au noeud distant pour qu'il puisse
 				# faire la demande de réception du file pour qu'il puisse l'analyser
 				if rcvCmd[:28] == "=cmd DemandeListeFichiersExt":
 					file = autresFonctions.lsteFichiers(1)
-					BDD.modifStats("NbEnvsLstFichiers")
+					stats.modifStats("NbEnvsLstFichiers")
 				else:
 					file = autresFonctions.lsteFichiers()
-					BDD.modifStats("NbEnvsLstFichiersExt")
+					stats.modifStats("NbEnvsLstFichiersExt")
 				self.clientsocket.send(file.encode())
 			elif rcvCmd[:23] == "=cmd DemandeListeNoeuds":
 				# On va récuperer le nom du file qui contient la liste
@@ -81,13 +82,13 @@ class ThreadLauncher(threading.Thread):
 				# faire la demande de réception du file pour qu'il puisse l'analyser
 				file = autresFonctions.lsteNoeuds()
 				self.clientsocket.send(file.encode())
-				BDD.modifStats("NbEnvsLstNoeuds")
+				stats.modifStats("NbEnvsLstNoeuds")
 			elif rcvCmd[:20] == "=cmd DemandePresence":
 				# C'est tout bête, pas besoin de fonction
 				# Il suffit de renvoyer la request informant que l'on est connecté au réseau.
 				sendCmd = "=cmd Present"
 				self.clientsocket.send(sendCmd.encode())
-				BDD.modifStats("NbPresence")
+				stats.modifStats("NbPresence")
 			elif rcvCmd[:15] == "=cmd rechercher":
 				# =cmd rechercher nom SHA256.ext
 				# Renvoie le retour de la fonction, qui elle même retourne une IP+Port ou 0
