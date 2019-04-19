@@ -57,7 +57,7 @@ def rapportErreur(selection = " "):
 		requests.post("https://myrasp.fr/WTP/Logs/index.php", data = data)
 	except Exception as e:
 		addLogs("ERROR : We could not send the logs to the developers in rapportErreur() : " + str(e))
-		print("We could not send the logs to the developers... \nCheck your Internet connection.")
+		print("\033[33mWe could not send the logs to the developers... \nCheck your Internet connection.\033[0m")
 	else:
 		supprLogs()
-		addLogs("INFO : The logs have been sent to the developers.")
+		addLogs("\033[36mINFO : The logs have been sent to the developers.\033[0m")

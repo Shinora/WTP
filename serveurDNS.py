@@ -161,7 +161,7 @@ class ServDNS(threading.Thread):
 			except OSError as e:
 				logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
 				logs.addLogs("FATAL : Shutting down...")
-				print("An error occured. Please restart WTP.")
+				print("\033[31mAn error occured. Please restart WTP.\033[0m")
 			else:
 				status.stop()
 				status.join()

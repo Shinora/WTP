@@ -109,7 +109,7 @@ class ServVPN(threading.Thread):
 			except OSError as e:
 				logs.addLogs("ERROR : In vpn.py : "+str(e))
 				logs.addLogs("FATAL : Shutting down...")
-				print("An error occured. Please restart WTP.")
+				print("\033[31mAn error occured. Please restart WTP.\033[0m")
 			else:
 				logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
 				status.stop()

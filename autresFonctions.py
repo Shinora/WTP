@@ -106,7 +106,7 @@ def connaitreIP():
 		page = opener.open("https://myrasp.fr/Accueil/monip.php")
 	except Exception as e:
 		addLogs("ERROR : We could not know the IP to the developers in connaitreIP() : " + str(e))
-		print("Check your Internet connection.")
+		print("\033[93mCheck your Internet connection.\033[0m")
 	sortie = page.read().decode("utf-8")
 	return sortie
 
@@ -172,7 +172,7 @@ def ask(question):
 		try:
 			result = str(input(str(question) + "\n>>> "))
 		except ValueError as e:
-			print("Your input isn't correct. Error : " + str(e))
+			print("\033[91mYour input isn't correct. Error : " + str(e)+"\033[0m")
 		else:
 			return result
 

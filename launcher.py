@@ -64,7 +64,7 @@ try:
 	except OSError as e:
 		logs.addLogs("ERROR : In launcher.py : "+str(e))
 		logs.addLogs("FATAL : Shutting down...")
-		print("An error occured. Please restart WTP.")
+		print("\033[91mAn error occured. Please restart WTP.\033[0m")
 	else:
 		# On lance les programmes externes
 		ThrdMntc = Maintenance()
@@ -121,7 +121,7 @@ try:
 		while serveur_lance:
 			# Gérer les commandes utilisateur
 			# La première fois, le wtp@PC:$ ne s'affiche pas...
-			userCmd = str(input("wtp@"+str(platform.uname()[1])+":$ "))
+			userCmd = str(input("\033[92m\033[1mwtp@"+str(platform.uname()[1])+":$ \033[0m"))
 			retour = cmdLauncher.cmdLauncher(userCmd)
 			if retour == -1:
 				serveur_lance = False
