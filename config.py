@@ -127,14 +127,14 @@ def modifConfig():
 			break
 		current = str(readConfFile(param))
 		if current == "None":
-			print("This parameter is unknown.")
+			print("\033[31mThis parameter is unknown.\033[0m")
 		else:
 			print("The current setting is : " + current)
 			value = str(input("By what do you want to replace him ?\n"))
 			modifConfigFile(param, value)
-			print("Done !")
+			print("\033[32mDone !\033[0m")
 		print("\n")
-	print("For the changes to take effect, please restart WTP")
+	print("\033[36mFor the changes to take effect, please restart WTP.\033[0m")
 
 def verifConfig():
 	try:

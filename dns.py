@@ -23,11 +23,11 @@ def addNDD(ipport, sha, ndd, password):
 			connexion_avec_serveur.close()
 			if message == "=cmd NDDDejaUtilise":
 				error = 5
-				print("The domain name is already used. If it belongs to you, you can modify it provided you know the password.")
+				print("\033[31mThe domain name is already used.\033[0m If it belongs to you, you can modify it provided you know the password.")
 			elif message == "=cmd SUCCESS":
-				print("The domain name and address SHA256 have been associated.")
+				print("\033[32mThe domain name and address SHA256 have been associated.\033[0m")
 			else:
-				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
 				error = 1
 	else:
 		error += 1
@@ -49,11 +49,11 @@ def addNoeudDNS(ipport, ipportNoeud):
 			connexion_avec_serveur.close()
 			if message == "=cmd IPPORTDejaUtilise":
 				error = 5
-				print("The peer DNS is already known by the receiver.")
+				print("\033[31mThe peer DNS is already known by the receiver.\033[0m")
 			elif message == "=cmd SUCCESS":
-				print("The DNS pair has been added to the receiver base.")
+				print("\033[32mThe DNS pair has been added to the receiver base.\033[0m")
 			else:
-				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
 				error = 1
 	else:
 		error += 1
@@ -76,11 +76,11 @@ def modifNDD(ipport, ndd, adress, password):
 			error = 0
 			if message == "=cmd IPPORTDejaUtilise":
 				error = 5
-				print("Le noeud DNS est déjà connu par le receveur.")
+				print("\033[31mLe noeud DNS est déjà connu par le receveur.\033[0m")
 			elif message == "=cmd SUCCESS":
-				print("Le noeud DNS a bien été ajouté à la base du receveur.")
+				print("\033[32mLe noeud DNS a bien été ajouté à la base du receveur.\033[0m")
 			else:
-				print("An undetermined error occurred. Please try again later or change DNS peer.")
+				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
 				error += 1
 	else:
 		error += 1

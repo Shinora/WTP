@@ -48,14 +48,14 @@ class ThreadLauncher(threading.Thread):
 						os.remove(".TEMP/"+temp)
 					except Exception as e:
 						error += 1
-						logs.addLogs("ERROR : An error occured in CmdDemandeFichier : "+str(e))
+						logs.addLogs("\033[31mERROR : An error occured in CmdDemandeFichier : "+str(e)+"\033[0m")
 					os.remove(".TEMP/"+temp)
 					if error != 0:
 						stats.modifStats("NbEnvsFichiers")
 					else:
-						logs.addLogs("ERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")")
+						logs.addLogs("\033[31mERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")\033[0m")
 				else:
-					print("This file isn't on this computer : '"+str(fileName)+"'")
+					print("\033[31mThis file isn't on this computer : '"+str(fileName)+"'\033[0m")
 			elif rcvCmd[:17] == "=cmd DemandeNoeud": # Fonction Serveur
 				# Dirriger vers la fonction EnvoiNoeuds()
 				# Le noeud distant a demandé les noeuds, on lui envoi !

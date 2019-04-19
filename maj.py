@@ -60,7 +60,7 @@ def verifMAJ(force = 0):
 			logs.addLogs("INFO : The file " + oldFichier + " has been updated")
 		logs.addLogs("INFO : The update is complete")
 		# Il faut redemarrer le protocol
-		print("The update is complete. Please restart WTP.")
+		print("\033[36mThe update is complete. Please restart WTP.\033[0m")
 	else:
 		logs.addLogs("INFO : Pas de mise à jour disponible")
 
