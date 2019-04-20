@@ -21,6 +21,10 @@ from clientDNS import DNSConfig
 from thrdLnch import ThreadLauncher
 import cmdLauncher
 #import ssl
+if os.name == "nt":
+	from colorama import init
+	init()
+
 
 logs.addLogs("\n\n\n")
 # On vérifie que les sources sont correctes et pas modifiées
@@ -64,7 +68,7 @@ try:
 	except OSError as e:
 		logs.addLogs("ERROR : In launcher.py : "+str(e))
 		logs.addLogs("FATAL : Shutting down...")
-		print("\033[91mAn error occured. Please restart WTP.\033[0m")
+		print("\033[31mAn error occured. Please restart WTP.\033[0m")
 	else:
 		# On lance les programmes externes
 		ThrdMntc = Maintenance()
@@ -121,7 +125,7 @@ try:
 		while serveur_lance:
 			# Gérer les commandes utilisateur
 			# La première fois, le wtp@PC:$ ne s'affiche pas...
-			userCmd = str(input("\033[92m\033[1mwtp@"+str(platform.uname()[1])+":$ \033[0m"))
+			userCmd = str(input("\033[32m\033[1mwtp@"+str(platform.uname()[1])+":$ \033[0m"))
 			retour = cmdLauncher.cmdLauncher(userCmd)
 			if retour == -1:
 				serveur_lance = False

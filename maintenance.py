@@ -3,8 +3,6 @@ import logs
 import fctsMntc
 import stats
 import maj
-from Crypto import Random
-from Crypto.Cipher import AES
 import threading
 
 

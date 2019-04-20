@@ -3,8 +3,6 @@ import os.path
 import logs
 import autresFonctions
 import dns
-from Crypto import Random
-from Crypto.Cipher import AES
 import threading
 from loader import loader
 import config
