@@ -130,20 +130,26 @@ def ajouterEntree(nomTable, entree, entree1 = "", entree2 = ""):
 			# En fonction de la table, il n'y a pas les mêmes champs à remplir
 			try:
 				if nomTable == "Noeuds":
-					if entree1 == "":
-						entree1 = str(fctsClient.CmdDemandeStatut(entree[:entree.find(":")], entree[entree.find(":")+1:]))
-						if len(entree1) < 3:
-							# C'est une erreur
-							logs.addLogs("ERROR : When trying to find the status of the peer : " + str(entree1))
-							entree1 = "Simple"
-					cursor.execute("""INSERT INTO Noeuds (IP, Fonction, DerSync, DateAjout) VALUES (?, ?, ?, ?)""", (entree, entree1, datetimeAct, datetimeAct))
+					if autresFonctions.verifIPPORT(entree):
+						if entree1 == "":
+							entree1 = str(fctsClient.CmdDemandeStatut(entree[:entree.find(":")], entree[entree.find(":")+1:]))
+							if len(entree1) < 3:
+								# C'est une erreur
+								logs.addLogs("ERROR : When trying to find the status of the peer : " + str(entree1))
+								entree1 = "Simple"
+						cursor.execute("""INSERT INTO Noeuds (IP, Fonction, DerSync, DateAjout) VALUES (?, ?, ?, ?)""", (entree, entree1, datetimeAct, datetimeAct))
+					else:
+						logs.addLogs("ERROR : A request to add to the Noeuds table was made while the input sent is not like IP:Port : '"+str(entree+"'"))
 				elif nomTable == "Fichiers":
 					pathFichier = "HOSTEDFILES/" + entree
 					cursor.execute("""INSERT INTO Fichiers (Nom, DateAjout, Taille, Chemin) VALUES (?, ?, ?, ?)""", (entree, datetimeAct, os.path.getsize(pathFichier), pathFichier))
 				elif nomTable == "FichiersExt":
 					cursor.execute("""INSERT INTO FichiersExt (Nom, IP) VALUES (?, ?)""", (entree, entree1))
 				elif nomTable == "NoeudsHorsCo":
-					cursor.execute("""INSERT INTO NoeudsHorsCo (IP, NbVerifs) VALUES (?, 0)""", (entree,))
+					if autresFonctions.verifIPPORT(entree):
+						cursor.execute("""INSERT INTO NoeudsHorsCo (IP, NbVerifs) VALUES (?, 0)""", (entree,))
+					else:
+						logs.addLogs("ERROR : A request to add to the NoeudsHorsCo table was made while the input sent is not like IP:Port : '"+str(entree+"'"))
 				elif nomTable == "DNS":
 					if entree1 != "" and entree2 != "":
 						passwordHash = hashlib.sha256(str(entree2).encode()).hexdigest()

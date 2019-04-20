@@ -1,8 +1,6 @@
 import BDD
 import autresFonctions
 import logs
-from Crypto import Random
-from Crypto.Cipher import AES
 import sqlite3
 import config
 

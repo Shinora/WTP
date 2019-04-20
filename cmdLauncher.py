@@ -30,7 +30,7 @@ def cmdLauncher(userCmd):
 		#maj.verifSources()
 		status.stop()
 		status.join()
-		print("\033[92mDone.\033[0m")
+		print("\033[32mDone.\033[0m")
 	elif userCmd == "stats":
 		# Affiche les statistiques
 		print("Number of peers in the database : " + str(stats.compterStats("NbNoeuds")))

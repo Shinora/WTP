@@ -4,8 +4,6 @@ import logs
 import autresFonctions
 import search
 import fctsClient
-from Crypto import Random
-from Crypto.Cipher import AES
 from loader import loader
 import threading
 #import ssl

@@ -6,8 +6,6 @@ import BDD
 import hashlib
 import re
 import time
-from Crypto import Random
-from Crypto.Cipher import AES
 from urllib.request import *
 from os import get_terminal_size
 import config
@@ -106,7 +104,7 @@ def connaitreIP():
 		page = opener.open("https://myrasp.fr/Accueil/monip.php")
 	except Exception as e:
 		addLogs("ERROR : We could not know the IP to the developers in connaitreIP() : " + str(e))
-		print("\033[93mCheck your Internet connection.\033[0m")
+		print("\033[33mCheck your Internet connection.\033[0m")
 	sortie = page.read().decode("utf-8")
 	return sortie
 
@@ -172,7 +170,7 @@ def ask(question):
 		try:
 			result = str(input(str(question) + "\n>>> "))
 		except ValueError as e:
-			print("\033[91mYour input isn't correct. Error : " + str(e)+"\033[0m")
+			print("\033[31mYour input isn't correct. Error : " + str(e)+"\033[0m")
 		else:
 			return result
 
