@@ -46,7 +46,6 @@ def maj(ipport = ""):
 	return error
 
 def searchBlackList(name, Isrank = False):
-	error = 0
 	rank = 0
 	rank = search.chercherInfo("Blacklist", name)
 	if rank == 0:

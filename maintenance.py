@@ -2,7 +2,7 @@ import time
 import logs
 import fctsMntc
 import stats
-import maj
+#import maj
 import threading
 
 
