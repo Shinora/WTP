@@ -8,6 +8,7 @@ from loader import loader
 import threading
 #import ssl
 import config
+from color import c
 
 # Toutes les fonctions ici permettent de créer une sorte de VPN au sein du réseau
 # Une requete passe alors par un autre noeud avant d'aller chez le destinataire
@@ -107,7 +108,7 @@ class ServVPN(threading.Thread):
 			except OSError as e:
 				logs.addLogs("ERROR : In vpn.py : "+str(e))
 				logs.addLogs("FATAL : Shutting down...")
-				print("\033[31mAn error occured. Please restart WTP.\033[0m")
+				print(c("red")+"An error occured. Please restart WTP."+c(""))
 			else:
 				logs.addLogs("INFO : The VPN service has started, he is now listening to the port " + str(port))
 				status.stop()

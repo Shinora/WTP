@@ -1,5 +1,6 @@
 import os
 import autresFonctions
+from color import c
 
 def fillConfFile():
 	# On vide le file avant de le remplir de nouveau
@@ -127,14 +128,14 @@ def modifConfig():
 			break
 		current = str(readConfFile(param))
 		if current == "None":
-			print("\033[31mThis parameter is unknown.\033[0m")
+			print(c("red")+"This parameter is unknown."+c(""))
 		else:
 			print("The current setting is : " + current)
 			value = str(input("By what do you want to replace him ?\n"))
 			modifConfigFile(param, value)
-			print("\033[32mDone !\033[0m")
+			print(c("green")+"Done !"+c(""))
 		print("\n")
-	print("\033[36mFor the changes to take effect, please restart WTP.\033[0m")
+	print(c("cian")+"For the changes to take effect, please restart WTP."+c(""))
 
 def verifConfig():
 	try:
