@@ -9,6 +9,7 @@ import threading
 import config
 import os
 import stats
+from color import c
 
 # Le thread principal du launcher est ici
 
@@ -48,14 +49,14 @@ class ThreadLauncher(threading.Thread):
 						os.remove(".TEMP/"+temp)
 					except Exception as e:
 						error += 1
-						logs.addLogs("\033[31mERROR : An error occured in CmdDemandeFichier : "+str(e)+"\033[0m")
+						logs.addLogs(c("red")+"ERROR : An error occured in CmdDemandeFichier : "+str(e)+c(""))
 					os.remove(".TEMP/"+temp)
 					if error != 0:
 						stats.modifStats("NbEnvsFichiers")
 					else:
-						logs.addLogs("\033[31mERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")\033[0m")
+						logs.addLogs(c("red")+"ERROR : An error occured for upload "+str(fileName)+" in thrdLnch.py ("+str(error)+")"+c(""))
 				else:
-					print("\033[31mThis file isn't on this computer : '"+str(fileName)+"'\033[0m")
+					print(c("red")+"This file isn't on this computer : '"+str(fileName)+"'"+c(""))
 			elif rcvCmd[:17] == "=cmd DemandeNoeud": # Fonction Serveur
 				# Dirriger vers la fonction EnvoiNoeuds()
 				# Le noeud distant a demandé les noeuds, on lui envoi !

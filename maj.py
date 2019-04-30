@@ -4,6 +4,7 @@ import logs
 import zipfile
 import hashlib
 from urllib.request import *
+from color import c
 
 def verifMAJ(force = 0):
 	# Fonction qui a pour but de vérifier si il y a des mises à jour à faire
@@ -60,7 +61,7 @@ def verifMAJ(force = 0):
 			logs.addLogs("INFO : The file " + oldFichier + " has been updated")
 		logs.addLogs("INFO : The update is complete")
 		# Il faut redemarrer le protocol
-		print("\033[36mThe update is complete. Please restart WTP.\033[0m")
+		print(c("cian")+"The update is complete. Please restart WTP."+c(""))
 	else:
 		logs.addLogs("INFO : Pas de mise à jour disponible")
 

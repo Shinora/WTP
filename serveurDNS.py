@@ -9,6 +9,7 @@ import config
 import search
 #import ssl
 import echangeListes
+from color import c
 
 
 class ClientThread(threading.Thread):
@@ -159,7 +160,7 @@ class ServDNS(threading.Thread):
 			except OSError as e:
 				logs.addLogs("ERROR : In serveurDNS.py : "+str(e))
 				logs.addLogs("FATAL : Shutting down...")
-				print("\033[31mAn error occured. Please restart WTP.\033[0m")
+				print(c("red")+"An error occured. Please restart WTP."+c(""))
 			else:
 				status.stop()
 				status.join()

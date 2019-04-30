@@ -6,6 +6,7 @@ import config
 import BDD
 import echangeListes
 import fctsClient
+from color import c
 
 def addNDD(ipport, sha, ndd, password):
 	error = 0
@@ -23,11 +24,11 @@ def addNDD(ipport, sha, ndd, password):
 			connexion_avec_serveur.close()
 			if message == "=cmd NDDDejaUtilise":
 				error = 5
-				print("\033[31mThe domain name is already used.\033[0m If it belongs to you, you can modify it provided you know the password.")
+				print(str(c("red"))+"The domain name is already used."+str(c(""))+" If it belongs to you, you can modify it provided you know the password.")
 			elif message == "=cmd SUCCESS":
-				print("\033[32mThe domain name and address SHA256 have been associated.\033[0m")
+				print(str(c("green"))+"The domain name and address SHA256 have been associated."+str(c("")))
 			else:
-				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
+				print(str(c("red"))+"An undetermined error occurred. Please try again later or change DNS peer."+str(c("")))
 				error = 1
 	else:
 		error += 1
@@ -49,11 +50,11 @@ def addNoeudDNS(ipport, ipportNoeud):
 			connexion_avec_serveur.close()
 			if message == "=cmd IPPORTDejaUtilise":
 				error = 5
-				print("\033[31mThe peer DNS is already known by the receiver.\033[0m")
+				print(str(c("red"))+"The peer DNS is already known by the receiver."+str(c("")))
 			elif message == "=cmd SUCCESS":
-				print("\033[32mThe DNS pair has been added to the receiver base.\033[0m")
+				print(str(c("green"))+"The DNS pair has been added to the receiver base."+str(c("")))
 			else:
-				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
+				print(str(c("red"))+"An undetermined error occurred. Please try again later or change DNS peer."+str(c("")))
 				error = 1
 	else:
 		error += 1
@@ -76,11 +77,11 @@ def modifNDD(ipport, ndd, adress, password):
 			error = 0
 			if message == "=cmd IPPORTDejaUtilise":
 				error = 5
-				print("\033[31mLe noeud DNS est déjà connu par le receveur.\033[0m")
+				print(str(c("red"))+"Le noeud DNS est déjà connu par le receveur."+str(c("")))
 			elif message == "=cmd SUCCESS":
-				print("\033[32mLe noeud DNS a bien été ajouté à la base du receveur.\033[0m")
+				print(str(c("green"))+"Le noeud DNS a bien été ajouté à la base du receveur."+str(c("")))
 			else:
-				print("\033[31mAn undetermined error occurred. Please try again later or change DNS peer.\033[0m")
+				print(str(c("red"))+"An undetermined error occurred. Please try again later or change DNS peer."+str(c("")))
 				error += 1
 	else:
 		error += 1

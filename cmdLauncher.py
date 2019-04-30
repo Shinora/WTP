@@ -15,6 +15,7 @@ import fctsClient
 import clientBlacklist
 import stats
 import documentation
+from color import c
 
 
 def cmdLauncher(userCmd):
@@ -30,7 +31,7 @@ def cmdLauncher(userCmd):
 		#maj.verifSources()
 		status.stop()
 		status.join()
-		print("\033[32mDone.\033[0m")
+		print(c("green")+"Done."+c(""))
 	elif userCmd == "stats":
 		# Affiche les statistiques
 		print("Number of peers in the database : " + str(stats.compterStats("NbNoeuds")))
@@ -68,7 +69,7 @@ def cmdLauncher(userCmd):
 		fctsMntc.supprTemp()
 		status.stop()
 		status.join()
-		print("\033[32mDone.\033[0m")
+		print(c("green")+"Done."+c(""))
 	elif userCmd == "delAll":
 		print("Are you sure you want to delete everything ?\nAll configuration, database, hosted files will be lost.")
 		print("You will not be able to go back.")
@@ -103,25 +104,25 @@ def cmdLauncher(userCmd):
 				if rcvCmd == "=cmd DNS":
 					e = dns.majDNS(ipport)
 					if int(e) > 0:
-						print("\033[31mAn error occured.\033[0m")
+						print(c("red")+"An error occured."+c(""))
 					else:
-						print("\033[32mDone.\033[0m")
+						print(c("green")+"Done."+c(""))
 				else:
-					print("\033[31mThis peer isn't DNS.\033[0m")
-			print("\033[31mUnable to connect to this peer.\033[0m")
+					print(c("red")+"This peer isn't DNS."+c(""))
+			print(c("red")+"Unable to connect to this peer."+c(""))
 		elif ipport == "crazy":
 			print("DISCLAMER : Some peers can be controlled by malicious people who can perform phishing attacks")
 			rep = str(input("Are you sure ? (y/N)\n>>"))
 			if rep == "y" or rep == "Y":
 				e = dns.majDNS()
 				if int(e) > 0:
-					print("\033[31mAn error occured.\033[0m")
+					print(c("red")+"An error occured."+c(""))
 				else:
-					print("\033[32mDone.\033[0m")
+					print(c("green")+"Done."+c(""))
 			else:
 				print("You scared us!\nFortunately, you have not passed the dark side of the force!")
 		else:
-			print("\033[31mIt's not an ip:port\033[0m")
+			print(c("red")+"It's not an ip:port"+c(""))
 	elif userCmd == "client":
 		# Possibilité de faire des demandes en console
 		error = 0
@@ -137,7 +138,7 @@ def cmdLauncher(userCmd):
 				try:
 					port = int(input("What is the Port of the peer that you want to contact ? > "))
 				except ValueError:
-					print("\033[31mIt isn't a port (between 1024 and 65535)\033[0m")
+					print(c("red")+"It isn't a port (between 1024 and 65535)"+c(""))
 				else:
 					if sendCmd == "=cmd DemandeNoeud":
 						error += fctsClient.CmdDemandeNoeud(host, port)
@@ -174,9 +175,9 @@ def cmdLauncher(userCmd):
 							connexion_avec_serveur.close()
 							print(rcvCmd)
 					if int(error) == 0:
-						print("\033[32mDone.\033[0m")
+						print(c("green")+"Done."+c(""))
 					else:
-						print("\033[31mAn error occured. ("+str(error)+")\033[0m")
+						print(c("red")+"An error occured. ("+str(error)+")"+c(""))
 			else:
 				break
 	elif userCmd == "add":
@@ -186,16 +187,16 @@ def cmdLauncher(userCmd):
 			ipport = str(input("What is the IP:Port of the peer ?\n>>> "))
 			error = BDD.ajouterEntree("Noeud", ipport)
 			if error == 0:
-				print("\033[32mDone.\033[0m")
+				print(c("green")+"Done."+c(""))
 			else:
-				print("\033[31mAn error occured ("+str(error)+").")
+				print(c("red")+"An error occured ("+str(error)+").")
 		else:
-			print("\033[31mYour input is unknown.\033[0m")
-			print("\033[36mYou can enter help for more information.\033[0m")
+			print(c("red")+"Your input is unknown."+c(""))
+			print(c("cian")+"You can enter help for more information."+c(""))
 	elif userCmd == "blacklist":
 		blckLst = clientBlacklist.configBlckLst()
 		blckLst.start()
 		blckLst.join()
 	else:
-		print("\033[31mUnknown request.\033[0m")
+		print(c("red")+"Unknown request."+c(""))
 	return 0
