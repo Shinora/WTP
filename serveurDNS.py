@@ -1,5 +1,3 @@
-import os
-import os.path
 import logs
 import autresFonctions
 import dns

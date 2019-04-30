@@ -1,7 +1,7 @@
 import os
 import os.path
 import BDD
-import maj
+#import maj
 import search
 from loader import loader
 import config

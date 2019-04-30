@@ -1,6 +1,5 @@
 import dns
 import autresFonctions
-import config
 import threading
 from color import c
 

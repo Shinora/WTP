@@ -1,7 +1,4 @@
-import os
-import os.path
 import logs
-import autresFonctions
 import search
 import fctsClient
 from loader import loader

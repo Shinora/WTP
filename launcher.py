@@ -2,22 +2,19 @@
 # -*- coding:utf-8 -*-
 
 import socket
-import os
-import os.path
 import platform
 import logs
 import BDD
 import autresFonctions
-import maj
+#import maj
 from loader import loader
 import threading
 from maintenance import Maintenance
 from parser import *
 from serveurDNS import ServDNS
 from vpn import ServVPN
-from bridge import Bridge
+#from bridge import Bridge
 import config
-from clientDNS import DNSConfig
 from thrdLnch import ThreadLauncher
 import cmdLauncher
 from color import c

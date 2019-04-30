@@ -2,7 +2,6 @@ import select
 import logs
 import BDD
 import sqlite3
-import config
 import blacklist
 
  ####################################################

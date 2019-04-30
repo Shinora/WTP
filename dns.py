@@ -2,7 +2,6 @@ import logs
 import hashlib
 import sqlite3
 import autresFonctions
-import config
 import BDD
 import echangeListes
 import fctsClient
